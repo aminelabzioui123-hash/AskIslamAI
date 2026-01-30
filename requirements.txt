@@ -1,2 +1,5 @@
 gradio>=4.0.0
 google-generativeai
+pip>=25.3
+gradio>=4.0.0
+google-generativeai
