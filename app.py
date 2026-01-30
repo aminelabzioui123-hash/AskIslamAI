@@ -30,5 +30,4 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="green")) as demo:
 
 # تصحيح الجزء الأخير (المسافات ضرورية جداً في Python)
 if __name__ == "__main__":
-    # السطر التالي يجب أن يكون مزاحاً لليمين (Indented)
     demo.launch(server_name="0.0.0.0", server_port=10000)
