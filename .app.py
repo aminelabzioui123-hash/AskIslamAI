@@ -2,7 +2,7 @@ import gradio as gr
 import google.generativeai as genai
 import os
 
-# جلب المفتاح السري من إعدادات Render (وليس كتابته هنا للأمان)
+# جلب المفتاح السري من إعدادات Render للأمان
 api_key = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=api_key)
 
@@ -17,7 +17,7 @@ def ask_islam(message, history):
         response = model.generate_content(system_prompt)
         return response.text
     except Exception as e:
-        return f"عذراً، حدث خطأ في الاتصال بالمحرك. تأكد من إعداد GOOGLE_API_KEY بشكل صحيح."
+        return f"عذراً، حدث خطأ: تأكد من إعداد GOOGLE_API_KEY بشكل صحيح في إعدادات Environment بـ Render."
 
 # تصميم واجهة الموقع بألوان إسلامية
 with gr.Blocks(theme=gr.themes.Soft(primary_hue="green")) as demo:
@@ -26,10 +26,9 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="green")) as demo:
     
     chat = gr.ChatInterface(
         fn=ask_islam,
-        placeholder="اكتب سؤالك هنا... (مثلاً: ما هي شروط الصلاة؟)",
     )
 
-# السطر الأهم لتشغيل الموقع على Render
+# تصحيح الجزء الأخير (المسافات ضرورية جداً في Python)
 if __name__ == "__main__":
-    # نستخدم البورت 10000 لأن Render يتطلبه في الخطة المجانية
+    # السطر التالي يجب أن يكون مزاحاً لليمين (Indented)
     demo.launch(server_name="0.0.0.0", server_port=10000)
