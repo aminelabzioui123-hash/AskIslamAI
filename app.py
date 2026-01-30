@@ -16,10 +16,9 @@ genai.configure(api_key=API_KEY)
 # ===============================
 def ask_islam(message, history):
     model = genai.GenerativeModel("gemini-1.5-flash")
-
+    
     strict_prompt = f"""
 أنت باحث إسلامي سُنّي ملتزم بمنهج أهل السنة والجماعة.
-
 التزم بالقواعد التالية حرفياً:
 1- لا تجب إلا بدليل من:
    - القرآن الكريم
@@ -34,11 +33,12 @@ def ask_islam(message, history):
 السؤال:
 {message}
 """
-
+    
     try:
         response = model.generate_content(strict_prompt)
         return response.text
-    except Exception:
+    except Exception as e:
+        print(f"خطأ: {e}")  # للتسجيل في logs
         return "حدث خطأ تقني. يرجى المحاولة لاحقاً."
 
 # ===============================
@@ -50,7 +50,11 @@ demo = gr.ChatInterface(
     description=(
         "الإجابات تعتمد على القرآن والسنة وفهم أئمة أهل السنة.\n"
         "⚠️ للاستئناس العلمي فقط وليست بديلاً عن العلماء."
-    )
+    ),
+    examples=[
+        "ما حكم صلاة الجماعة؟",
+        "كيف أتوضأ بشكل صحيح؟"
+    ]
 )
 
 # ===============================
@@ -59,5 +63,6 @@ demo = gr.ChatInterface(
 if __name__ == "__main__":
     demo.launch(
         server_name="0.0.0.0",
-        server_port=int(os.environ.get("PORT", 10000))
+        server_port=int(os.environ.get("PORT", 10000)),
+        share=False  # أمان إضافي في الإنتاج
     )
