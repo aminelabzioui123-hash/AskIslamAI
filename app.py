@@ -96,7 +96,7 @@ body {
     margin: 1rem 0 !important;
 }
 
-.user-message {
+.user.message {
     background: linear-gradient(135deg, #2d5a3d 0%, #1a472a 100%) !important;
     color: white !important;
     border-radius: 15px 15px 5px 15px !important;
@@ -106,7 +106,7 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
-.bot-message {
+.bot.message {
     background: #f5f5f5 !important;
     color: #2d5a3d !important;
     border-radius: 15px 15px 15px 5px !important;
@@ -118,7 +118,7 @@ body {
 }
 
 /* Input box */
-.input-container textarea {
+textarea {
     border: 2px solid #2d5a3d !important;
     border-radius: 12px !important;
     padding: 1rem !important;
@@ -128,7 +128,7 @@ body {
     text-align: right !important;
 }
 
-.input-container textarea:focus {
+textarea:focus {
     border-color: #1a472a !important;
     box-shadow: 0 0 0 3px rgba(29, 71, 42, 0.1) !important;
 }
@@ -152,7 +152,7 @@ button.primary:hover {
 }
 
 /* Examples */
-.examples button {
+button {
     background: white !important;
     border: 2px solid #2d5a3d !important;
     color: #1a472a !important;
@@ -163,7 +163,7 @@ button.primary:hover {
     direction: rtl !important;
 }
 
-.examples button:hover {
+button:hover {
     background: #2d5a3d !important;
     color: white !important;
     transform: translateY(-2px) !important;
@@ -223,7 +223,7 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(), title="🌙 AskIslamAI") 
     """)
     
     # Chatbot
-    chatbot = gr.ChatInterface(
+    gr.ChatInterface(
         fn=ask_islam,
         examples=[
             "ما حكم صلاة الجماعة؟",
@@ -231,8 +231,7 @@ with gr.Blocks(css=custom_css, theme=gr.themes.Soft(), title="🌙 AskIslamAI") 
             "ما هي شروط الصيام؟",
             "كيف أحسب زكاة المال؟"
         ],
-        cache_examples=False,
-        type="messages"
+        cache_examples=False
     )
     
     # Footer
@@ -261,7 +260,7 @@ if __name__ == "__main__":
 
 ---
 
-## **📄 الكود 2: requirements.txt**
+## **📄 الملف 2: requirements.txt**
 ```
-gradio>=4.0.0
+gradio==4.44.0
 google-generativeai
