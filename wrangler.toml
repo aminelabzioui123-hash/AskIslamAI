@@ -2,10 +2,20 @@ name = "askislamai-api"
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
+# Environment variables (أضف الـ API key هنا بدل استخدامها مباشرة في الكود)
 [vars]
-# خلي هادي خاوية هنا، وعمريها فـ Cloudflare Dashboard باش يبقى الساروت مخبي
-ANTHROPIC_API_KEY = ""
+# ANTHROPIC_API_KEY = "your-key-here" # استخدم wrangler secret put بدلاً من هذا
 
-# هاد الجزء ضروري باش الـ Worker يقدر يقرأ ملف index.html
-[site]
-bucket = "./"
+# إعدادات الـ routes (اختياري - لو بغيتي تربطو بدومين معين)
+# routes = [
+#   { pattern = "askislamai.com/api/*", zone_name = "askislamai.com" }
+# ]
+
+# KV Namespaces (لو بغيتي تحفظ البيانات)
+# kv_namespaces = [
+#   { binding = "CHAT_HISTORY", id = "your-kv-namespace-id" }
+# ]
+
+# Rate limiting (اختياري)
+# [limits]
+# cpu_ms = 50
