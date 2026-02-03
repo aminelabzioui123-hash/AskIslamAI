@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0a5f4f">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>المحادثة - AskIslamAI</title>
+    <title>المحادثة - اسأل الإسلام AI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
@@ -22,6 +22,7 @@
             --gold: #d4a574;
             --dark: #1a1a1a;
             --light: #f5f5f5;
+            --quran-color: #ffd700;
         }
 
         body {
@@ -279,8 +280,13 @@
         .welcome-screen h2 {
             font-family: "Amiri Quran", serif;
             font-size: 2.5rem;
-            color: var(--gold);
+            color: var(--quran-color);
             margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .welcome-screen p {
@@ -619,7 +625,7 @@
                 z-index: 1500;
                 background: rgba(10, 95, 79, 0.95);
                 backdrop-filter: blur(20px);
-                transform: translateX(100%); /* مخفي افتراضياً على الموبايل */
+                transform: translateX(100%);
             }
 
             .sidebar.hidden {
@@ -627,7 +633,7 @@
             }
             
             .sidebar:not(.hidden) {
-                transform: translateX(0); /* يظهر عند إزالة class hidden */
+                transform: translateX(0);
             }
 
             .main-content {
@@ -651,7 +657,6 @@
                 grid-template-columns: 1fr;
             }
 
-            /* Modal responsive على التابلت */
             .modal-content {
                 width: 85%;
                 max-width: 500px;
@@ -664,7 +669,6 @@
         }
 
         @media (max-width: 768px) {
-            /* تصغير الخط على الشاشات المتوسطة */
             .welcome-screen h2 {
                 font-size: 2rem;
             }
@@ -684,7 +688,6 @@
         }
 
         @media (max-width: 480px) {
-            /* Modal على الجوال - مريح وليس كامل الشاشة */
             .modal-content {
                 width: 90%;
                 max-width: none;
@@ -705,7 +708,6 @@
                 font-size: 0.95rem;
             }
 
-            /* Custom Alert على الجوال */
             .custom-alert-content {
                 width: 90%;
                 max-width: none;
@@ -721,7 +723,6 @@
                 font-size: 0.95rem;
             }
 
-            /* تحسينات عامة للجوال */
             .chat-area {
                 padding: 1rem 0.5rem;
             }
@@ -765,7 +766,6 @@
                 font-size: 0.8rem;
             }
 
-            /* تحسين sidebar على الجوال */
             .sidebar {
                 width: 280px;
             }
@@ -781,7 +781,6 @@
         }
 
         @media (max-width: 360px) {
-            /* للشاشات الصغيرة جداً */
             .modal-content,
             .custom-alert-content {
                 padding: 1.5rem 1rem;
@@ -879,7 +878,6 @@
 
         /* Touch-friendly improvements */
         @media (hover: none) and (pointer: coarse) {
-            /* للأجهزة التي تعمل باللمس فقط */
             .btn-primary,
             .new-chat-btn,
             .custom-alert-btn,
@@ -889,7 +887,6 @@
                 touch-action: manipulation;
             }
 
-            /* تكبير المساحة القابلة للنقر */
             .send-btn {
                 min-width: 50px;
                 min-height: 50px;
@@ -900,7 +897,6 @@
                 min-height: 48px;
             }
 
-            /* تحسين scroll للمحادثات على الجوال */
             .chat-area {
                 -webkit-overflow-scrolling: touch;
                 scroll-behavior: smooth;
@@ -912,7 +908,6 @@
             }
         }
 
-        /* منع التكبير التلقائي على iOS عند focus */
         @supports (-webkit-touch-callout: none) {
             input, textarea, select {
                 font-size: 16px !important;
@@ -961,8 +956,8 @@
     <div class="modal" id="loginModal">
         <div class="modal-content glass-strong">
             <div class="modal-header">
-                <h2>مرحباً بك في AskIslamAI</h2>
-                <p>سجل دخولك للبدء</p>
+                <h2>مرحباً بك في اسأل الإسلام AI</h2>
+                <p>سجِّل دخولك للبدء</p>
             </div>
             <form onsubmit="handleLogin(event)">
                 <div class="form-group">
@@ -997,7 +992,7 @@
         <!-- Sidebar -->
         <aside class="sidebar glass hidden" id="sidebar">
             <div class="sidebar-header">
-                <div class="logo">☪ AskIslamAI</div>
+                <div class="logo">☪ اسأل الإسلام AI</div>
                 <button class="new-chat-btn" onclick="startNewChat()">
                     محادثة جديدة
                 </button>
@@ -1012,7 +1007,7 @@
                     <div class="user-avatar">👤</div>
                     <div>
                         <div style="font-weight: 600;">مستخدم</div>
-                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dfaaacbaad9fbaa7beb2afb3baf1bcb0b2">[email&#160;protected]</a></div>
+                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">user@example.com</div>
                     </div>
                 </div>
                 <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
@@ -1034,8 +1029,8 @@
                             السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ
                         </p>
                         <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.85); max-width: 600px; margin: 0 auto; line-height: 1.8;">
-                            مرحباً بك في AskIslamAI، مساعدك الإسلامي الموثوق.<br>
-                            اطرح أسئلتك عن الدين الإسلامي وسأجيبك من القرآن الكريم والسنة النبوية وأقوال العلماء الثقات.
+                            مرحباً بك في اسأل الإسلام AI، مساعدك الإسلامي الموثوق.<br>
+                            اطرح أسئلتك عن الدين الإسلامي وسأجيبك من القرآن الكريم والسنة النبوية الشريفة وأقوال العلماء الثقات.
                         </p>
                         <div style="background: rgba(212, 165, 116, 0.15); border: 1px solid rgba(212, 165, 116, 0.3); border-radius: 12px; padding: 1rem; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
                             <p style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
@@ -1063,7 +1058,7 @@
                             oninput="autoResize(this)"
                         ></textarea>
                         <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="إرسال">
-                            OK
+                            إرسال
                         </button>
                     </div>
                 </div>
@@ -1071,14 +1066,13 @@
         </main>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
         let messageHistory = [];
         let currentChatId = Date.now().toString();
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-        // Check login status on load - Modal will only open when user clicks on profile
+        // Check login status on load
         window.onload = function() {
-            // إظهار sidebar على الشاشات الكبيرة فقط
             function handleSidebarOnResize() {
                 const sidebar = document.getElementById('sidebar');
                 if (window.innerWidth > 968) {
@@ -1088,16 +1082,12 @@
                 }
             }
             
-            // تشغيل عند التحميل
             handleSidebarOnResize();
-            
-            // تشغيل عند تغيير حجم الشاشة
             window.addEventListener('resize', handleSidebarOnResize);
         };
 
         function handleLogin(event) {
             event.preventDefault();
-            // Simulate login (في المشروع الحقيقي، هنا تتصل بالـ API)
             localStorage.setItem('isLoggedIn', 'true');
             isLoggedIn = true;
             document.getElementById('loginModal').classList.remove('active');
@@ -1151,10 +1141,40 @@
             }
         }
 
+        // دالة لإضافة رمز ﷺ بعد ذكر النبي محمد
+        function addProphetSymbol(text) {
+            // قائمة بالألفاظ التي تشير للنبي محمد ﷺ
+            const prophetNames = [
+                'محمد',
+                'النبي',
+                'الرسول',
+                'رسول الله',
+                'خاتم النبيين',
+                'خاتم المرسلين',
+                'الحبيب المصطفى',
+                'المصطفى',
+                'الهادي البشير'
+            ];
+            
+            let result = text;
+            prophetNames.forEach(name => {
+                // البحث عن الاسم متبوعاً بمسافة أو علامة ترقيم وليس متبوعاً برمز ﷺ
+                const regex = new RegExp(`${name}(?!\\s*ﷺ)`, 'g');
+                result = result.replace(regex, `${name} ﷺ`);
+            });
+            
+            return result;
+        }
+
         function addMessageToUI(content, role, source = null, similarQuestions = null) {
             const container = document.getElementById('messagesContainer');
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role === 'user' ? 'user-message' : 'ai-message'}`;
+            
+            // إضافة رمز ﷺ للرسائل من الذكاء الاصطناعي
+            if (role === 'assistant') {
+                content = addProphetSymbol(content);
+            }
             
             let sourceHTML = '';
             if (source) {
@@ -1178,7 +1198,7 @@
             msgDiv.innerHTML = `
                 <div class="message-header">
                     <div class="message-avatar">${role === 'user' ? '👤' : '☪️'}</div>
-                    <span class="message-name">${role === 'user' ? 'أنت' : 'AskIslamAI'}</span>
+                    <span class="message-name">${role === 'user' ? 'أنت' : 'اسأل الإسلام AI'}</span>
                 </div>
                 <div class="message-content">
                     ${content.replace(/\n/g, '<br>')}
@@ -1197,7 +1217,6 @@
         }
 
         function generateSimilarQuestions(userQuestion) {
-            // مجموعة من الأسئلة المشابهة المتعلقة بمواضيع مختلفة
             const questionPatterns = {
                 'صلاة|صلوات|الصلاة': [
                     'ما هي شروط صحة الصلاة؟',
@@ -1241,7 +1260,6 @@
                 ]
             };
 
-            // البحث عن الموضوع المناسب
             for (const [pattern, questions] of Object.entries(questionPatterns)) {
                 const regex = new RegExp(pattern, 'i');
                 if (regex.test(userQuestion)) {
@@ -1249,7 +1267,6 @@
                 }
             }
 
-            // أسئلة عامة افتراضية
             return [
                 'ما هي أركان الإسلام؟',
                 'ما هي أركان الإيمان؟',
@@ -1257,10 +1274,7 @@
             ];
         }
 
-        // ============================================
-        // نظام البحث في الأحاديث من GitHub API
-        // ============================================
-        
+        // نظام البحث في الأحاديث
         const HADITH_API_BASE = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1';
         const hadithCache = new Map();
         
@@ -1273,7 +1287,6 @@
             'ibnmajah': 'سنن ابن ماجه'
         };
 
-        // استخراج الكلمات المفتاحية
         function extractKeywords(query) {
             const stopWords = ['ما', 'هو', 'هي', 'كيف', 'لماذا', 'متى', 'أين', 'من', 'هل', 
                               'في', 'على', 'عن', 'إلى', 'أن', 'أو', 'و', 'ف', 'ل',
@@ -1306,7 +1319,6 @@
             return Array.from(enhancedKeywords);
         }
 
-        // جلب الأحاديث من كتاب معين
         async function fetchBookHadiths(bookKey) {
             if (hadithCache.has(bookKey)) {
                 return hadithCache.get(bookKey);
@@ -1333,7 +1345,6 @@
             }
         }
 
-        // البحث عن أحاديث مطابقة
         function findMatchingHadiths(hadiths, keywords, bookName) {
             const matches = [];
             
@@ -1367,7 +1378,6 @@
             return matches.sort((a, b) => b.score - a.score);
         }
 
-        // البحث الرئيسي
         async function searchHadiths(query, maxResults = 1) {
             const keywords = extractKeywords(query);
             console.log('🔍 البحث عن:', keywords);
@@ -1379,7 +1389,6 @@
             const results = [];
 
             try {
-                // البحث في البخاري ومسلم أولاً (أصح الكتب)
                 for (const [bookKey, bookName] of Object.entries(ARABIC_BOOKS)) {
                     if (results.length >= maxResults) break;
                     
@@ -1397,7 +1406,6 @@
                         continue;
                     }
                     
-                    // توقف بعد البخاري ومسلم إذا وجدنا نتائج كافية
                     if (results.length >= maxResults && (bookKey === 'bukhari' || bookKey === 'muslim')) {
                         break;
                     }
@@ -1410,7 +1418,6 @@
             }
         }
 
-        // تنسيق الأحاديث للـ AI
         function formatHadithsForAI(hadiths) {
             if (!hadiths || hadiths.length === 0) return '';
 
@@ -1442,7 +1449,6 @@
             document.getElementById('sendBtn').disabled = true;
 
             try {
-                // ============ البحث عن أحاديث ذات صلة ============
                 let relevantHadiths = [];
                 let hadithsContext = '';
                 
@@ -1456,8 +1462,8 @@
                     console.warn('⚠️ لم يتم العثور على أحاديث:', hadithError);
                 }
                 
-                // استخدام Groq API - from groq import Groq
-                const API_KEY = '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';
+                // ضع مفتاح API الخاص بك هنا
+                const API_KEY = 'YOUR_API_KEY_HERE';
                 
                 const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                     method: 'POST',
@@ -1481,7 +1487,8 @@ ${hadithsContext}
 **تعليمات مهمة:**
 - استخدم الأحاديث المذكورة أعلاه في إجابتك عندما تكون ذات صلة
 - اذكر المصدر والرقم بالضبط كما هو موجود
-- لا تخترع أحاديث أخرى - استخدم فقط ما هو مذكور أعلاه أو أذكر أنك تعتمد على معرفتك العامة
+- لا تخترع أحاديث أخرى - استخدم فقط ما هو مذكور أعلاه أو اذكر أنك تعتمد على معرفتك العامة
+- **مهم جداً:** عند ذكر النبي محمد، أضف رمز ﷺ بعد اسمه مباشرة
 \n` : ''}
 
 ### أولاً: تعليمات التوثيق والمصادر (صرامة النقل)
@@ -1495,6 +1502,9 @@ ${hadithsContext}
 **دقة الآيات:**
 - عند الاستشهاد بالقرآن الكريم، يجب كتابة النص بالرسم العثماني أو الإملائي الصحيح مع ذكر اسم السورة ورقم الآية.
 - يُمنع تفسير الآية من تلقاء النفس؛ بل يجب العودة لتفاسير (الطبري، القرطبي، ابن كثير).
+
+**إضافة رمز ﷺ:**
+- يجب إضافة رمز ﷺ بعد كل ذكر للنبي محمد (مثل: النبي ﷺ، الرسول ﷺ، محمد ﷺ، رسول الله ﷺ)
 
 ### ثانياً: تعليمات الضبط اللغوي والاصطلاحي (الصرامة اللغوية)
 
@@ -1522,7 +1532,7 @@ ${hadithsContext}
 - يُمنع اقتطاع النصوص من سياقها.
 - يجب ذكر سبب نزول الآية أو مورد ورود الحديث إذا كان ذلك يؤثر على فهم الحكم الشرعي.
 
-### رابعاً: تعليمات الحماية من الخطأ (Fail-safe)
+### رابعاً: تعليمات الحماية من الخطأ
 
 **قاعدة التوقف:**
 - إذا لم تجد نصاً صريحاً أو مرجعاً معتمداً للمعلومة، يجب أن تقول: "لا تتوفر لدي بيانات موثوقة حول هذه المسألة" بدلاً من محاولة استنتاج إجابة.
@@ -1536,6 +1546,7 @@ ${hadithsContext}
 3. التزم بالفصحى الجزلة وتجنب الأخطاء النحوية تماماً؛ فأي خطأ لغوي قد يفسد حكماً شرعياً.
 4. في حال تعارض النصوص، انقل أقوال أهل العلم المعتبرين ولا تجتهد من تلقاء نفسك.
 5. كن شديد الحذر في ألفاظ التكفير، التحريم، والتبديع، ولا تطلقها إلا بنص قطعي.
+6. **أضف رمز ﷺ بعد كل ذكر للنبي محمد.**
 
 **معلومة مهمة:** التاريخ الحالي هو فبراير 2026.
 
@@ -1556,31 +1567,28 @@ ${hadithsContext}
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
 
-                // طباعة البيانات في Console للتصحيح
-                console.log('Response:', data);
+                console.log('الاستجابة:', data);
 
                 if (data.choices && data.choices[0] && data.choices[0].message) {
                     const aiText = data.choices[0].message.content;
-                    // Extract source if mentioned in the response
                     const sourceMatch = aiText.match(/المصدر: (.+?)(?:\n|$)/);
                     const source = sourceMatch ? sourceMatch[1] : 'القرآن والسنة';
                     
-                    // Generate similar questions based on user's question
                     const similarQuestions = generateSimilarQuestions(text);
                     
                     addMessageToUI(aiText, 'assistant', source, similarQuestions);
                     messageHistory.push({ role: 'assistant', content: aiText });
                 } else if (data.error) {
-                    console.error('API Error:', data.error);
+                    console.error('خطأ في API:', data.error);
                     addMessageToUI('عذراً، حدث خطأ: ' + data.error.message, 'assistant');
                 } else {
-                    console.error('Unexpected response:', data);
+                    console.error('استجابة غير متوقعة:', data);
                     addMessageToUI('عذراً، لم نتمكن من الحصول على رد. يرجى المحاولة مرة أخرى.', 'assistant');
                 }
             } catch (error) {
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
-                console.error('Error:', error);
+                console.error('خطأ:', error);
                 addMessageToUI('عذراً، حدث خطأ في الاتصال: ' + error.message + '. يرجى التحقق من مفتاح API والمحاولة مرة أخرى.', 'assistant');
             }
         }
