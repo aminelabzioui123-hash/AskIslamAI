@@ -1462,9 +1462,8 @@
                     console.warn('⚠️ لم يتم العثور على أحاديث:', hadithError);
                 }
                 
-                // استخدام Cloudflare Worker بدلاً من الاتصال المباشر
-                // استبدل YOUR_WORKER_URL برابط Worker الخاص بك
-                const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+                // استخدام Cloudflare Worker من نفس الدومين
+                const WORKER_URL = '/api';
                 
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
