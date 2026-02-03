@@ -974,6 +974,18 @@
             
             if (!message) return;
             
+            // التحقق من السلام أولاً
+            const greetings = ['السلام عليكم', 'سلام عليكم', 'السلام', 'سلام', 'مرحبا', 'مرحبًا', 'أهلا', 'أهلاً', 'صباح الخير', 'مساء الخير'];
+            const isGreeting = greetings.some(greeting => message.toLowerCase().includes(greeting.toLowerCase()));
+            
+            if (isGreeting) {
+                addMessageToUI(message, 'user', null, [], true);
+                addMessageToUI('وعليكم السلام ورحمة الله وبركاته 🌙\n\nأهلاً بك في اسأل الإسلام AI، كيف يمكنني مساعدتك اليوم؟', 'assistant', null, [], true);
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                return;
+            }
+            
             // Check if question is Islamic
             if (!isIslamicQuestion(message)) {
                 addMessageToUI(message, 'user', null, [], true);
