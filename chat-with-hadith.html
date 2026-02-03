@@ -1462,7 +1462,7 @@
                     console.warn('⚠️ لم يتم العثور على أحاديث:', hadithError);
                 }
                 
-                // استخدام Cloudflare Worker من نفس الدومين
+                // استخدام API من نفس الدومين (GitHub + Cloudflare Worker)
                 const WORKER_URL = '/api';
                 
                 const response = await fetch(WORKER_URL, {
