@@ -80,6 +80,58 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* Non-Profit Banner */
+        .nonprofit-banner {
+            position: fixed;
+            top: 100px;
+            right: 50%;
+            transform: translateX(50%);
+            width: 90%;
+            max-width: 1200px;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            z-index: 999;
+            animation: slideDown 0.8s ease 0.3s backwards;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, rgba(45, 139, 116, 0.15), rgba(10, 95, 79, 0.15));
+            border: 1px solid rgba(212, 165, 116, 0.3);
+        }
+
+        .nonprofit-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 8px rgba(212, 165, 116, 0.3));
+        }
+
+        .nonprofit-text {
+            flex: 1;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .nonprofit-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .nonprofit-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .nonprofit-banner.hidden {
+            display: none;
+        }
+
         /* Navigation */
         nav {
             position: fixed;
@@ -144,7 +196,6 @@
             width: 100%;
         }
 
-        /* تعديل الأزرار لضمان الاستجابة */
         .btn-primary {
             background: linear-gradient(135deg, var(--gold), #c4956a);
             color: var(--dark);
@@ -157,7 +208,7 @@
             font-family: inherit;
             box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
             position: relative;
-            z-index: 1001; /* فوق القائمة في الجوال */
+            z-index: 1001;
             touch-action: manipulation;
         }
 
@@ -225,7 +276,7 @@
             padding: 1.2rem 3rem;
             font-size: 1.1rem;
             border-radius: 16px;
-            z-index: 1005 !important; /* ضمان بقاء الزر قابلاً للنقر */
+            z-index: 1005 !important;
         }
 
         .btn-outline {
@@ -309,21 +360,114 @@
         }
 
         .book-item {
-            padding: 1.5rem;
-            border-radius: 16px;
+            padding: 2rem;
+            border-radius: 20px;
             text-align: center;
             transition: all 0.3s ease;
         }
 
         .book-item:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .book-item h4 {
+            font-size: 1.2rem;
             color: var(--gold);
-            margin-bottom: 0.5rem;
             font-weight: 600;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonials-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .testimonial-card {
+            padding: 2rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .testimonial-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .testimonial-author {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .testimonial-date {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+        }
+
+        .add-testimonial-section {
+            text-align: center;
+            padding: 3rem;
+            border-radius: 24px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .add-testimonial-section h3 {
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .testimonial-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .testimonial-input {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .testimonial-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .testimonial-input:focus {
+            outline: none;
+            border-color: var(--gold);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         /* Founder Section */
@@ -334,37 +478,50 @@
         }
 
         .founder-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 4rem 3rem;
-            border-radius: 32px;
-            gap: 2.5rem;
             max-width: 900px;
             margin: 0 auto;
+            padding: 3rem;
+            border-radius: 30px;
+            display: flex;
+            gap: 3rem;
+            align-items: center;
         }
 
         .founder-image-wrapper {
-            position: relative;
+            flex-shrink: 0;
+        }
+
+        .founder-image {
             width: 200px;
             height: 200px;
             border-radius: 50%;
-            overflow: hidden;
+            object-fit: cover;
             border: 4px solid var(--gold);
             box-shadow: 0 10px 40px rgba(212, 165, 116, 0.3);
         }
 
-        .founder-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .founder-info h3 {
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .founder-title {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .founder-description {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
         }
 
         /* CTA Section */
         .cta {
             padding: 6rem 2rem;
-            text-align: center;
             position: relative;
             z-index: 1;
         }
@@ -373,83 +530,393 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 4rem 3rem;
-            border-radius: 32px;
+            border-radius: 30px;
+            text-align: center;
+        }
+
+        .cta-box h2 {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-box p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* Footer */
         footer {
-            padding: 3rem 2rem;
             text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
             position: relative;
             z-index: 1;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 300;
+        }
+
+        /* Floating Action Buttons */
+        .floating-actions {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, var(--gold), #c4956a);
+            color: var(--dark);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(212, 165, 116, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 30px rgba(212, 165, 116, 0.6);
+        }
+
+        .action-btn::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(26, 26, 26, 0.95);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            font-family: "IBM Plex Sans Arabic", sans-serif;
+        }
+
+        .action-btn:hover::before {
+            opacity: 1;
+            bottom: 75px;
+        }
+
+        .support-btn {
+            background: linear-gradient(135deg, #4caf50, #45a049);
+        }
+
+        .support-btn:hover {
+            box-shadow: 0 6px 30px rgba(76, 175, 80, 0.6);
+        }
+
+        /* Contact Modal */
+        .contact-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .contact-modal.active {
+            display: flex;
+        }
+
+        .contact-modal-content {
+            max-width: 500px;
+            width: 90%;
+            padding: 2.5rem;
+            border-radius: 24px;
+            position: relative;
+        }
+
+        .contact-modal h3 {
+            color: var(--gold);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .contact-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-option {
+            padding: 1.2rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: white;
+        }
+
+        .contact-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            transform: translateX(-5px);
+        }
+
+        .contact-icon {
+            font-size: 1.5rem;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-label {
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 0.2rem;
+        }
+
+        .contact-value {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        /* Support Modal */
+        .support-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .support-modal.active {
+            display: flex;
+        }
+
+        .support-modal-content {
+            max-width: 600px;
+            width: 90%;
+            padding: 2.5rem;
+            border-radius: 24px;
+            position: relative;
+        }
+
+        .support-modal h3 {
+            color: #4caf50;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .support-description {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+        }
+
+        .support-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .support-method {
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .support-method:hover {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4caf50;
+            transform: translateY(-5px);
+        }
+
+        .support-method-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.8rem;
+            display: block;
+        }
+
+        .support-method-title {
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .support-method-desc {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .support-note {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .support-note strong {
+            color: #4caf50;
         }
 
         /* Mobile Menu */
-        .mobile-menu-btn {
+        .menu-toggle {
             display: none;
             background: none;
             border: none;
             color: white;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            z-index: 1100;
+            z-index: 1002;
         }
 
-        /* Responsive */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            nav {
-                width: 95%;
-                padding: 1rem;
-            }
-
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                right: 0;
-                left: 0;
-                margin-top: 1rem;
+            .nonprofit-banner {
+                top: 80px;
+                padding: 0.8rem 1.2rem;
                 flex-direction: column;
-                padding: 1.5rem;
-                border-radius: 20px;
-                background: rgba(10, 95, 79, 0.95);
-                backdrop-filter: blur(20px);
+                text-align: center;
             }
 
-            .nav-links.active {
-                display: flex;
+            .nonprofit-icon {
+                font-size: 1.5rem;
             }
 
-            .mobile-menu-btn {
+            .nonprofit-text {
+                font-size: 0.9rem;
+            }
+
+            .menu-toggle {
                 display: block;
             }
 
-            .hero h1 { font-size: 2.5rem; }
-            .hero-buttons { flex-direction: column; }
-            .btn-large { width: 100%; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                background: rgba(10, 95, 79, 0.98);
+                flex-direction: column;
+                padding: 5rem 2rem;
+                transition: right 0.3s ease;
+                backdrop-filter: blur(20px);
+                z-index: 1001;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .hero {
+                padding: 10rem 1.5rem 4rem;
+            }
+
+            .founder-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-actions {
+                bottom: 20px;
+                left: 20px;
+                gap: 10px;
+            }
+
+            .action-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .support-methods {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Non-Profit Banner -->
+    <div class="nonprofit-banner glass" id="nonprofitBanner">
+        <span class="nonprofit-icon">💚</span>
+        <p class="nonprofit-text">
+            <strong>منصة وقفية تعليمية غير ربحية</strong> - نهدف لنشر المعرفة الشرعية واللغوية مجاناً لوجه الله تعالى
+        </p>
+        <button class="nonprofit-close" onclick="closeBanner()">✕</button>
+    </div>
+
     <nav class="glass">
         <div class="nav-content">
-            <div class="logo">
-                <svg class="mosque-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width: 40px; height: 40px; fill: #d4a574; margin-left: 8px; vertical-align: middle;">
-                    <circle cx="50" cy="35" r="15" fill="currentColor"/>
-                    <rect x="20" y="45" width="8" height="35" fill="currentColor"/>
-                    <circle cx="24" cy="42" r="5" fill="currentColor"/>
-                    <rect x="72" y="45" width="8" height="35" fill="currentColor"/>
-                    <circle cx="76" cy="42" r="5" fill="currentColor"/>
-                    <rect x="35" y="50" width="30" height="30" fill="currentColor"/>
-                </svg>
-                AskIslamAI
-            </div>
-            <button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+            <div class="logo">AskIslamAI</div>
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
                 <li><a href="#home">الرئيسية</a></li>
                 <li><a href="#features">المميزات</a></li>
                 <li><a href="#books">المصادر</a></li>
+                <li><a href="#testimonials">آراء المستخدمين</a></li>
                 <li><a href="#founder">المؤسس</a></li>
                 <li><a href="#about">عن الموقع</a></li>
                 <li><button class="btn-primary" onclick="goToChat()">ابدأ الآن</button></li>
@@ -508,6 +975,39 @@
         </div>
     </section>
 
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials">
+        <h2 class="section-title">قالوا عن المنصة</h2>
+        <div class="testimonials-container">
+            <div class="testimonials-grid" id="testimonialsGrid">
+                <!-- الآراء ستظهر هنا تلقائياً -->
+            </div>
+            
+            <div class="add-testimonial-section glass-strong">
+                <h3>شاركنا رأيك 💬</h3>
+                <form class="testimonial-form" id="testimonialForm">
+                    <input 
+                        type="text" 
+                        class="testimonial-input" 
+                        id="testimonialName" 
+                        placeholder="اسمك (اختياري)" 
+                        maxlength="50"
+                    >
+                    <textarea 
+                        class="testimonial-input" 
+                        id="testimonialText" 
+                        placeholder="شاركنا تجربتك مع المنصة..." 
+                        required
+                        maxlength="500"
+                    ></textarea>
+                    <button type="submit" class="btn-primary btn-large">
+                        ✨ نشر الرأي
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <section class="founder" id="founder">
         <h2 class="section-title">المؤسس</h2>
         <div class="founder-card glass-strong">
@@ -532,11 +1032,94 @@
         </div>
     </section>
 
+    <!-- Floating Action Buttons -->
+    <div class="floating-actions">
+        <button class="action-btn" data-tooltip="تواصل معنا" onclick="openContactModal()">
+            ✉️
+        </button>
+        <button class="action-btn support-btn" data-tooltip="ادعم المشروع" onclick="openSupportModal()">
+            💝
+        </button>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="contact-modal" id="contactModal">
+        <div class="contact-modal-content glass-strong">
+            <button class="modal-close" onclick="closeContactModal()">✕</button>
+            <h3>تواصل معنا</h3>
+            <div class="contact-options">
+                <a href="mailto:islamaiask@gmail.com" class="contact-option">
+                    <span class="contact-icon">📧</span>
+                    <div class="contact-info">
+                        <div class="contact-label">البريد الإلكتروني</div>
+                        <div class="contact-value">islamaiask@gmail.com</div>
+                    </div>
+                </a>
+                <div class="contact-option" onclick="copyEmail()">
+                    <span class="contact-icon">📋</span>
+                    <div class="contact-info">
+                        <div class="contact-label">نسخ البريد</div>
+                        <div class="contact-value">انقر لنسخ البريد الإلكتروني</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="support-modal" id="supportModal">
+        <div class="support-modal-content glass-strong">
+            <button class="modal-close" onclick="closeSupportModal()">✕</button>
+            <h3>💚 ادعم المشروع</h3>
+            <p class="support-description">
+                ساهم في استمرار هذا المشروع الوقفي وانشر الخير معنا.
+                كل دعم يساعد في تطوير المنصة وإضافة مميزات جديدة.
+            </p>
+            
+            <div class="support-methods">
+                <div class="support-method" onclick="alert('🔜 قريباً: سيتم إضافة خيارات الدفع الإلكتروني')">
+                    <span class="support-method-icon">💳</span>
+                    <div class="support-method-title">بطاقة ائتمانية</div>
+                    <div class="support-method-desc">قريباً</div>
+                </div>
+                
+                <div class="support-method" onclick="alert('🔜 قريباً: سيتم إضافة رابط PayPal')">
+                    <span class="support-method-icon">💰</span>
+                    <div class="support-method-title">PayPal</div>
+                    <div class="support-method-desc">قريباً</div>
+                </div>
+                
+                <div class="support-method" onclick="copyDonationInfo()">
+                    <span class="support-method-icon">🏦</span>
+                    <div class="support-method-title">تحويل بنكي</div>
+                    <div class="support-method-desc">راسلنا للحصول على التفاصيل</div>
+                </div>
+            </div>
+            
+            <div class="support-note">
+                <strong>جزاكم الله خيراً</strong><br>
+                كل دعم مهما كان صغيراً يساهم في استمرار هذا العمل الخيري
+            </div>
+        </div>
+    </div>
+
     <footer>
         <p>© 2026 AskIslamAI - جميع الحقوق محفوظة | صُنع بـ ❤️ لخدمة الإسلام</p>
     </footer>
 
     <script>
+        // Non-Profit Banner Functions
+        function closeBanner() {
+            document.getElementById('nonprofitBanner').classList.add('hidden');
+            localStorage.setItem('bannerClosed', 'true');
+        }
+
+        // Check if banner was previously closed
+        if (localStorage.getItem('bannerClosed') === 'true') {
+            document.getElementById('nonprofitBanner').classList.add('hidden');
+        }
+
+        // Menu Toggle
         function toggleMenu() {
             document.getElementById('navLinks').classList.toggle('active');
         }
@@ -546,16 +1129,141 @@
             if(el) el.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // الوظيفة الأساسية للتوجيه
         function goToChat() {
             console.log("Redirecting...");
             window.location.href = 'chat-with-hadith.html';
         }
 
-        // إضافة مستمع لمس الشاشة للهواتف لضمان عمل الزر
+        // Contact Modal Functions
+        function openContactModal() {
+            document.getElementById('contactModal').classList.add('active');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.remove('active');
+        }
+
+        function copyEmail() {
+            navigator.clipboard.writeText('islamaiask@gmail.com').then(() => {
+                alert('✅ تم نسخ البريد الإلكتروني');
+            });
+        }
+
+        // Support Modal Functions
+        function openSupportModal() {
+            document.getElementById('supportModal').classList.add('active');
+        }
+
+        function closeSupportModal() {
+            document.getElementById('supportModal').classList.remove('active');
+        }
+
+        function copyDonationInfo() {
+            const email = 'islamaiask@gmail.com';
+            navigator.clipboard.writeText(email).then(() => {
+                alert('✅ تم نسخ البريد الإلكتروني. يمكنك مراسلتنا للحصول على تفاصيل التحويل البنكي');
+            });
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('contactModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeContactModal();
+            }
+        });
+
+        document.getElementById('supportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSupportModal();
+            }
+        });
+
+        // Testimonials System with LocalStorage
+        const testimonials = [
+            {
+                text: "منصة رائعة ساعدتني في فهم الكثير من الأمور الشرعية بطريقة سهلة وموثوقة",
+                author: "أحمد محمد",
+                date: "منذ يومين"
+            },
+            {
+                text: "أفضل مساعد إسلامي جربته! الإجابات دقيقة ومدعومة بالمراجع",
+                author: "فاطمة الزهراء",
+                date: "منذ أسبوع"
+            },
+            {
+                text: "جزاكم الله خيراً على هذا المجهود الرائع في خدمة الإسلام",
+                author: "عبدالله السعيد",
+                date: "منذ 3 أيام"
+            }
+        ];
+
+        // Load testimonials from localStorage or use defaults
+        function loadTestimonials() {
+            const saved = localStorage.getItem('testimonials');
+            return saved ? JSON.parse(saved) : testimonials;
+        }
+
+        // Save testimonials to localStorage
+        function saveTestimonials(data) {
+            localStorage.setItem('testimonials', JSON.stringify(data));
+        }
+
+        // Display testimonials
+        function displayTestimonials() {
+            const grid = document.getElementById('testimonialsGrid');
+            const data = loadTestimonials();
+            
+            grid.innerHTML = '';
+            
+            // Show last 6 testimonials
+            data.slice(-6).reverse().forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'testimonial-card glass';
+                card.innerHTML = `
+                    <p class="testimonial-text">"${item.text}"</p>
+                    <div class="testimonial-author">${item.author || 'مستخدم'}</div>
+                    <div class="testimonial-date">${item.date}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Add new testimonial
+        document.getElementById('testimonialForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('testimonialName').value.trim() || 'مستخدم';
+            const text = document.getElementById('testimonialText').value.trim();
+            
+            if (!text) return;
+            
+            const newTestimonial = {
+                text: text,
+                author: name,
+                date: 'الآن'
+            };
+            
+            const currentTestimonials = loadTestimonials();
+            currentTestimonials.push(newTestimonial);
+            saveTestimonials(currentTestimonials);
+            
+            // Clear form
+            document.getElementById('testimonialName').value = '';
+            document.getElementById('testimonialText').value = '';
+            
+            // Refresh display
+            displayTestimonials();
+            
+            // Show success message
+            alert('✨ شكراً لك! تم نشر رأيك بنجاح');
+        });
+
+        // Initialize testimonials on page load
+        displayTestimonials();
+
+        // Touch events for mobile
         document.querySelectorAll('.chat-trigger, .btn-primary').forEach(button => {
             button.addEventListener('touchstart', function(e) {
-                // نترك المتصفح يتعامل مع النقرة لكن نضمن الاستجابة
                 console.log("Touch detected");
             }, {passive: true});
         });
