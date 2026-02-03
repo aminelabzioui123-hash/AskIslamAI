@@ -1,7 +1,7 @@
 {
   "name": "askislamai",
   "version": "1.0.0",
-  "description": "مساعد إسلامي ذكي م ",
+  "description": "مساعد إسلامي ذكي متطور يعتمد على اكتب الاسلامية الموثوقة  ",
   "main": "worker.js",
   "scripts": {
     "dev": "wrangler dev",
