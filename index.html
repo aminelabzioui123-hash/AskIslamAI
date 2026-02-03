@@ -1119,166 +1119,106 @@
         <p>© 2026 AskIslamAI - جميع الحقوق محفوظة | صُنع بـ ❤️ لخدمة الإسلام</p>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Non-Profit Banner Functions
-        function closeBanner() {
-            document.getElementById('nonprofitBanner').classList.add('hidden');
-            localStorage.setItem('bannerClosed', 'true');
-        }
+   <script>
+    // 1. وظائف شريط "غير ربحي"
+    function closeBanner() {
+        document.getElementById('nonprofitBanner').classList.add('hidden');
+        localStorage.setItem('bannerClosed', 'true');
+    }
 
-        // Check if banner was previously closed
-        if (localStorage.getItem('bannerClosed') === 'true') {
-            document.getElementById('nonprofitBanner').classList.add('hidden');
-        }
+    if (localStorage.getItem('bannerClosed') === 'true') {
+        const banner = document.getElementById('nonprofitBanner');
+        if(banner) banner.classList.add('hidden');
+    }
 
-        // Menu Toggle
-        function toggleMenu() {
-            document.getElementById('navLinks').classList.toggle('active');
-        }
+    // 2. القائمة الجانبية للجوال
+    function toggleMenu() {
+        document.getElementById('navLinks').classList.toggle('active');
+    }
 
-        function scrollToSection(id) {
-            const el = document.getElementById(id);
-            if(el) el.scrollIntoView({ behavior: 'smooth' });
-        }
+    // 3. التنقل السلس والتحويل للشات
+    function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if(el) el.scrollIntoView({ behavior: 'smooth' });
+    }
 
-        function goToChat() {
-            console.log("Redirecting...");
-            window.location.href = '/chat';
-        }
+    function goToChat() {
+        // تأكد من صحة المسار المسجل في خادمك (مثلاً /chat.html أو /chat)
+        window.location.href = '/chat';
+    }
 
-        // Contact Modal Functions
-        function openContactModal() {
-            document.getElementById('contactModal').classList.add('active');
-        }
+    // 4. النوافذ المنبثقة (Modals)
+    function openContactModal() {
+        document.getElementById('contactModal').classList.add('active');
+    }
 
-        function closeContactModal() {
-            document.getElementById('contactModal').classList.remove('active');
-        }
+    function closeContactModal() {
+        document.getElementById('contactModal').classList.remove('active');
+    }
 
-        function copyEmail() {
-            navigator.clipboard.writeText('islamaiask@gmail.com').then(() => {
-                alert('✅ تم نسخ البريد الإلكتروني');
-            });
-        }
+    function openSupportModal() {
+        document.getElementById('supportModal').classList.add('active');
+    }
 
-        // Support Modal Functions
-        function openSupportModal() {
-            document.getElementById('supportModal').classList.add('active');
-        }
+    function closeSupportModal() {
+        document.getElementById('supportModal').classList.remove('active');
+    }
 
-        function closeSupportModal() {
-            document.getElementById('supportModal').classList.remove('active');
-        }
-
-        function copyDonationInfo() {
-            const email = 'islamaiask@gmail.com';
-            navigator.clipboard.writeText(email).then(() => {
-                alert('✅ تم نسخ البريد الإلكتروني. يمكنك مراسلتنا للحصول على تفاصيل التحويل البنكي');
-            });
-        }
-
-        // Close modals when clicking outside
-        document.getElementById('contactModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeContactModal();
-            }
+    function copyEmail() {
+        navigator.clipboard.writeText('islamaiask@gmail.com').then(() => {
+            alert('✅ تم نسخ البريد الإلكتروني');
         });
+    }
 
-        document.getElementById('supportModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeSupportModal();
-            }
+    // 5. نظام الآراء والتحديث التلقائي
+    const defaultTestimonials = [
+        { text: "منصة رائعة ساعدتني في فهم الكثير من الأمور الشرعية", author: "أحمد محمد", date: "منذ يومين" },
+        { text: "أفضل مساعد إسلامي جربته! الإجابات دقيقة ومدعومة بالمراجع", author: "فاطمة الزهراء", date: "منذ أسبوع" }
+    ];
+
+    function loadTestimonials() {
+        const saved = localStorage.getItem('testimonials');
+        return saved ? JSON.parse(saved) : defaultTestimonials;
+    }
+
+    function displayTestimonials() {
+        const grid = document.getElementById('testimonialsGrid');
+        if(!grid) return;
+        const data = loadTestimonials();
+        grid.innerHTML = '';
+        data.slice(-6).reverse().forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'testimonial-card glass';
+            card.innerHTML = `
+                <p class="testimonial-text">"${item.text}"</p>
+                <div class="testimonial-author">${item.author}</div>
+                <div class="testimonial-date">${item.date}</div>
+            `;
+            grid.appendChild(card);
         });
+    }
 
-        // Testimonials System with LocalStorage
-        const testimonials = [
-            {
-                text: "منصة رائعة ساعدتني في فهم الكثير من الأمور الشرعية بطريقة سهلة وموثوقة",
-                author: "أحمد محمد",
-                date: "منذ يومين"
-            },
-            {
-                text: "أفضل مساعد إسلامي جربته! الإجابات دقيقة ومدعومة بالمراجع",
-                author: "فاطمة الزهراء",
-                date: "منذ أسبوع"
-            },
-            {
-                text: "جزاكم الله خيراً على هذا المجهود الرائع في خدمة الإسلام",
-                author: "عبدالله السعيد",
-                date: "منذ 3 أيام"
-            }
-        ];
+    document.getElementById('testimonialForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const name = document.getElementById('testimonialName').value.trim() || 'مستخدم';
+        const text = document.getElementById('testimonialText').value.trim();
+        if (!text) return;
 
-        // Load testimonials from localStorage or use defaults
-        function loadTestimonials() {
-            const saved = localStorage.getItem('testimonials');
-            return saved ? JSON.parse(saved) : testimonials;
-        }
-
-        // Save testimonials to localStorage
-        function saveTestimonials(data) {
-            localStorage.setItem('testimonials', JSON.stringify(data));
-        }
-
-        // Display testimonials
-        function displayTestimonials() {
-            const grid = document.getElementById('testimonialsGrid');
-            const data = loadTestimonials();
-            
-            grid.innerHTML = '';
-            
-            // Show last 6 testimonials
-            data.slice(-6).reverse().forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'testimonial-card glass';
-                card.innerHTML = `
-                    <p class="testimonial-text">"${item.text}"</p>
-                    <div class="testimonial-author">${item.author || 'مستخدم'}</div>
-                    <div class="testimonial-date">${item.date}</div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        // Add new testimonial
-        document.getElementById('testimonialForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('testimonialName').value.trim() || 'مستخدم';
-            const text = document.getElementById('testimonialText').value.trim();
-            
-            if (!text) return;
-            
-            const newTestimonial = {
-                text: text,
-                author: name,
-                date: 'الآن'
-            };
-            
-            const currentTestimonials = loadTestimonials();
-            currentTestimonials.push(newTestimonial);
-            saveTestimonials(currentTestimonials);
-            
-            // Clear form
-            document.getElementById('testimonialName').value = '';
-            document.getElementById('testimonialText').value = '';
-            
-            // Refresh display
-            displayTestimonials();
-            
-            // Show success message
-            alert('✨ شكراً لك! تم نشر رأيك بنجاح');
-        });
-
-        // Initialize testimonials on page load
+        const current = loadTestimonials();
+        current.push({ text, author: name, date: "الآن" });
+        localStorage.setItem('testimonials', JSON.stringify(current));
+        
+        this.reset();
         displayTestimonials();
+        alert('✨ شكراً لك! تم نشر رأيك بنجاح');
+    });
 
-        // Touch events for mobile
-        document.querySelectorAll('.chat-trigger, .btn-primary').forEach(button => {
-            button.addEventListener('touchstart', function(e) {
-                console.log("Touch detected");
-            }, {passive: true});
-        });
+    // إغلاق النوافذ عند النقر خارجها
+    window.onclick = function(event) {
+        if (event.target.classList.contains('contact-modal')) closeContactModal();
+        if (event.target.classList.contains('support-modal')) closeSupportModal();
+    }
 
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').fo
+    // تشغيل النظام عند التحميل
+    document.addEventListener('DOMContentLoaded', displayTestimonials);
+</script>
