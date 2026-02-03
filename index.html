@@ -739,40 +739,40 @@
         }
 
         .support-modal-content {
-            max-width: 600px;
+            max-width: 400px;
             width: 90%;
-            padding: 2.5rem;
-            border-radius: 24px;
+            padding: 1.5rem;
+            border-radius: 20px;
             position: relative;
         }
 
         .support-modal h3 {
             color: #4caf50;
-            font-size: 2rem;
-            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
             text-align: center;
         }
 
         .support-description {
             text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.8;
-            margin-bottom: 2rem;
-            font-size: 1.05rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.5;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
         }
 
         .support-methods {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.6rem;
+            margin-bottom: 1rem;
         }
 
         .support-method {
-            padding: 1.5rem;
-            border-radius: 16px;
+            padding: 0.8rem 0.5rem;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(76, 175, 80, 0.3);
+            border: 1.5px solid rgba(76, 175, 80, 0.3);
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -781,39 +781,42 @@
         .support-method:hover {
             background: rgba(76, 175, 80, 0.1);
             border-color: #4caf50;
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
 
         .support-method-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.8rem;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
             display: block;
         }
 
         .support-method-title {
             color: #4caf50;
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
         }
 
         .support-method-desc {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.7rem;
         }
 
         .support-note {
             background: rgba(76, 175, 80, 0.1);
             border: 1px solid rgba(76, 175, 80, 0.3);
-            border-radius: 12px;
-            padding: 1.2rem;
+            border-radius: 8px;
+            padding: 0.8rem;
             text-align: center;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.4;
+            font-size: 0.8rem;
         }
 
         .support-note strong {
             color: #4caf50;
+            display: block;
+            margin-bottom: 0.2rem;
         }
 
         /* Mobile Menu */
@@ -894,6 +897,15 @@
 
             .support-methods {
                 grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .support-method {
+                padding: 0.7rem 0.5rem;
+            }
+            
+            .support-modal-content {
+                padding: 1.2rem;
             }
         }
     </style>
