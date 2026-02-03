@@ -750,10 +750,10 @@
         });
 
         // ============================================
-        // إعدادات Cloudflare Workers AI
+        // إعدادات API
         // ============================================
-        // استخدام Cloudflare Workers endpoint المخصص
-        const WORKERS_API_URL = 'https://askislam-ai.aminelabzioui123.workers.dev';
+        // استخدام Cloudflare Workers endpoint مع Groq API
+        const API_ENDPOINT = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
 
         // التعليمات البرمجية للذكاء الاصطناعي
         const systemPrompts = {
@@ -1022,26 +1022,24 @@
             try {
                 // إضافة التعليمات حسب الوضع المختار
                 const systemPrompt = systemPrompts[selectedAnswerMode];
-                const islamicContext = `أنت مساعد إسلامي متخصص. يجب عليك:
-- الإجابة على الأسئلة الإسلامية فقط
-- استخدام القرآن والسنة النبوية كمصادر
-- تقديم إجابات دقيقة ومؤصلة شرعياً
-- الالتزام بالمنهج السني
-- عدم الفتوى في المسائل الحساسة وتوجيه السائل للعلماء`;
+                const islamicContext = `أنت مساعد إسلامي متخصص خبير. يجب عليك:
+- الإجابة على الأسئلة الإسلامية فقط بدقة عالية
+- استخدام القرآن الكريم والسنة النبوية الشريفة كمصادر أساسية
+- تقديم إجابات دقيقة ومؤصلة شرعياً من المذاهب السنية
+- الالتزام بالمنهج السني والوسطية في الفتوى
+- عدم الفتوى في المسائل الحساسة والخلافية وتوجيه السائل للعلماء المختصين
+- استخدام لغة عربية فصحى واضحة ومفهومة`;
                 
-                const fullPrompt = `${systemPrompt}\n\n${islamicContext}\n\nالسؤال: ${message}`;
+                const fullMessage = `${systemPrompt}\n\n${islamicContext}\n\nالسؤال: ${message}`;
                 
-                // استخدام Cloudflare Workers endpoint
-                const response = await fetch(WORKERS_API_URL, {
+                // استخدام API endpoint
+                const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: message,
-                        systemPrompt: systemPrompt,
-                        islamicContext: islamicContext,
-                        mode: selectedAnswerMode
+                        message: fullMessage
                     })
                 });
 
@@ -1056,11 +1054,11 @@
                 const data = await response.json();
                 let aiResponse = '';
                 
-                // معالجة الاستجابة من Cloudflare Workers
-                if (data.response) {
-                    aiResponse = data.response;
-                } else if (data.result) {
-                    aiResponse = data.result;
+                // معالجة الاستجابة من Groq API
+                if (data.choices && data.choices.length > 0) {
+                    aiResponse = data.choices[0].message.content;
+                } else if (data.error) {
+                    throw new Error(data.error);
                 } else {
                     aiResponse = 'عذراً، لم أتمكن من معالجة الإجابة.';
                 }
