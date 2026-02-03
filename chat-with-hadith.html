@@ -300,6 +300,55 @@
             border-bottom-left-radius: 4px; 
         }
         
+        /* تنسيق الآيات القرآنية */
+        .quran-verse {
+            font-family: 'Amiri Quran', serif;
+            color: var(--quran-color);
+            font-size: 1.15em;
+            line-height: 2;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(212, 165, 116, 0.1));
+            padding: 0.5rem 1rem;
+            border-radius: 12px;
+            border-right: 3px solid var(--gold);
+            display: inline-block;
+            margin: 0.5rem 0;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+        }
+        
+        /* تنسيق المصطلحات الإسلامية */
+        .islamic-term {
+            color: rgba(212, 165, 116, 0.9);
+            font-weight: 500;
+        }
+        
+        /* تنسيق الأحاديث - بسيط وواضح */
+        .hadith-quote {
+            color: rgba(255, 255, 255, 0.95);
+            font-style: normal;
+            padding: 0 0.2rem;
+        }
+        
+        /* تنسيق الأرقام والتعداد */
+        .list-number {
+            color: var(--gold);
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        
+        /* تنسيق المراجع */
+        .reference {
+            color: rgba(212, 165, 116, 0.7);
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        
+        /* تنسيق الفقرات */
+        .paragraph {
+            margin: 0.5rem 0;
+            line-height: 1.8;
+            text-align: justify;
+        }
+        
         .message-source { 
             font-size: 0.85rem; 
             color: var(--gold); 
@@ -408,45 +457,6 @@
             font-size: 0.9rem;
         }
 
-        /* تنسيق الآيات القرآنية */
-        .quran-verse {
-            font-family: 'Amiri Quran', serif;
-            font-size: 1.3rem;
-            line-height: 2.2;
-            color: #2ecc71;
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(39, 174, 96, 0.1));
-            border-right: 4px solid #2ecc71;
-            padding: 1.2rem 1.5rem;
-            margin: 1.2rem 0;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2);
-            direction: rtl;
-        }
-
-        /* تنسيق الأحاديث النبوية */
-        .hadith-text {
-            font-family: 'IBM Plex Sans Arabic', sans-serif;
-            font-size: 1.1rem;
-            line-height: 2;
-            color: #f39c12;
-            background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(230, 126, 34, 0.1));
-            border-right: 4px solid #f39c12;
-            padding: 1.2rem 1.5rem;
-            margin: 1.2rem 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.2);
-            direction: rtl;
-        }
-
-        /* رمز الصلاة على النبي */
-        .salla {
-            color: #3498db;
-            font-weight: bold;
-            font-size: 1.05em;
-            margin: 0 2px;
-        }
-
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -504,50 +514,19 @@
         <main class="main-content glass" id="mainContent">
             <div class="chat-area" id="chatArea">
                 <div class="message assistant-message">
-                    <div class="message-content">
-                        <div style="text-align: center; margin-bottom: 1rem;">
-                            <span style="font-size: 2rem;">☪️</span>
-                        </div>
-                        
-                        <div style="font-family: 'Amiri Quran'; font-size: 1.2rem; text-align: center; color: var(--gold); margin-bottom: 1.5rem;">
+                    <div class="message-content" style="text-align: center;">
+                        <div style="font-family: 'Amiri Quran', serif; font-size: 1.8rem; color: var(--quran-color); margin-bottom: 1.5rem; line-height: 2.5;">
                             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                         </div>
-                        
-                        <div style="font-size: 1.1rem; margin-bottom: 1rem;">
-                            السلام عليكم ورحمة الله وبركاته 🌙
-                        </div>
-                        
-                        <p style="margin-bottom: 1rem;">
-                            أنا <strong>مساعدك الإسلامي الذكي المتخصص</strong>، مُبرمج للإجابة على أسئلتك الدينية بالاستناد إلى القرآن الكريم والسنة النبوية الصحيحة.
+                        <p style="margin: 1rem 0; line-height: 1.8;">
+                            السلام عليكم ورحمة الله وبركاته
                         </p>
-                        
-                        <div style="background: rgba(212, 165, 116, 0.15); padding: 1rem; border-radius: 12px; border-right: 3px solid var(--gold); margin: 1rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--gold);">⚠️ تنبيه هام:</div>
-                            <p>أجيب <strong>حصرياً</strong> على الأسئلة الإسلامية من مصادر موثوقة. لديّ قاعدة بيانات تحتوي على أكثر من <strong>50,000 حديث نبوي</strong> من الكتب الستة.</p>
-                        </div>
-                        
-                        <div style="margin: 1.5rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.8rem; color: var(--gold);">✅ سأجيب على:</div>
-                            <div style="padding-right: 1rem; line-height: 1.8;">
-                                • أسئلة العقيدة والفقه والعبادات<br>
-                                • تفسير آيات القرآن الكريم<br>
-                                • شرح الأحاديث النبوية الشريفة<br>
-                                • الأحكام الشرعية والفتاوى<br>
-                                • السيرة النبوية المطهرة<br>
-                                • الأخلاق والآداب الإسلامية
-                            </div>
-                        </div>
-                        
-                        <div style="background: rgba(255, 100, 100, 0.15); padding: 1rem; border-radius: 12px; border-right: 3px solid #e74c3c; margin: 1rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: #e74c3c;">⛔ لن أجيب على:</div>
-                            <p>أي أسئلة خارج المجال الإسلامي (سياسة، برمجة، طب عام، علوم، إلخ)</p>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 1.5rem; padding: 1rem; background: rgba(46, 204, 113, 0.1); border-radius: 12px;">
-                            <p style="font-size: 1.05rem; color: var(--gold);">
-                                كيف يمكنني مساعدتك في أمور دينك اليوم؟ 🤲
-                            </p>
-                        </div>
+                        <p style="margin: 1rem 0; line-height: 1.8;">
+                            مرحباً بك في مساعدك الإسلامي الذكي، أنا هنا للإجابة على أسئلتك في العقيدة والفقه والعبادات من القرآن الكريم والسنة النبوية الصحيحة.
+                        </p>
+                        <p style="margin: 1rem 0; line-height: 1.8; color: var(--gold);">
+                            كيف يمكنني مساعدتك في الأمور الدينية اليوم؟
+                        </p>
                     </div>
                 </div>
             </div>
@@ -713,49 +692,20 @@
             chatArea.innerHTML = `
                 <div class="message assistant-message">
                     <div class="message-content">
-                        <div style="text-align: center; margin-bottom: 1rem;">
-                            <span style="font-size: 2rem;">☪️</span>
-                        </div>
-                        
-                        <div style="font-family: 'Amiri Quran'; font-size: 1.2rem; text-align: center; color: var(--gold); margin-bottom: 1.5rem;">
-                            بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
-                        </div>
-                        
-                        <div style="font-size: 1.1rem; margin-bottom: 1rem;">
-                            السلام عليكم ورحمة الله وبركاته 🌙
-                        </div>
-                        
-                        <p style="margin-bottom: 1rem;">
-                            أنا <strong>مساعدك الإسلامي الذكي المتخصص</strong>، مُبرمج للإجابة على أسئلتك الدينية بالاستناد إلى القرآن الكريم والسنة النبوية الصحيحة.
-                        </p>
-                        
-                        <div style="background: rgba(212, 165, 116, 0.15); padding: 1rem; border-radius: 12px; border-right: 3px solid var(--gold); margin: 1rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: var(--gold);">⚠️ تنبيه هام:</div>
-                            <p>أجيب <strong>حصرياً</strong> على الأسئلة الإسلامية من مصادر موثوقة. لديّ قاعدة بيانات تحتوي على أكثر من <strong>50,000 حديث نبوي</strong> من الكتب الستة.</p>
-                        </div>
-                        
-                        <div style="margin: 1.5rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.8rem; color: var(--gold);">✅ سأجيب على:</div>
-                            <div style="padding-right: 1rem; line-height: 1.8;">
-                                • أسئلة العقيدة والفقه والعبادات<br>
-                                • تفسير آيات القرآن الكريم<br>
-                                • شرح الأحاديث النبوية الشريفة<br>
-                                • الأحكام الشرعية والفتاوى<br>
-                                • السيرة النبوية المطهرة<br>
-                                • الأخلاق والآداب الإسلامية
-                            </div>
-                        </div>
-                        
-                        <div style="background: rgba(255, 100, 100, 0.15); padding: 1rem; border-radius: 12px; border-right: 3px solid #e74c3c; margin: 1rem 0;">
-                            <div style="font-weight: bold; margin-bottom: 0.5rem; color: #e74c3c;">⛔ لن أجيب على:</div>
-                            <p>أي أسئلة خارج المجال الإسلامي (سياسة، برمجة، طب عام، علوم، إلخ)</p>
-                        </div>
-                        
-                        <div style="text-align: center; margin-top: 1.5rem; padding: 1rem; background: rgba(46, 204, 113, 0.1); border-radius: 12px;">
-                            <p style="font-size: 1.05rem; color: var(--gold);">
-                                كيف يمكنني مساعدتك في أمور دينك اليوم؟ 🤲
-                            </p>
-                        </div>
+                        السلام عليكم ورحمة الله وبركاته، أنا مساعدك الإسلامي الذكي المتخصص. 
+                        <br><br>
+                        <strong>⚠️ تنبيه هام:</strong> أنا مُبرمج للإجابة على الأسئلة الإسلامية فقط من القرآن الكريم والسنة النبوية الصحيحة والملفات المرفقة.
+                        <br><br>
+                        <strong>سأجيب فقط على:</strong>
+                        <br>• أسئلة العقيدة والفقه والعبادات
+                        <br>• تفسير القرآن الكريم
+                        <br>• شرح الأحاديث النبوية
+                        <br>• الأحكام الشرعية
+                        <br>• السيرة النبوية
+                        <br><br>
+                        <strong>لن أجيب على:</strong> أي أسئلة خارج المجال الإسلامي
+                        <br><br>
+                        كيف يمكنني مساعدتك في الأمور الدينية اليوم؟
                     </div>
                 </div>
             `;
@@ -890,87 +840,6 @@
             }
         }
 
-        // دالة تنسيق الآيات والأحاديث وإضافة ﷺ
-        function formatIslamicContent(text) {
-            if (!text) return text;
-            
-            // 1. إضافة ﷺ بعد ذكر النبي محمد
-            const prophetNames = [
-                'النبي محمد',
-                'الرسول محمد',
-                'محمد',
-                'النبي',
-                'الرسول',
-                'رسول الله',
-                'نبي الله',
-                'خاتم النبيين',
-                'خاتم المرسلين',
-                'الحبيب المصطفى',
-                'المصطفى'
-            ];
-            
-            prophetNames.forEach(name => {
-                // تجنب التكرار إذا كان ﷺ موجود بالفعل
-                const regex = new RegExp(`${name}(?!\\s*ﷺ)`, 'g');
-                text = text.replace(regex, `${name} <span class="salla">ﷺ</span>`);
-            });
-            
-            // 2. تنسيق الآيات القرآنية (بين ﴿ و ﴾ أو بين قوسين مع "قال الله" أو "قال تعالى")
-            // الآيات بين ﴿ ﴾
-            text = text.replace(/﴿([^﴾]+)﴾/g, '<div class="quran-verse">﴿ $1 ﴾</div>');
-            
-            // الآيات بعد "قال الله تعالى:" أو "قال تعالى:"
-            text = text.replace(/(قال الله تعالى|قال تعالى):([^\.]+\.)/g, 
-                '<div class="quran-verse">$1: $2</div>');
-            
-            // الآيات الطويلة بين علامات التنصيص مع سياق قرآني
-            text = text.replace(/"([^"]{50,})"(\s*\([^)]*سورة[^)]*\))?/g, 
-                '<div class="quran-verse">" $1 " $2</div>');
-            
-            // 3. تنسيق الأحاديث النبوية
-            const hadithPhrases = [
-                'قال رسول الله ﷺ',
-                'قال النبي ﷺ',
-                'عن النبي ﷺ',
-                'قال عليه الصلاة والسلام',
-                'قال صلى الله عليه وسلم',
-                'عن رسول الله ﷺ',
-                'روى البخاري',
-                'روى مسلم',
-                'رواه البخاري',
-                'رواه مسلم'
-            ];
-            
-            hadithPhrases.forEach(phrase => {
-                const regex = new RegExp(`(${phrase}[^\.]+\\.?)`, 'g');
-                text = text.replace(regex, '<div class="hadith-text">$1</div>');
-            });
-            
-            // 4. تنسيق المصادر (صحيح البخاري، صحيح مسلم، إلخ)
-            text = text.replace(/\(?(صحيح البخاري|صحيح مسلم|سنن [^)،\.]+|جامع الترمذي|سنن النسائي|سنن ابن ماجه)([^)]*)\)?/g,
-                '<span style="color: var(--gold); font-weight: 600;">📖 $1$2</span>');
-            
-            return text;
-        }
-
-        // دالة لضمان النصوص العربية فقط في واجهة المستخدم
-        function ensureArabicUI() {
-            // تحديث جميع النصوص الثابتة
-            const arabicTexts = {
-                'Loading...': 'جاري التحميل...',
-                'Send': 'إرسال',
-                'New Chat': 'محادثة جديدة',
-                'Delete': 'حذف',
-                'Type your message...': 'اكتب رسالتك هنا...',
-                'Sending...': 'جاري الإرسال...',
-                'Error': 'خطأ',
-                'Success': 'نجح'
-            };
-            
-            // يمكن توسيعها حسب الحاجة
-            return arabicTexts;
-        }
-
         // Validate if question is Islamic
         function validateIslamicQuestion(text) {
             const islamicKeywords = [
@@ -1041,18 +910,13 @@
             const div = document.createElement('div');
             div.className = `message ${role}-message`;
             
-            // تطبيق التنسيق الإسلامي على المحتوى
-            let formattedContent = content;
-            if (role === 'assistant') {
-                formattedContent = formatIslamicContent(content);
-            }
+            // تنسيق المحتوى مع تزيين الآيات فقط
+            let formattedContent = formatArabicText(content);
             
-            let html = `<div class="message-content">${role === 'assistant' ? formattedContent : escapeHtml(content).replace(/\n/g, '<br>')}`;
+            let html = `<div class="message-content">${formattedContent}`;
             
             if (role === 'assistant') {
-                if (source) {
-                    html += `<div class="message-source">📖 المصدر: ${escapeHtml(source)}</div>`;
-                }
+                // إزالة عرض المصدر - تم حذف هذا الجزء
                 if (similarQuestions && similarQuestions.length > 0) {
                     html += `<div class="similar-questions">`;
                     similarQuestions.forEach(q => {
@@ -1083,6 +947,84 @@
                     saveChatsToStorage();
                 }
             }
+        }
+
+        // دالة لتنسيق النص العربي مع تزيين الآيات القرآنية فقط وتحسين التنسيق اللغوي
+        function formatArabicText(text) {
+            if (!text) return '';
+            
+            // تنظيف النص وإزالة علامات المصدر
+            text = text.replace(/المصدر:.*?(?:\n|$)/g, '');
+            text = text.replace(/الراوي:.*?(?:\n|$)/g, '');
+            
+            // إزالة النجوم والنقاط من بداية الأسطر (•, *, -, ○, ●)
+            text = text.replace(/^[\s]*[•\*\-○●]\s+/gm, '');
+            text = text.replace(/\n[\s]*[•\*\-○●]\s+/g, '\n');
+            
+            // Escape HTML
+            text = escapeHtml(text);
+            
+            // === تحويل الأرقام الإنجليزية إلى عربية ===
+            const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            text = text.replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+            
+            // === تزيين الآيات القرآنية فقط ===
+            // نمط 1: ﴿ آية ﴾
+            text = text.replace(/﴿([^﴾]+)﴾/g, '<span class="quran-verse">﴿$1﴾</span>');
+            
+            // نمط 2: "آية" - فقط إذا كانت تبدو قرآنية
+            text = text.replace(/"([^"]+)"/g, function(match, verse) {
+                // التحقق من وجود كلمات قرآنية شائعة
+                const quranIndicators = ['الله', 'رب', 'قل', 'يا أيها', 'إن', 'الذين آمنوا', 'السماوات', 'الأرض'];
+                const looksLikeQuran = quranIndicators.some(word => verse.includes(word)) && verse.length > 20;
+                
+                if (looksLikeQuran) {
+                    return `<span class="quran-verse">"${verse}"</span>`;
+                }
+                return match; // الحديث يبقى بدون تنسيق خاص
+            });
+            
+            // === تحسين التنسيق اللغوي للنصوص العادية ===
+            
+            // 1. تنسيق العناوين والمصطلحات المهمة (بدون المساس بالآيات والأحاديث)
+            const importantTerms = [
+                'الإسلام', 'الإيمان', 'الإحسان', 'التوحيد', 'العقيدة', 'الفقه', 'الشريعة',
+                'الصلاة', 'الزكاة', 'الصيام', 'الحج', 'الوضوء', 'التيمم', 'الغسل',
+                'الطهارة', 'النجاسة', 'الحلال', 'الحرام', 'المكروه', 'المستحب', 'الواجب',
+                'السنة', 'البدعة', 'الجماعة', 'الإجماع', 'القياس', 'الاجتهاد'
+            ];
+            
+            // تمييز المصطلحات الشرعية بلون خفيف (فقط إذا لم تكن داخل آية)
+            importantTerms.forEach(term => {
+                // تجنب التنسيق داخل الآيات القرآنية
+                const regex = new RegExp(`(?<!quran-verse">[^<]*)(${term})(?![^<]*<\\/span>)`, 'g');
+                text = text.replace(regex, '<span class="islamic-term">$1</span>');
+            });
+            
+            // 2. تحسين العلامات الترقيمية العربية
+            text = text.replace(/\s*،\s*/g, '، '); // إضافة مسافة بعد الفاصلة
+            text = text.replace(/\s*؛\s*/g, '؛ '); // إضافة مسافة بعد الفاصلة المنقوطة
+            text = text.replace(/\s*:\s*/g, ': '); // إضافة مسافة بعد النقطتين
+            
+            // 3. تنسيق الأرقام العربية في التعداد
+            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*\)/g, '<span class="list-number">$&</span>'); // ترقيم بـ )
+            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*-/g, '<span class="list-number">$&</span>'); // ترقيم بشرطة
+            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*\./g, '<span class="list-number">$&</span>'); // ترقيم بنقطة
+            
+            // 4. تنسيق علامات التنصيص للأحاديث (بدون تزيين - فقط توضيح)
+            text = text.replace(/«([^»]+)»/g, '<span class="hadith-quote">«$1»</span>');
+            
+            // 5. تنسيق الإشارات المرجعية
+            text = text.replace(/\[([^\]]+)\]/g, '<span class="reference">[$1]</span>');
+            
+            // 6. تحسين التباعد بين الفقرات
+            text = text.replace(/\n\n+/g, '</p><p class="paragraph">');
+            text = '<p class="paragraph">' + text + '</p>';
+            
+            // 7. استبدال الأسطر الجديدة المفردة بـ <br>
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
         }
 
         // Extract source from response
