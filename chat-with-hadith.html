@@ -315,40 +315,6 @@
             box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
         }
         
-        /* تنسيق المصطلحات الإسلامية */
-        .islamic-term {
-            color: rgba(212, 165, 116, 0.9);
-            font-weight: 500;
-        }
-        
-        /* تنسيق الأحاديث - بسيط وواضح */
-        .hadith-quote {
-            color: rgba(255, 255, 255, 0.95);
-            font-style: normal;
-            padding: 0 0.2rem;
-        }
-        
-        /* تنسيق الأرقام والتعداد */
-        .list-number {
-            color: var(--gold);
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-        
-        /* تنسيق المراجع */
-        .reference {
-            color: rgba(212, 165, 116, 0.7);
-            font-size: 0.9em;
-            font-style: italic;
-        }
-        
-        /* تنسيق الفقرات */
-        .paragraph {
-            margin: 0.5rem 0;
-            line-height: 1.8;
-            text-align: justify;
-        }
-        
         .message-source { 
             font-size: 0.85rem; 
             color: var(--gold); 
@@ -949,7 +915,7 @@
             }
         }
 
-        // دالة لتنسيق النص العربي مع تزيين الآيات القرآنية فقط وتحسين التنسيق اللغوي
+        // دالة لتنسيق النص العربي - تلوين الآيات فقط + تناسق لغوي
         function formatArabicText(text) {
             if (!text) return '';
             
@@ -974,54 +940,29 @@
             
             // نمط 2: "آية" - فقط إذا كانت تبدو قرآنية
             text = text.replace(/"([^"]+)"/g, function(match, verse) {
-                // التحقق من وجود كلمات قرآنية شائعة
                 const quranIndicators = ['الله', 'رب', 'قل', 'يا أيها', 'إن', 'الذين آمنوا', 'السماوات', 'الأرض'];
                 const looksLikeQuran = quranIndicators.some(word => verse.includes(word)) && verse.length > 20;
                 
                 if (looksLikeQuran) {
                     return `<span class="quran-verse">"${verse}"</span>`;
                 }
-                return match; // الحديث يبقى بدون تنسيق خاص
+                return match;
             });
             
-            // === تحسين التنسيق اللغوي للنصوص العادية ===
+            // === التناسق اللغوي فقط - بدون تلوينات ===
             
-            // 1. تنسيق العناوين والمصطلحات المهمة (بدون المساس بالآيات والأحاديث)
-            const importantTerms = [
-                'الإسلام', 'الإيمان', 'الإحسان', 'التوحيد', 'العقيدة', 'الفقه', 'الشريعة',
-                'الصلاة', 'الزكاة', 'الصيام', 'الحج', 'الوضوء', 'التيمم', 'الغسل',
-                'الطهارة', 'النجاسة', 'الحلال', 'الحرام', 'المكروه', 'المستحب', 'الواجب',
-                'السنة', 'البدعة', 'الجماعة', 'الإجماع', 'القياس', 'الاجتهاد'
-            ];
+            // 1. تحسين العلامات الترقيمية العربية
+            text = text.replace(/\s*،\s*/g, '، ');
+            text = text.replace(/\s*؛\s*/g, '؛ ');
+            text = text.replace(/\s*:\s*/g, ': ');
             
-            // تمييز المصطلحات الشرعية بلون خفيف (فقط إذا لم تكن داخل آية)
-            importantTerms.forEach(term => {
-                // تجنب التنسيق داخل الآيات القرآنية
-                const regex = new RegExp(`(?<!quran-verse">[^<]*)(${term})(?![^<]*<\\/span>)`, 'g');
-                text = text.replace(regex, '<span class="islamic-term">$1</span>');
-            });
+            // 2. إضافة سطر جديد بعد النقطة (بداية فقرة جديدة)
+            text = text.replace(/\.\s+/g, '.<br><br>');
             
-            // 2. تحسين العلامات الترقيمية العربية
-            text = text.replace(/\s*،\s*/g, '، '); // إضافة مسافة بعد الفاصلة
-            text = text.replace(/\s*؛\s*/g, '؛ '); // إضافة مسافة بعد الفاصلة المنقوطة
-            text = text.replace(/\s*:\s*/g, ': '); // إضافة مسافة بعد النقطتين
+            // 3. تحسين الفقرات
+            text = text.replace(/\n\n+/g, '<br><br>');
             
-            // 3. تنسيق الأرقام العربية في التعداد
-            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*\)/g, '<span class="list-number">$&</span>'); // ترقيم بـ )
-            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*-/g, '<span class="list-number">$&</span>'); // ترقيم بشرطة
-            text = text.replace(/(٠|١|٢|٣|٤|٥|٦|٧|٨|٩)+\s*\./g, '<span class="list-number">$&</span>'); // ترقيم بنقطة
-            
-            // 4. تنسيق علامات التنصيص للأحاديث (بدون تزيين - فقط توضيح)
-            text = text.replace(/«([^»]+)»/g, '<span class="hadith-quote">«$1»</span>');
-            
-            // 5. تنسيق الإشارات المرجعية
-            text = text.replace(/\[([^\]]+)\]/g, '<span class="reference">[$1]</span>');
-            
-            // 6. تحسين التباعد بين الفقرات
-            text = text.replace(/\n\n+/g, '</p><p class="paragraph">');
-            text = '<p class="paragraph">' + text + '</p>';
-            
-            // 7. استبدال الأسطر الجديدة المفردة بـ <br>
+            // 4. استبدال السطر الجديد المفرد
             text = text.replace(/\n/g, '<br>');
             
             return text;
