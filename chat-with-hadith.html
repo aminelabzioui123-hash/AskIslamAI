@@ -1007,7 +1007,7 @@
                     <div class="user-avatar">👤</div>
                     <div>
                         <div style="font-weight: 600;">مستخدم</div>
-                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">user@example.com</div>
+                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="750006100735100d14180519105b161a18">[email&#160;protected]</a></div>
                     </div>
                 </div>
                 <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
@@ -1066,7 +1066,7 @@
         </main>
     </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         let messageHistory = [];
         let currentChatId = Date.now().toString();
         let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
@@ -1462,14 +1462,14 @@
                     console.warn('⚠️ لم يتم العثور على أحاديث:', hadithError);
                 }
                 
-                // ضع مفتاح API الخاص بك هنا
-                const API_KEY = 'YOUR_API_KEY_HERE';
+                // استخدام Cloudflare Worker بدلاً من الاتصال المباشر
+                // استبدل YOUR_WORKER_URL برابط Worker الخاص بك
+                const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
                 
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         model: 'llama-3.3-70b-versatile',
@@ -1589,9 +1589,4 @@ ${hadithsContext}
                 document.getElementById('typingIndicator').classList.remove('active');
                 document.getElementById('sendBtn').disabled = false;
                 console.error('خطأ:', error);
-                addMessageToUI('عذراً، حدث خطأ في الاتصال: ' + error.message + '. يرجى التحقق من مفتاح API والمحاولة مرة أخرى.', 'assistant');
-            }
-        }
-    </script>
-</body>
-</html>
+                addMessa
