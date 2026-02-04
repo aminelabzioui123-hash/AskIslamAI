@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0a5f4f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>المحادثة - اسأل الإسلام AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        :root { 
+            --primary: #10b981; 
+            --secondary: #34d399; 
+            --gold: #fbbf24; 
+            --dark: #1a1a1a; 
+            --light: #f5f5f5; 
+            --quran-color: #fcd34d;
+            --sidebar-width: 320px;
+        }
+        
+        body { 
+            font-family: "IBM Plex Sans Arabic", sans-serif; 
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #34d399 100%); 
+            color: #fff; 
+            overflow: hidden; 
+            position: relative; 
+            height: 100vh; 
+            margin: 0;
+        }
+        
+        .glass { 
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 24px; 
+        }
+        
+        /* تنبيه القرآن - جديد */
+        .quran-notice {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(252, 211, 77, 0.1));
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+        }
+        
+        .quran-notice-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .quran-notice-content h4 {
+            color: var(--gold);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .quran-notice-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.8rem;
+        }
+        
+        .quran-search-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .quran-search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+        }
+        
+        /* باقي الأنماط من الملف الأصلي... */
+        .container { 
+            display: flex; 
+            height: 100vh; 
+            padding: 0; 
+            gap: 0; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        .sidebar { 
+            width: var(--sidebar-width);
+            display: flex; 
+            flex-direction: column; 
+            padding: 1.5rem; 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(calc(var(--sidebar-width) + 20px));
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .sidebar:not(.collapsed) {
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(calc(var(--sidebar-width) + 20px));
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar {
+                position: relative;
+            }
+            
+            .sidebar.collapsed ~ .chat-section {
+                margin-right: 0;
+                max-width: 100%;
+                padding-right: 2rem;
+                padding-left: 2rem;
+            }
+        }
+        
+        .chat-section { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 1.5rem; 
+            margin-right: var(--sidebar-width); 
+            position: relative;
+        }
+        
+        @media (max-width: 768px) {
+            .chat-section {
+                margin-right: 0;
+                width: 100%;
+            }
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .logo-icon {
+            font-size: 2rem;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-weight: 700;
+        }
+        
+        #chatArea { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 1.5rem; 
+            scroll-behavior: smooth; 
+        }
+        
+        #chatArea::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #chatArea::-webkit-scrollbar-thumb {
+            background: rgba(212, 165, 116, 0.5);
+            border-radius: 10px;
+        }
+        
+        .message { 
+            margin-bottom: 2rem; 
+            animation: messageSlide 0.4s ease-out; 
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-message { 
+            text-align: right; 
+        }
+        
+        .user-message .message-content { 
+            background: rgba(212, 165, 116, 0.2); 
+            border: 1px solid rgba(212, 165, 116, 0.3); 
+            border-radius: 20px 20px 5px 20px; 
+            padding: 1.2rem 1.5rem; 
+            display: inline-block; 
+            max-width: 75%; 
+            text-align: right; 
+            color: #fff; 
+            word-wrap: break-word; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+        }
+        
+        .assistant-message .message-content { 
+            background: rgba(255, 255, 255, 0.08); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 20px 20px 20px 5px; 
+            padding: 1.5rem; 
+            max-width: 85%; 
+            text-align: right; 
+            color: #fff; 
+            line-height: 1.9; 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+        }
+        
+        .loading {
+            display: flex;
+            gap: 8px;
+            padding: 1rem;
+        }
+        
+        .loading span {
+            width: 10px;
+            height: 10px;
+            background: var(--gold);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .loading span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        
+        .input-wrapper { 
+            padding: 1rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            border-radius: 20px; 
+            margin-top: 1rem; 
+        }
+        
+        #userInput { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            font-size: 0.95rem; 
+            resize: none; 
+            min-height: 20px; 
+            max-height: 120px; 
+            overflow-y: auto; 
+            font-family: inherit; 
+            outline: none;
+            line-height: 1.5;
+            text-align: right;
+        }
+        
+        #userInput::placeholder { 
+            color: rgba(255, 255, 255, 0.5); 
+        }
+        
+        #sendBtn { 
+            background: var(--gold); 
+            color: var(--dark); 
+            border: none; 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            flex-shrink: 0; 
+        }
+        
+        #sendBtn:hover { 
+            transform: scale(1.1) rotate(15deg); 
+            box-shadow: 0 5px 20px rgba(212, 165, 116, 0.5); 
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-title {
+            color: var(--gold);
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .new-chat-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+        }
+        
+        .chats-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .chats-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chats-container::-webkit-scrollbar-thumb {
+            background: rgba(212, 165, 116, 0.5);
+            border-radius: 10px;
+        }
+        
+        .chat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px);
+        }
+        
+        .chat-item.active {
+            background: rgba(212, 165, 116, 0.2);
+            border-color: var(--gold);
+        }
+        
+        .floating-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: 3px solid var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-toggle {
+                display: flex;
+            }
+        }
+        
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 99;
+            backdrop-filter: blur(4px);
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
+        /* أنماط النصوص القرآنية */
+        .quran-verse {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.4rem;
+            color: var(--quran-color);
+            line-height: 2.2;
+            display: block;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(252, 211, 77, 0.1);
+            border-right: 4px solid var(--gold);
+            border-radius: 8px;
+        }
+        
+        .verse-ref {
+            color: rgba(212, 165, 116, 0.8);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <button class="floating-toggle" id="floatingToggle">☰</button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar glass" id="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">المحادثات</h2>
+                <button class="toggle-btn" id="toggleSidebar">✕</button>
+            </div>
+            
+            <button class="new-chat-btn" id="newChatBtn">
+                ➕ محادثة جديدة
+            </button>
+            
+            <div class="chats-container" id="chatsContainer"></div>
+        </div>
+        
+        <!-- Chat Section -->
+        <div class="chat-section">
+            <div class="top-bar">
+                <div class="logo-section">
+                    <span class="logo-icon">🕌</span>
+                    <div class="logo-text">
+                        <h1>اسأل الإسلام AI</h1>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="chatArea" class="glass"></div>
+            
+            <div class="input-wrapper glass">
+                <button id="sendBtn">▶</button>
+                <textarea 
+                    id="userInput" 
+                    placeholder="اكتب سؤالك الشرعي هنا..."
+                    rows="1"
+                ></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // إعدادات التطبيق
+        // ============================================
+        
+        const API_ENDPOINT = 'YOUR_CLOUDFLARE_WORKER_URL'; // غيّر هنا!
+        
+        // عناصر DOM
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const floatingToggle = document.getElementById('floatingToggle');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const chatsContainer = document.getElementById('chatsContainer');
+        
+        // حالة التطبيق
+        let chats = [];
+        let currentChatId = null;
+        let selectedAnswerMode = 'balanced';
+        
+        // ============================================
+        // نظام المحادثات
+        // ============================================
+        
+        function loadChatsFromStorage() {
+            try {
+                const saved = localStorage.getItem('islamicChats');
+                if (saved) {
+                    chats = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load chats:', e);
+                chats = [];
+            }
+        }
+        
+        function saveChatsToStorage() {
+            try {
+                localStorage.setItem('islamicChats', JSON.stringify(chats));
+            } catch (e) {
+                console.error('Failed to save chats:', e);
+            }
+        }
+        
+        function createNewChat() {
+            const chat = {
+                id: Date.now(),
+                title: 'محادثة جديدة',
+                messages: [],
+                timestamp: new Date().toISOString()
+            };
+            
+            chats.unshift(chat);
+            saveChatsToStorage();
+            switchToChat(chat.id);
+            renderChats();
+        }
+        
+        function switchToChat(chatId) {
+            currentChatId = chatId;
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (!chat) return;
+            
+            // مسح منطقة المحادثة
+            chatArea.innerHTML = '';
+            
+            // عرض الرسائل
+            if (chat.messages.length === 0) {
+                showWelcomeMessage();
+            } else {
+                chat.messages.forEach(msg => {
+                    addMessageToUI(msg.content, msg.role, msg.source, msg.similarQuestions || [], false);
+                });
+            }
+            
+            renderChats();
+        }
+        
+        function renderChats() {
+            chatsContainer.innerHTML = '';
+            
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'chat-item' + (chat.id === currentChatId ? ' active' : '');
+                div.innerHTML = `
+                    <div class="chat-title">${escapeHtml(chat.title)}</div>
+                    <div class="chat-time">${formatTime(new Date(chat.timestamp))}</div>
+                `;
+                
+                div.addEventListener('click', () => switchToChat(chat.id));
+                chatsContainer.appendChild(div);
+            });
+        }
+        
+        function formatTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (minutes < 1) return 'الآن';
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            if (days < 7) return `منذ ${days} يوم`;
+            
+            return date.toLocaleDateString('ar-EG');
+        }
+        
+        function showWelcomeMessage() {
+            const welcomeMessage = `
+                <div style="text-align: center; padding: 2rem 1rem; animation: fadeIn 0.6s ease-out;">
+                    <h2 style="font-family: 'IBM Plex Sans Arabic', sans-serif; color: var(--gold); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">
+                        السلام عليكم ورحمة الله وبركاته
+                    </h2>
+                    <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 2rem; line-height: 1.8;">
+                        مرحباً بك في <strong style="color: var(--gold);">اسأل الإسلام AI</strong><br>
+                        مساعدك الموثوق للإجابة على أسئلتك الشرعية
+                    </p>
+                    
+                    <div class="quran-notice">
+                        <div class="quran-notice-icon">📖</div>
+                        <div class="quran-notice-content">
+                            <h4>ملاحظة مهمة حول الآيات القرآنية</h4>
+                            <p>المساعد الذكي لا يحفظ القرآن الكريم بشكل دقيق. إذا كنت تبحث عن آية محددة أو تريد التحقق من نص قرآني، يُرجى استخدام محركات البحث القرآنية الموثوقة.</p>
+                            <button class="quran-search-btn" onclick="window.open('https://quran.com', '_blank')">
+                                🔍 البحث في القرآن الكريم
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 2rem;">
+                        <p style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 1rem;">
+                            💡 <strong>أمثلة للأسئلة:</strong>
+                        </p>
+                        <div style="display: grid; gap: 0.8rem; text-align: right;">
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer;" 
+                                 onclick="askQuestion('ما هي شروط الصلاة؟')">
+                                <span style="color: var(--gold);">•</span> ما هي شروط الصلاة؟
+                            </div>
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer;"
+                                 onclick="askQuestion('كيف أتوضأ بشكل صحيح؟')">
+                                <span style="color: var(--gold);">•</span> كيف أتوضأ بشكل صحيح؟
+                            </div>
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer;"
+                                 onclick="askQuestion('ما هي أركان الإسلام؟')">
+                                <span style="color: var(--gold);">•</span> ما هي أركان الإسلام؟
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatArea.innerHTML = welcomeMessage;
+        }
+        
+        // ============================================
+        // إرسال الرسائل
+        // ============================================
+        
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            // معالجة خاصة للتحيات
+            const greetings = ['السلام عليكم', 'سلام عليكم', 'السلام', 'سلام', 'مرحبا', 'مرحبًا', 'أهلا', 'أهلاً'];
+            const isGreeting = greetings.some(g => message.toLowerCase().includes(g.toLowerCase())) && message.length < 50;
+            
+            if (isGreeting) {
+                addMessageToUI(message, 'user', null, [], true);
+                setTimeout(() => {
+                    addMessageToUI('وعليكم السلام ورحمة الله وبركاته 🌙\n\nأهلاً بك في اسأل الإسلام AI، كيف يمكنني مساعدتك اليوم؟', 'assistant', null, [], true);
+                }, 500);
+                userInput.value = '';
+                return;
+            }
+            
+            // إضافة رسالة المستخدم
+            addMessageToUI(message, 'user', null, [], true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            // تحديث عنوان المحادثة
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat && chat.messages.length === 1) {
+                chat.title = message.substring(0, 50) + (message.length > 50 ? '...' : '');
+                saveChatsToStorage();
+                renderChats();
+            }
+            
+            // مؤشر التحميل
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant-message';
+            loadingDiv.innerHTML = '<div class="message-content"><div class="loading"><span></span><span></span><span></span></div></div>';
+            chatArea.appendChild(loadingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            try {
+                // إرسال للـ Worker
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        mode: selectedAnswerMode
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`خطأ في الخادم: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // إزالة مؤشر التحميل
+                if (chatArea.contains(loadingDiv)) {
+                    chatArea.removeChild(loadingDiv);
+                }
+
+                // استخراج الإجابة
+                let aiResponse = data.content || data.answer || data.message || "عذراً، لم أتمكن من معالجة الإجابة.";
+                
+                // التحقق من طلبات الآيات القرآنية
+                const quranKeywords = ['آية', 'سورة', 'القرآن', 'اقرأ', 'اعطني', 'ما هي الآية'];
+                const isQuranRequest = quranKeywords.some(keyword => message.includes(keyword));
+                
+                // إضافة تنبيه للآيات القرآنية
+                if (isQuranRequest) {
+                    aiResponse += '\n\n<div class="quran-notice"><div class="quran-notice-icon">⚠️</div><div class="quran-notice-content"><h4>ملاحظة مهمة</h4><p>للتأكد من دقة النص القرآني، يُرجى مراجعة المصحف أو استخدام محركات البحث القرآنية الموثوقة.</p><button class="quran-search-btn" onclick="window.open(\'https://quran.com\', \'_blank\')">🔍 التحقق من المصحف</button></div></div>';
+                }
+                
+                addMessageToUI(aiResponse, 'assistant', null, [], true);
+                
+            } catch (error) {
+                if (chatArea.contains(loadingDiv)) {
+                    chatArea.removeChild(loadingDiv);
+                }
+                
+                let errorMessage = 'عذراً، حدث خطأ أثناء الاتصال بالخادم.';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += '\n\n🔴 تأكد من:\n1. تشغيل Cloudflare Worker\n2. صحة عنوان API\n3. اتصالك بالإنترنت';
+                }
+                
+                addMessageToUI(errorMessage, 'assistant', null, [], true);
+            }
+        }
+        
+        function addMessageToUI(content, role, source = null, similarQuestions = [], saveToChat = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            if (saveToChat) {
+                const chat = chats.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages.push({ role, content, source, similarQuestions });
+                    saveChatsToStorage();
+                }
+            }
+        }
+        
+        function askQuestion(question) {
+            userInput.value = question;
+            sendMessage();
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // ============================================
+        // Event Listeners
+        // ============================================
+        
+        userInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sendBtn.addEventListener('click', sendMessage);
+
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+        
+        toggleSidebarBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        });
+
+        floatingToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        });
+        
+        document.getElementById('sidebarOverlay').addEventListener('click', function() {
+            sidebar.classList.add('collapsed');
+            this.classList.remove('show');
+        });
+        
+        newChatBtn.addEventListener('click', createNewChat);
+        
+        // ============================================
+        // تهيئة التطبيق
+        // ============================================
+        
+        loadChatsFromStorage();
+        renderChats();
+        
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+        
+        if (chats.length === 0) {
+            createNewChat();
+            showWelcomeMessage();
+        } else {
+            switchToChat(chats[0].id);
+        }
+        
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('collapsed');
+                document.getElementById('sidebarOverlay').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
