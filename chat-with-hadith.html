@@ -101,17 +101,15 @@
         .sidebar-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2rem;
+            justify-content: flex-start;
+            margin-bottom: 1.5rem;
         }
         
         .sidebar-title {
             color: var(--gold);
-            font-family: 'IBM Plex Sans Arabic', 'Amiri Quran', sans-serif;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
             font-size: 1.3rem;
             text-shadow: 0 2px 10px rgba(212, 165, 116, 0.3);
-            direction: rtl;
-            unicode-bidi: embed;
             white-space: nowrap;
             font-weight: 600;
         }
@@ -120,15 +118,15 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         
         .toggle-btn:hover {
@@ -152,8 +150,6 @@
             justify-content: center;
             gap: 0.5rem;
             box-shadow: 0 4px 15px rgba(212, 165, 116, 0.2);
-            direction: rtl;
-            unicode-bidi: embed;
         }
         
         .new-chat-btn:hover {
@@ -245,8 +241,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             font-weight: 500;
-            direction: rtl;
-            unicode-bidi: embed;
             text-align: right;
         }
         
@@ -348,13 +342,9 @@
             z-index: 1000;
         }
         
-        /* إظهار الزر العائم عند إخفاء الـ sidebar */
+        /* إظهار الزر العائم فقط عند إخفاء الـ sidebar */
         .sidebar.collapsed ~ .floating-toggle {
-            display: flex;
-        }
-        
-        .floating-toggle.show {
-            display: flex;
+            display: flex !important;
         }
         
         .floating-toggle:hover {
@@ -384,20 +374,16 @@
         }
         
         .chat-header h1 { 
-            font-family: 'IBM Plex Sans Arabic', 'Amiri Quran', sans-serif; 
+            font-family: 'IBM Plex Sans Arabic', sans-serif; 
             font-size: 1.6rem; 
             color: var(--gold); 
             margin-bottom: 0.3rem;
-            direction: rtl;
-            unicode-bidi: embed;
             font-weight: 700;
         }
         
         .chat-header p { 
             color: rgba(255, 255, 255, 0.7); 
             font-size: 0.9rem;
-            direction: rtl;
-            unicode-bidi: embed;
         }
         
         .chat-section.has-messages .chat-header {
@@ -511,8 +497,6 @@
             position: relative;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            direction: rtl;
-            unicode-bidi: embed;
             text-align: right;
         }
         
@@ -704,8 +688,6 @@
             font-family: inherit; 
             outline: none;
             line-height: 1.5;
-            direction: rtl;
-            unicode-bidi: embed;
             text-align: right;
         }
         
@@ -1001,6 +983,76 @@
                 height: 10px;
             }
         }
+        
+        /* تنسيقات للهواتف الصغيرة (حتى 375px) - iPhone SE, Galaxy S8 */
+        @media (max-width: 375px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .new-chat-btn {
+                font-size: 0.9rem;
+                padding: 0.8rem;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .chat-header p {
+                font-size: 0.85rem;
+            }
+            
+            .message-content {
+                font-size: 1rem;
+                padding: 1rem 1.2rem;
+            }
+            
+            .floating-toggle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+                top: 20px;
+                right: 20px;
+            }
+        }
+        
+        /* تنسيقات للهواتف المتوسطة (376px - 414px) - iPhone 12/13/14, Pixel */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .sidebar {
+                width: 300px;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* تنسيقات للهواتف الكبيرة (415px - 768px) - iPhone Pro Max, Galaxy Note */
+        @media (min-width: 415px) and (max-width: 768px) {
+            .sidebar {
+                width: 320px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+        
+        /* تنسيقات للأجهزة اللوحية الصغيرة (769px - 1024px) - iPad Mini, tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar {
+                width: 340px;
+            }
+            
+            .message-content {
+                max-width: 75%;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1008,8 +1060,7 @@
         <!-- Sidebar -->
         <aside class="sidebar glass" id="sidebar">
             <div class="sidebar-header">
-                <h2 class="sidebar-title">المحادثات</h2>
-                <button class="toggle-btn" id="toggleSidebar" title="إخفاء الشريط الجانبي">☰</button>
+                <button class="toggle-btn" id="toggleSidebar" title="إخفاء الشريط الجانبي">✕</button>
             </div>
             
             <button class="new-chat-btn" id="newChatBtn">
@@ -1244,7 +1295,7 @@
         function showWelcomeMessage() {
             const welcomeMessage = `
                 <div style="text-align: center; padding: 2rem 1rem; animation: fadeIn 0.6s ease-out;">
-                    <h2 style="font-family: 'Amiri Quran'; color: var(--gold); font-size: 1.8rem; margin-bottom: 1rem;">
+                    <h2 style="font-family: 'IBM Plex Sans Arabic', sans-serif; color: var(--gold); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">
                         السلام عليكم ورحمة الله وبركاته
                     </h2>
                     <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 2rem; line-height: 1.8;">
@@ -1866,12 +1917,9 @@
                     document.body.appendChild(overlay);
                 }
                 
-                // إضافة زر عائم لإظهار الشريط الجانبي
-                if (!document.getElementById('floatingToggle')) {
-                    const floatingBtn = document.createElement('button');
-                    floatingBtn.id = 'floatingToggle';
-                    floatingBtn.className = 'floating-toggle';
-                    floatingBtn.innerHTML = '☰';
+                // الزر العائم موجود في HTML، لا حاجة لإنشائه
+                const floatingBtn = document.getElementById('floatingToggle');
+                if (floatingBtn) {
                     floatingBtn.onclick = () => {
                         sidebar.classList.toggle('collapsed');
                         const overlay = document.getElementById('sidebarOverlay');
@@ -1879,7 +1927,6 @@
                             overlay.classList.toggle('show');
                         }
                     };
-                    document.body.appendChild(floatingBtn);
                 }
                 
                 // تحديث زر التبديل الأصلي
@@ -1893,6 +1940,9 @@
                         }
                     };
                 }
+            } else {
+                // على الحاسوب، إزالة class collapsed إذا كان موجود
+                sidebar.classList.remove('collapsed');
             }
         }
 
