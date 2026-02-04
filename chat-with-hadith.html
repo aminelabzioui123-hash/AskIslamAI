@@ -841,7 +841,15 @@
             try {
                 const response = await fetch('https://cdn.jsdelivr.net/npm/quran-json@3.1.2/quran.json');
                 quranData = await response.json();
-                console.log('✅ تم تحميل بيانات القرآن الكريم');
+                console.log('✅ تم تحميل بيانات القرآن الكريم بنجاح');
+                
+                // تحقق من وجود البيانات
+                if (quranData && quranData.length > 0) {
+                    console.log(`✅ عدد السور المحملة: ${quranData.length}`);
+                    console.log(`✅ أول سورة: ${quranData[0].name} (${quranData[0].ayas.length} آية)`);
+                } else {
+                    console.error('❌ بيانات القرآن فارغة!');
+                }
             } catch (error) {
                 console.error('❌ فشل في تحميل بيانات القرآن:', error);
                 quranData = [];
@@ -1066,33 +1074,14 @@
             }
         }
         
-        // إرسال الرسالة
-        function sendMessage() {
-            const userInput = document.getElementById('userInput');
-            const message = userInput.value.trim();
-            
-            if (!message) return;
-            
-            const sendBtn = document.getElementById('sendBtn');
-            sendBtn.disabled = true;
-            
-            addMessageToUI(message, 'user');
-            
-            processQuery(message);
-            
-            userInput.value = '';
-            userInput.style.height = 'auto';
-            sendBtn.disabled = false;
-        }
-        
         // التحقق من وجود كلمات أمر
         function hasCommandWord(message) {
             const commandWords = [
-                'اكتب', 'اكتب لي', 'اكتبلي', 'اكتب لى', 'اكتبلي',
-                'اعرض', 'اعرض لي', 'اعرضلي', 'اعرض لى', 'اعرضلي',
-                'أعطني', 'أعطيني', 'اعطني', 'اعطيني', 'اعطني',
-                'اريد', 'أريد', 'ابي', 'ابى', 'ابي', 'ابغى', 'أبغى',
-                'اقرأ', 'اقرا', 'أقرأ', 'أقرا', 'قراءة', 'قراءه',
+                'اكتب', 'اكتب لي', 'اكتبلي', 'اكتب لى',
+                'اعرض', 'اعرض لي', 'اعرضلي', 'اعرض لى',
+                'أعطني', 'أعطيني', 'اعطني', 'اعطيني',
+                'اريد', 'أريد', 'ابي', 'ابى', 'ابغى', 'أبغى',
+                'اقرأ', 'اقرا', 'أقرأ', 'أقرا',
                 'نريد', 'عايز', 'عاوز', 'عوز', 'أحب', 'احب',
                 'ما هي', 'ما هو', 'ماهي', 'ماهو', 'ما معنى', 'ماذا',
                 'واحد', 'وحده', 'واحدة', 'اول', 'أول', 'اخر', 'آخر'
@@ -1123,7 +1112,7 @@
                     const surahResult = findCompleteSurah(message);
                     
                     if (surahResult) {
-                        console.log(`✅ عرض سورة ${surahResult.name} كاملة`);
+                        console.log(`✅ تم العثور على سورة: ${surahResult.name}`);
                         displayCompleteSurah(surahResult);
                         return;
                     } else {
@@ -1313,6 +1302,16 @@
                 return true;
             }
             
+            // إذا كان هناك أمر + اسم سورة + كاملة (حتى بدون كلمة سورة)
+            if (hasCommand && hasCompleteWord) {
+                // التحقق من وجود أي اسم سورة في الرسالة
+                const popularSurahNames = ['الفاتحة', 'البقرة', 'الكهف', 'يوسف', 'مريم', 'طه', 'الرحمن'];
+                const hasSurahName = popularSurahNames.some(name => lowerMessage.includes(name.toLowerCase()));
+                if (hasSurahName) {
+                    return true;
+                }
+            }
+            
             // إذا كان هناك اسم سورة + كاملة
             const surahNames = getSurahNames();
             const hasSurahName = surahNames.some(name => lowerMessage.includes(name));
@@ -1421,38 +1420,42 @@
             return hasAyahIndicator && !hasSurahIndicator;
         }
         
-        // البحث عن سورة كاملة
+        // البحث عن سورة كاملة - إصدار محسّن
         function findCompleteSurah(message) {
-            if (!quranData || quranData.length === 0) return null;
+            if (!quranData || quranData.length === 0) {
+                console.log('❌ بيانات القرآن غير متوفرة');
+                return null;
+            }
             
             const lowerMessage = message.toLowerCase().trim();
+            console.log('🔍 البحث عن سورة في النص:', lowerMessage);
             
-            // إزالة كلمات الأمر الشائعة
-            const commandWordsToRemove = [
-                'اكتب', 'اكتب لي', 'اكتبلي', 'اكتب لى',
-                'اعرض', 'اعرض لي', 'اعرضلي', 'اعرض لى',
-                'أعطني', 'أعطيني', 'اعطني', 'اعطيني',
-                'اريد', 'أريد', 'ابي', 'ابى', 'ابغى', 'أبغى',
-                'اقرأ', 'اقرا', 'أقرأ', 'أقرا',
-                'نريد', 'عايز', 'عاوز', 'عوز', 'أحب', 'احب',
-                'ما هي', 'ما هو', 'ماهي', 'ماهو',
-                'واحد', 'وحده', 'واحدة'
-            ];
+            // قائمة بأسماء السور الشائعة مع أسماء بديلة
+            const surahAliases = {
+                'الفاتحة': ['الفاتحة', 'فاتحة', 'الحمد', 'سورة الحمد'],
+                'البقرة': ['البقرة', 'بقرة'],
+                'آل عمران': ['آل عمران', 'ال عمران', 'عمران'],
+                'النساء': ['النساء', 'نساء'],
+                'المائدة': ['المائدة', 'مائدة'],
+                'الأنعام': ['الأنعام', 'الانعام', 'أنعام'],
+                'الأعراف': ['الأعراف', 'الاعراف', 'أعراف'],
+                'الأنفال': ['الأنفال', 'الانفال', 'أنفال'],
+                'التوبة': ['التوبة', 'توبة'],
+                'يونس': ['يونس'],
+                'يوسف': ['يوسف'],
+                'الكهف': ['الكهف', 'كهف'],
+                'مريم': ['مريم'],
+                'طه': ['طه', 'طاها'],
+                'الرحمن': ['الرحمن', 'رحمن'],
+                'الواقعة': ['الواقعة', 'واقعة'],
+                'الملك': ['الملك', 'ملك'],
+                'النبأ': ['النبأ', 'نبأ']
+            };
             
-            let cleanedMessage = lowerMessage;
-            commandWordsToRemove.forEach(word => {
-                cleanedMessage = cleanedMessage.replace(word, '');
-            });
-            
-            // إزالة كلمات "سورة" و"كاملة" وما شابه
-            cleanedMessage = cleanedMessage
-                .replace(/سورة|سوره|كاملة|كامله|كلها|بكاملها|جميعها|كامل|كامله/g, '')
-                .trim();
-            
-            // البحث برقم السورة أولاً
-            const numberMatch = cleanedMessage.match(/\d+/);
+            // البحث عن رقم السورة أولاً
+            const numberMatch = lowerMessage.match(/(\d+)/);
             if (numberMatch) {
-                const surahNumber = parseInt(numberMatch[0]);
+                const surahNumber = parseInt(numberMatch[1]);
                 if (surahNumber >= 1 && surahNumber <= 114) {
                     const surah = quranData.find(s => s.id === surahNumber);
                     if (surah) {
@@ -1462,63 +1465,35 @@
                 }
             }
             
-            // البحث باسم السورة في النص النظيف
-            for (let surah of quranData) {
-                const surahName = surah.name.toLowerCase();
-                const cleanSurahName = surahName.replace('سورة', '').trim();
-                
-                // التحقق إذا كان اسم السورة موجودًا في النص النظيف
-                if (cleanedMessage.includes(cleanSurahName) || lowerMessage.includes(cleanSurahName)) {
-                    console.log(`✅ تم العثور على السورة بالاسم: ${surah.name}`);
-                    return surah;
-                }
-                
-                // التحقق بالأسماء البديلة أو الأجزاء من الاسم
-                const nameParts = cleanSurahName.split(' ');
-                for (let part of nameParts) {
-                    if (part.length > 2 && (cleanedMessage.includes(part) || lowerMessage.includes(part))) {
-                        console.log(`✅ تم العثور على السورة بجزء الاسم: ${part} (${surah.name})`);
-                        return surah;
+            // البحث في أسماء السور المشهورة
+            for (const [surahName, aliases] of Object.entries(surahAliases)) {
+                for (const alias of aliases) {
+                    if (lowerMessage.includes(alias.toLowerCase())) {
+                        const surah = quranData.find(s => s.name === surahName);
+                        if (surah) {
+                            console.log(`✅ تم العثور على السورة بالاسم المشهور: ${alias} (${surah.name})`);
+                            return surah;
+                        }
                     }
                 }
             }
             
-            // البحث في الرسالة الأصلية بدون تنظيف للكلمات المفتاحية
-            for (let surah of quranData) {
+            // البحث في جميع السور
+            for (const surah of quranData) {
                 const surahName = surah.name.toLowerCase();
-                if (lowerMessage.includes(surahName)) {
-                    console.log(`✅ تم العثور على السورة بالاسم الكامل: ${surah.name}`);
+                const cleanSurahName = surahName.replace('سورة', '').trim();
+                
+                // التحقق إذا كان اسم السورة موجودًا في النص
+                if (lowerMessage.includes(surahName) || lowerMessage.includes(cleanSurahName)) {
+                    console.log(`✅ تم العثور على السورة بالاسم: ${surah.name}`);
                     return surah;
                 }
-            }
-            
-            // البحث عن سور مشهورة معروفة
-            const popularSurahs = [
-                { name: 'الفاتحة', number: 1 },
-                { name: 'البقرة', number: 2 },
-                { name: 'ال عمران', number: 3 },
-                { name: 'النساء', number: 4 },
-                { name: 'المائدة', number: 5 },
-                { name: 'الانعام', number: 6 },
-                { name: 'الاعراف', number: 7 },
-                { name: 'الانفال', number: 8 },
-                { name: 'التوبة', number: 9 },
-                { name: 'يونس', number: 10 },
-                { name: 'يوسف', number: 12 },
-                { name: 'الكهف', number: 18 },
-                { name: 'مريم', number: 19 },
-                { name: 'طه', number: 20 },
-                { name: 'الرحمن', number: 55 },
-                { name: 'الواقعة', number: 56 },
-                { name: 'الملك', number: 67 },
-                { name: 'النبأ', number: 78 }
-            ];
-            
-            for (let popular of popularSurahs) {
-                if (lowerMessage.includes(popular.name.toLowerCase())) {
-                    const surah = quranData.find(s => s.id === popular.number);
-                    if (surah) {
-                        console.log(`✅ تم العثور على السورة المشهورة: ${surah.name}`);
+                
+                // التحقق بالأجزاء من الاسم
+                const nameParts = cleanSurahName.split(' ');
+                for (const part of nameParts) {
+                    if (part.length > 2 && lowerMessage.includes(part)) {
+                        console.log(`✅ تم العثور على السورة بجزء الاسم: ${part} (${surah.name})`);
                         return surah;
                     }
                 }
@@ -1528,7 +1503,7 @@
             return null;
         }
         
-        // البحث في القرآن الكريم
+        // البحث في القرآن الكريم - إصدار محسّن
         function searchQuran(query) {
             if (!quranData || quranData.length === 0) {
                 console.warn('⚠️ بيانات القرآن غير متوفرة');
@@ -1536,7 +1511,27 @@
             }
             
             const lowerQuery = query.toLowerCase().trim();
+            console.log('🔍 البحث في القرآن عن:', lowerQuery);
             const results = [];
+            
+            // البحث الخاص بآية الكرسي
+            if (lowerQuery.includes('آية الكرسي') || lowerQuery.includes('اية الكرسي') || 
+                lowerQuery.includes('آية الكراسي') || lowerQuery.includes('اية الكراسي') ||
+                lowerQuery.includes('الكرسي') || lowerQuery.includes('كرسي')) {
+                console.log('🔍 تم التعرف على طلب آية الكرسي');
+                const surah = quranData.find(s => s.id === 2); // سورة البقرة
+                if (surah && surah.ayas && surah.ayas[254]) { // الآية 255
+                    results.push({
+                        type: 'ayah',
+                        text: surah.ayas[254].text,
+                        surahNumber: 2,
+                        surahName: 'البقرة',
+                        ayahNumber: 255,
+                        verified: true
+                    });
+                    return results;
+                }
+            }
             
             // التحقق من طلب آية محددة
             const surahAyahMatch = extractSurahAndAyah(query);
@@ -1594,38 +1589,17 @@
                 }
             }
             
-            // إذا لم نجد أي نتائج، نحاول البحث ببعض الكلمات المشهورة
-            if (results.length === 0) {
-                const commonWords = ['الله', 'الرحمن', 'الرحيم', 'الكتاب', 'المؤمنين', 'الصلاة', 'الزكاة'];
-                const foundWord = commonWords.find(word => lowerQuery.includes(word));
-                
-                if (foundWord) {
-                    quranData.forEach(surah => {
-                        if (surah.ayas) {
-                            surah.ayas.forEach((ayah, index) => {
-                                if (ayah.text.toLowerCase().includes(foundWord)) {
-                                    results.push({
-                                        type: 'ayah',
-                                        text: ayah.text,
-                                        surahNumber: surah.id,
-                                        surahName: surah.name,
-                                        ayahNumber: index + 1,
-                                        verified: true
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-            
             return results.slice(0, 5);
         }
         
         // استخراج رقم السورة والآية من النص
         function extractSurahAndAyah(text) {
-            const pattern1 = /سورة\s+(\S+)\s+آية\s+(\d+)/;
+            // نمط "سورة البقرة آية 255"
+            const pattern1 = /سورة\s+(\S+)\s+آية\s+(\d+)/i;
+            // نمط "البقرة 255"
             const pattern2 = /(\S+)\s+(\d+)/;
+            // نمط "الآية 255 من سورة البقرة"
+            const pattern3 = /الآية\s+(\d+)\s+من\s+سورة\s+(\S+)/i;
             
             let match = text.match(pattern1);
             if (match) {
@@ -1641,6 +1615,16 @@
             if (match) {
                 const surahName = match[1];
                 const ayahNumber = parseInt(match[2]);
+                const surahNumber = getSurahNumberByName(surahName);
+                if (surahNumber && ayahNumber) {
+                    return { surahNumber, ayahNumber };
+                }
+            }
+            
+            match = text.match(pattern3);
+            if (match) {
+                const ayahNumber = parseInt(match[1]);
+                const surahName = match[2];
                 const surahNumber = getSurahNumberByName(surahName);
                 if (surahNumber && ayahNumber) {
                     return { surahNumber, ayahNumber };
@@ -1710,7 +1694,7 @@
         // عرض سورة كاملة
         function displayCompleteSurah(surah) {
             if (!surah || !surah.ayas) {
-                addMessageToUI('لم أتمكن من العثور على السورة المطلوبة.', 'assistant', null, [], true);
+                addMessageToUI('عذراً، لم أتمكن من العثور على السورة المطلوبة.', 'assistant', null, [], true);
                 return;
             }
             
