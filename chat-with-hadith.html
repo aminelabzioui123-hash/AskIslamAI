@@ -1349,6 +1349,12 @@
             resetButtons();
 
             const text = btn.dataset.text;
+            
+            if (!text) {
+                alert('لا يوجد نص للقراءة');
+                return;
+            }
+            
             const cleanText = text
                 .replace(/<[^>]*>/g, '')
                 .replace(/&nbsp;/g, ' ')
@@ -1359,7 +1365,17 @@
                 .replace(/\s+/g, ' ')
                 .replace(/المصدر:.*?(?:\n|$)/g, '')
                 .replace(/الراوي:.*?(?:\n|$)/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
                 .trim();
+
+            console.log('النص الذي سيتم قراءته:', cleanText);
+            console.log('طول النص:', cleanText.length);
+
+            if (!cleanText || cleanText.length < 5) {
+                alert('النص قصير جداً أو فارغ');
+                return;
+            }
 
             const utterance = new SpeechSynthesisUtterance(cleanText);
             utterance.lang = 'ar-SA';
@@ -1368,18 +1384,23 @@
             utterance.volume = 1.0;
 
             utterance.onstart = () => {
+                console.log('بدأت القراءة');
                 btn.classList.add('playing');
                 btn.innerHTML = '⏸️ إيقاف القراءة';
             };
 
             utterance.onend = () => {
+                console.log('انتهت القراءة');
                 resetButtons();
             };
 
-            utterance.onerror = () => {
+            utterance.onerror = (event) => {
+                console.error('خطأ في القراءة:', event);
+                alert('حدث خطأ في قراءة النص. قد لا يدعم متصفحك اللغة العربية.');
                 resetButtons();
             };
 
+            console.log('جاري تشغيل الصوت...');
             window.speechSynthesis.speak(utterance);
         }
 
