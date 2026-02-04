@@ -206,37 +206,30 @@
         
         /* تنسيق زر الاستماع للصوت */
         .speak-btn {
-            background: none;
-            border: none;
+            background: rgba(212, 165, 116, 0.1);
+            border: 1px solid var(--gold);
             color: var(--gold);
             cursor: pointer;
-            padding: 8px 12px;
-            margin-top: 12px;
+            padding: 6px 12px;
+            margin-top: 10px;
+            border-radius: 20px;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.95rem;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
-            border-radius: 8px;
         }
 
         .speak-btn:hover {
-            background: rgba(212, 165, 116, 0.1);
-            transform: translateX(-3px);
+            background: var(--gold);
+            color: white;
         }
 
         .speak-btn.playing {
-            color: #ff6b6b;
-            animation: نبض 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes نبض {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        
-        .speak-icon {
-            font-size: 1.1rem;
+            background: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
         }
         
         /* Floating Toggle Button (when sidebar is collapsed) */
@@ -1167,11 +1160,10 @@
             
             if (role === 'assistant') {
                 // إضافة زر الاستماع
-                const cleanContent = content.replace(/[`'"]/g, '').replace(/\n/g, ' ');
+                const cleanText = content.replace(/['"`]/g, '');
                 html += `
-                    <button class="speak-btn" onclick="toggleSpeech(this, \`${cleanContent}\`)">
-                        <span class="speak-icon">🔊</span>
-                        <span class="speak-text">استماع للإجابة</span>
+                    <button class="speak-btn" onclick="toggleSpeech(this, '${cleanText}')">
+                        <i class="fas fa-volume-up"></i> استماع للنص
                     </button>`;
                 
                 // عرض الأسئلة المشابهة إن وجدت
@@ -1340,57 +1332,54 @@
             this.style.height = Math.min(this.scrollHeight, 150) + 'px';
         });
 
-        // ===== نظام تحويل النص إلى صوت (Text-to-Speech) =====
-        let currentUtterance = null;
-
+        // ===== نظام تحويل النص إلى صوت باللغة العربية =====
+        
+        // دالة تحويل النص إلى صوت
         function toggleSpeech(btn, text) {
-            // إذا كان هناك صوت يعمل حالياً، قم بإيقافه
+            // إذا كان المتصفح يقرأ حالياً، قم بإيقافه
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
+                
+                // إذا كان الضغط على نفس الزر الذي يقرأ، نكتفي بالإيقاف
                 if (btn.classList.contains('playing')) {
-                    btn.innerHTML = '<span class="speak-icon">🔊</span><span class="speak-text">استماع للإجابة</span>';
-                    btn.classList.remove('playing');
+                    resetButtons();
                     return;
                 }
             }
 
-            // تنظيف النص من علامات HTML والتنسيق
-            const cleanText = text
-                .replace(/<[^>]*>/g, '') // إزالة HTML tags
-                .replace(/&nbsp;/g, ' ') // إزالة &nbsp;
-                .replace(/&quot;/g, '"') // إزالة &quot;
-                .replace(/&amp;/g, '&')  // إزالة &amp;
-                .replace(/\s+/g, ' ')    // إزالة المسافات الزائدة
-                .trim();
+            // تنظيف جميع الأزرار الأخرى
+            resetButtons();
 
-            // إعداد القراءة
-            const utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = 'ar-SA'; // لغة عربية بلهجة سعودية (الأقرب للفصحى)
-            utterance.pitch = 1;      // درجة الصوت
-            utterance.rate = 0.85;    // سرعة القراءة (مبطأة قليلاً للوضوح)
-            utterance.volume = 1;     // مستوى الصوت
+            // إعداد النص للقراءة
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // إجبار المتصفح على استخدام اللغة العربية
+            utterance.lang = 'ar-SA'; 
+            utterance.rate = 0.9;  // سرعة هادئة ومناسبة للنصوص الدينية
+            utterance.pitch = 1.0; // طبقة صوت طبيعية
 
-            // عند بدء القراءة
+            // تغيير حالة الزر عند البدء
             utterance.onstart = () => {
-                btn.innerHTML = '<span class="speak-icon">⏸️</span><span class="speak-text">إيقاف الاستماع</span>';
                 btn.classList.add('playing');
+                btn.innerHTML = '<i class="fas fa-stop"></i> إيقاف القراءة';
             };
 
-            // عند انتهاء القراءة
+            // إعادة الزر لحالته عند الانتهاء
             utterance.onend = () => {
-                btn.innerHTML = '<span class="speak-icon">🔊</span><span class="speak-text">استماع للإجابة</span>';
-                btn.classList.remove('playing');
+                resetButtons();
             };
 
-            // عند حدوث خطأ
-            utterance.onerror = (event) => {
-                console.error('خطأ في تحويل النص إلى صوت:', event);
-                btn.innerHTML = '<span class="speak-icon">🔊</span><span class="speak-text">استماع للإجابة</span>';
-                btn.classList.remove('playing');
-            };
-
+            // تنفيذ القراءة
             window.speechSynthesis.speak(utterance);
-            currentUtterance = utterance;
+        }
+
+        // دالة لإعادة الأزرار لشكلها الأصلي
+        function resetButtons() {
+            const btns = document.querySelectorAll('.speak-btn');
+            btns.forEach(b => {
+                b.classList.remove('playing');
+                b.innerHTML = '<i class="fas fa-volume-up"></i> استماع للنص';
+            });
         }
 
         // إيقاف الصوت عند إغلاق الصفحة
