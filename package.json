@@ -1,23 +1,48 @@
 {
   "name": "askislamai",
-  "version": "1.0.0",
-  "description": "مساعد إسلامي ذكي متطور يعتمد على اكتب الاسلامية الموثوقة  ",
+  "version": "2.0.0",
+  "description": "مساعد إسلامي ذكي متطور يعتمد على الكتب الإسلامية الموثوقة مع دمج الأحاديث النبوية",
   "main": "worker.js",
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "tail": "wrangler tail"
+    "tail": "wrangler tail",
+    "publish": "wrangler deploy",
+    "start": "wrangler dev --local",
+    "test": "wrangler dev --test"
   },
   "keywords": [
     "islam",
     "ai",
-    "claude",
+    "groq",
     "cloudflare",
-    "worker"
+    "worker",
+    "hadith",
+    "quran",
+    "fiqh",
+    "islamic-assistant",
+    "arabic",
+    "llm",
+    "chatbot"
   ],
-  "author": "Your Name",
+  "author": "AskIslamAI Team",
+  "contributors": [
+    "Your Name <your.email@example.com>"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aminelabzioui123-hash/AskIslamAI.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aminelabzioui123-hash/AskIslamAI/issues"
+  },
+  "homepage": "https://github.com/aminelabzioui123-hash/AskIslamAI#readme",
   "devDependencies": {
     "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
   }
 }
