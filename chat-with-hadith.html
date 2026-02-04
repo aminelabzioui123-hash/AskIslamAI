@@ -399,6 +399,7 @@
             justify-content: center;
             background: transparent;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
         
         .chat-section.has-messages {
@@ -592,11 +593,17 @@
             border-top: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: 0; 
             padding: 0.9rem 1.2rem; 
+            padding-bottom: max(0.9rem, env(safe-area-inset-bottom)); 
             display: flex; 
             align-items: flex-end;
             gap: 0.8rem; 
             transition: all 0.3s ease;
             backdrop-filter: blur(10px);
+            position: sticky;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
         }
         
         .input-wrapper:focus-within { 
@@ -891,6 +898,9 @@
             
             .chat-section {
                 padding: 1.2rem 1rem;
+                padding-bottom: 0;
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height - يتكيف مع لوحة المفاتيح */
             }
             
             .chat-header h1 {
@@ -912,6 +922,8 @@
             
             #chatArea {
                 padding: 1.2rem;
+                padding-bottom: 0;
+                margin-bottom: 0;
             }
             
             .message {
@@ -964,7 +976,13 @@
             
             .input-wrapper {
                 padding: 1.3rem;
+                padding-bottom: max(1.3rem, calc(env(safe-area-inset-bottom) + 0.5rem));
                 gap: 1rem;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: 0;
             }
             
             #userInput {
@@ -1076,6 +1094,51 @@
             
             .chat-header h1 {
                 font-size: 1.8rem;
+            }
+        }
+
+        /* معالجة خاصة للوحة المفاتيح على الأجهزة المحمولة */
+        @media (max-width: 768px) {
+            /* منع التمرير على الـ body عند ظهور لوحة المفاتيح */
+            body.keyboard-open {
+                position: fixed;
+                width: 100%;
+            }
+
+            /* التأكد من أن chatArea يأخذ المساحة المتبقية */
+            .chat-section.has-messages #chatArea {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 120px; /* مساحة إضافية من الأسفل */
+            }
+
+            /* رفع آخر رسالة عن لوحة المفاتيح */
+            #chatArea .message:last-child {
+                margin-bottom: 20px;
+                padding-bottom: 20px;
+            }
+
+            /* التأكد من أن input-wrapper يبقى في الأسفل */
+            .input-wrapper {
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        /* دعم Dynamic Viewport Height للأجهزة الحديثة */
+        @supports (height: 100dvh) {
+            @media (max-width: 768px) {
+                .chat-section {
+                    height: 100dvh;
+                }
+                
+                body {
+                    height: 100dvh;
+                }
+
+                .container {
+                    height: 100dvh;
+                }
             }
         }
     </style>
@@ -2011,6 +2074,49 @@
         
         // إعادة التشغيل عند تغيير حجم النافذة
         window.addEventListener('resize', initMobileOptimizations);
+
+        // معالجة ظهور لوحة المفاتيح على الأجهزة المحمولة
+        function handleKeyboardDisplay() {
+            const userInput = document.getElementById('userInput');
+            const chatArea = document.getElementById('chatArea');
+            
+            // عند التركيز على حقل الإدخال
+            userInput.addEventListener('focus', function() {
+                // انتظار قليلاً حتى تظهر لوحة المفاتيح
+                setTimeout(() => {
+                    // التمرير إلى الأسفل لضمان رؤية حقل الإدخال
+                    this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // التمرير في منطقة المحادثة للأسفل
+                    if (chatArea) {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                    }
+                }, 300);
+            });
+            
+            // معالجة تغيير حجم النافذة (عند ظهور/إخفاء لوحة المفاتيح)
+            let lastHeight = window.innerHeight;
+            window.visualViewport?.addEventListener('resize', () => {
+                const currentHeight = window.visualViewport.height;
+                
+                // إذا انخفض الارتفاع (ظهرت لوحة المفاتيح)
+                if (currentHeight < lastHeight) {
+                    // التمرير للأسفل
+                    setTimeout(() => {
+                        if (chatArea) {
+                            chatArea.scrollTop = chatArea.scrollHeight;
+                        }
+                    }, 100);
+                }
+                
+                lastHeight = currentHeight;
+            });
+        }
+
+        // تفعيل معالجة لوحة المفاتيح
+        if (window.innerWidth <= 768) {
+            handleKeyboardDisplay();
+        }
     </script>
 </body>
 </html>
