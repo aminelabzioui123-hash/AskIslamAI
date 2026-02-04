@@ -974,29 +974,32 @@
             }
         }
 
-        // Send Message
+        // Send Message - النسخة المحسنة
         async function sendMessage() {
             const message = userInput.value.trim();
             
             if (!message) return;
             
-            // التحقق من السلام أولاً
+            // 1. التحقق من التحية
             const greetings = ['السلام عليكم', 'سلام عليكم', 'السلام', 'سلام', 'مرحبا', 'مرحبًا', 'أهلا', 'أهلاً', 'صباح الخير', 'مساء الخير'];
-            const isGreeting = greetings.some(greeting => message.toLowerCase().includes(greeting.toLowerCase()));
+            const isGreeting = greetings.some(g => message.toLowerCase().includes(g.toLowerCase()));
             
             if (isGreeting) {
                 addMessageToUI(message, 'user', null, [], true);
-                addMessageToUI('وعليكم السلام ورحمة الله وبركاته 🌙\n\nأهلاً بك في اسأل الإسلام AI، كيف يمكنني مساعدتك اليوم؟', 'assistant', null, [], true);
+                setTimeout(() => {
+                    addMessageToUI('وعليكم السلام ورحمة الله وبركاته 🌙\n\nأهلاً بك في اسأل الإسلام AI، كيف يمكنني مساعدتك اليوم؟', 'assistant', null, [], true);
+                }, 500);
                 userInput.value = '';
                 userInput.style.height = 'auto';
                 return;
             }
             
-            // Check if question is Islamic
+            // 2. التحقق من طبيعة السؤال (إسلامي أم لا)
             if (!isIslamicQuestion(message)) {
                 addMessageToUI(message, 'user', null, [], true);
-                addMessageToUI('عذراً، أنا متخصص في الإجابة على الأسئلة الإسلامية فقط. يرجى طرح سؤال يتعلق بالدين الإسلامي.', 'assistant', null, [], true);
+                addMessageToUI('عذراً، أنا متخصص في الأسئلة الإسلامية فقط. يرجى توجيه سؤال شرعي أو ديني.', 'assistant', null, [], true);
                 userInput.value = '';
+                userInput.style.height = 'auto';
                 return;
             }
             
@@ -1012,7 +1015,7 @@
                 renderChats();
             }
             
-            // Show loading
+            // 3. إظهار مؤشر التحميل
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'message assistant-message';
             loadingDiv.innerHTML = '<div class="message-content"><div class="loading"><span></span><span></span><span></span></div></div>';
@@ -1020,56 +1023,35 @@
             chatArea.scrollTop = chatArea.scrollHeight;
             
             try {
-                // إضافة التعليمات حسب الوضع المختار
-                const systemPrompt = systemPrompts[selectedAnswerMode];
-                const islamicContext = `أنت مساعد إسلامي متخصص خبير. يجب عليك:
-- الإجابة على الأسئلة الإسلامية فقط بدقة عالية
-- استخدام القرآن الكريم والسنة النبوية الشريفة كمصادر أساسية
-- تقديم إجابات دقيقة ومؤصلة شرعياً من المذاهب السنية
-- الالتزام بالمنهج السني والوسطية في الفتوى
-- عدم الفتوى في المسائل الحساسة والخلافية وتوجيه السائل للعلماء المختصين
-- استخدام لغة عربية فصحى واضحة ومفهومة`;
-                
-                const fullMessage = `${systemPrompt}\n\n${islamicContext}\n\nالسؤال: ${message}`;
-                
-                // استخدام API endpoint
+                // إرسال الرسالة بطريقة مبسطة - Worker سيتولى System Prompt
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                    headers: { 
+                        'Content-Type': 'application/json' 
                     },
                     body: JSON.stringify({
-                        message: fullMessage
+                        message: message, // نرسل الرسالة فقط
+                        mode: selectedAnswerMode // إرسال النمط المختار
                     })
                 });
 
-                chatArea.removeChild(loadingDiv);
-
                 if (!response.ok) {
-                    const errorData = await response.text();
-                    console.error('API Error:', errorData);
-                    throw new Error('فشل في الحصول على الرد من API');
+                    throw new Error('خطأ في استجابة الخادم');
                 }
 
                 const data = await response.json();
-                let aiResponse = '';
                 
-                // الإصلاح النهائي والشامل لاستخراج الإجابة
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    aiResponse = data.choices[0].message.content;
-                } else if (data.answer) {
-                    aiResponse = data.answer;
-                } else if (data.message && data.message.content) {
-                    aiResponse = data.message.content;
-                } else if (data.content) {
-                    aiResponse = data.content;
-                } else if (typeof data === 'string') {
-                    aiResponse = data;
-                } else if (data.error) {
-                    throw new Error(data.error);
-                } else {
-                    aiResponse = 'عذراً، لم أتمكن من استخراج الإجابة من الخادم.';
+                // إزالة مؤشر التحميل
+                if (chatArea.contains(loadingDiv)) {
+                    chatArea.removeChild(loadingDiv);
                 }
+
+                // محاولة مرنة لاستخراج النص من أي بنية محتملة
+                const aiResponse = data.content || 
+                                   (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || 
+                                   data.answer || 
+                                   data.message || 
+                                   "نعتذر، لم أتمكن من صياغة الإجابة حالياً.";
                 
                 const source = extractSource(aiResponse);
                 const similarQuestions = generateSimilarQuestions(message);
@@ -1081,10 +1063,8 @@
                     chatArea.removeChild(loadingDiv);
                 }
                 
-                let errorMessage = 'عذراً، حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.';
-                
-                addMessageToUI(errorMessage, 'assistant', null, [], true);
-                console.error('Error:', error);
+                addMessageToUI('عذراً، حدث خطأ أثناء الاتصال بالخادم. تأكد من تشغيل الـ Worker الخاص بك.', 'assistant', null, [], true);
+                console.error('Fetch Error:', error);
             }
         }
 
