@@ -1054,13 +1054,21 @@
                 const data = await response.json();
                 let aiResponse = '';
                 
-                // معالجة الاستجابة من Groq API
-                if (data.choices && data.choices.length > 0) {
+                // الإصلاح النهائي والشامل لاستخراج الإجابة
+                if (data.choices && data.choices[0] && data.choices[0].message) {
                     aiResponse = data.choices[0].message.content;
+                } else if (data.answer) {
+                    aiResponse = data.answer;
+                } else if (data.message && data.message.content) {
+                    aiResponse = data.message.content;
+                } else if (data.content) {
+                    aiResponse = data.content;
+                } else if (typeof data === 'string') {
+                    aiResponse = data;
                 } else if (data.error) {
                     throw new Error(data.error);
                 } else {
-                    aiResponse = 'عذراً، لم أتمكن من معالجة الإجابة.';
+                    aiResponse = 'عذراً، لم أتمكن من استخراج الإجابة من الخادم.';
                 }
                 
                 const source = extractSource(aiResponse);
