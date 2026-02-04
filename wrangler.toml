@@ -2,20 +2,29 @@ name = 'askislam-ai'
 main = "worker.js"
 compatibility_date = "2024-01-01"
 
-# Environment variables (أضف الـ API key هنا بدل استخدامها مباشرة في الكود)
-[vars]
-# ANTHROPIC_API_KEY = "your-key-here" # استخدم wrangler secret put بدلاً من هذا
+# Worker Configuration
+[observability]
+enabled = true
 
-# إعدادات الـ routes (اختياري - لو بغيتي تربطو بدومين معين)
+# Compatibility flags
+compatibility_flags = ["nodejs_compat"]
+
+# إعدادات اختيارية - يمكن تفعيلها لاحقاً
+
+# Environment variables (استخدم wrangler secret put للمتغيرات الحساسة)
+# [vars]
+# DEBUG = "false"
+
+# Custom domains (بعد إضافة domain مخصص)
 # routes = [
-#   { pattern = "askislamai.com/api/*", zone_name = "askislamai.com" }
+#   { pattern = "askislamai.com/*", zone_name = "askislamai.com" }
 # ]
 
-# KV Namespaces (لو بغيتي تحفظ البيانات)
+# KV Namespaces لحفظ البيانات (اختياري)
 # kv_namespaces = [
 #   { binding = "CHAT_HISTORY", id = "your-kv-namespace-id" }
 # ]
 
-# Rate limiting (اختياري)
+# Rate limiting (اختياري - للحماية من الإفراط في الاستخدام)
 # [limits]
 # cpu_ms = 50
