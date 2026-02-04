@@ -204,7 +204,6 @@
             background: rgba(255, 0, 0, 0.6);
         }
         
-        /* تنسيق زر الاستماع للصوت */
         .speak-btn {
             background: rgba(212, 165, 116, 0.1);
             border: 1px solid var(--gold);
@@ -1142,12 +1141,12 @@
         // تم نقل فحص الأسئلة الإسلامية إلى Worker لمزيد من الذكاء والدقة
         // Worker يستخدم نظام تصنيف ذكي مع AI للتحقق من طبيعة السؤال
 
-        // إضافة رسالة إلى واجهة المستخدم وحفظها في المحادثة
+        // Add message to UI and save to chat
         function addMessageToUI(content, role, source = null, similarQuestions = [], saveToChat = true) {
             const div = document.createElement('div');
             div.className = `message ${role}-message`;
             
-            // إضافة صنف عندما توجد رسائل
+            // إضافة class عندما توجد رسائل
             const chatSection = document.querySelector('.chat-section');
             if (chatSection) {
                 chatSection.classList.add('has-messages');
@@ -1159,16 +1158,10 @@
             let html = `<div class="message-content">${formattedContent}`;
             
             if (role === 'assistant') {
-                // إنشاء معرّف فريد للنص
-                const textId = 'text-' + Date.now();
+                // إضافة زر الصوت
+                html += `<button class="speak-btn" onclick="toggleSpeech(this)">🔊 استماع للنص</button>`;
                 
-                // إضافة زر الاستماع
-                html += `
-                    <button class="speak-btn" data-text-id="${textId}">
-                        <i class="fas fa-volume-up"></i> استماع للنص
-                    </button>`;
-                
-                // عرض الأسئلة المشابهة إن وجدت
+                // إزالة عرض المصدر - تم حذف هذا الجزء
                 if (similarQuestions && similarQuestions.length > 0) {
                     html += `<div class="similar-questions">`;
                     similarQuestions.forEach(q => {
@@ -1180,23 +1173,22 @@
             
             html += `</div>`;
             div.innerHTML = html;
-            chatArea.appendChild(div);
             
-            // إضافة مستمع الحدث للزر بعد إضافته إلى الصفحة
+            // حفظ النص في الزر
             if (role === 'assistant') {
                 const btn = div.querySelector('.speak-btn');
                 if (btn) {
-                    btn.addEventListener('click', function() {
-                        toggleSpeech(this, content);
-                    });
+                    btn.dataset.text = content;
                 }
             }
+            
+            chatArea.appendChild(div);
             
             setTimeout(() => {
                 chatArea.scrollTop = chatArea.scrollHeight;
             }, 100);
 
-            // حفظ في المحادثة الحالية
+            // Save to current chat
             if (saveToChat && currentChatId) {
                 const chat = chats.find(c => c.id === currentChatId);
                 if (chat) {
@@ -1344,77 +1336,61 @@
             this.style.height = Math.min(this.scrollHeight, 150) + 'px';
         });
 
-        // ===== نظام تحويل النص إلى صوت باللغة العربية =====
-        
-        // دالة تحويل النص إلى صوت
-        function toggleSpeech(btn, text) {
-            // إذا كان المتصفح يقرأ حالياً، قم بإيقافه
+        function toggleSpeech(btn) {
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
                 
-                // إذا كان الضغط على نفس الزر الذي يقرأ، نكتفي بالإيقاف
                 if (btn.classList.contains('playing')) {
                     resetButtons();
                     return;
                 }
             }
 
-            // تنظيف جميع الأزرار الأخرى
             resetButtons();
 
-            // تنظيف النص من علامات HTML والتنسيق
-            let cleanText = text
-                .replace(/<[^>]*>/g, '')           // إزالة HTML tags
-                .replace(/&nbsp;/g, ' ')           // إزالة &nbsp;
-                .replace(/&quot;/g, '"')           // إزالة &quot;
-                .replace(/&amp;/g, '&')            // إزالة &amp;
-                .replace(/&lt;/g, '<')             // إزالة &lt;
-                .replace(/&gt;/g, '>')             // إزالة &gt;
-                .replace(/\s+/g, ' ')              // إزالة المسافات الزائدة
-                .replace(/المصدر:.*?(?:\n|$)/g, '') // إزالة المصدر
-                .replace(/الراوي:.*?(?:\n|$)/g, '')  // إزالة الراوي
+            const text = btn.dataset.text;
+            const cleanText = text
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/\s+/g, ' ')
+                .replace(/المصدر:.*?(?:\n|$)/g, '')
+                .replace(/الراوي:.*?(?:\n|$)/g, '')
                 .trim();
 
-            // إعداد النص للقراءة
             const utterance = new SpeechSynthesisUtterance(cleanText);
-            
-            // إجبار المتصفح على استخدام اللغة العربية
-            utterance.lang = 'ar-SA'; 
-            utterance.rate = 0.9;  // سرعة هادئة ومناسبة للنصوص الدينية
-            utterance.pitch = 1.0; // طبقة صوت طبيعية
-            utterance.volume = 1.0; // مستوى الصوت
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
 
-            // تغيير حالة الزر عند البدء
             utterance.onstart = () => {
                 btn.classList.add('playing');
-                btn.innerHTML = '<i class="fas fa-stop"></i> إيقاف القراءة';
+                btn.innerHTML = '⏸️ إيقاف القراءة';
             };
 
-            // إعادة الزر لحالته عند الانتهاء
             utterance.onend = () => {
                 resetButtons();
             };
 
-            // معالجة الأخطاء
-            utterance.onerror = (event) => {
-                console.error('خطأ في تحويل النص إلى صوت:', event);
+            utterance.onerror = () => {
                 resetButtons();
             };
 
-            // تنفيذ القراءة
             window.speechSynthesis.speak(utterance);
         }
 
-        // دالة لإعادة الأزرار لشكلها الأصلي
         function resetButtons() {
             const btns = document.querySelectorAll('.speak-btn');
             btns.forEach(b => {
                 b.classList.remove('playing');
-                b.innerHTML = '<i class="fas fa-volume-up"></i> استماع للنص';
+                b.innerHTML = '🔊 استماع للنص';
             });
         }
 
-        // إيقاف الصوت عند إغلاق الصفحة
         window.addEventListener('beforeunload', () => {
             if (window.speechSynthesis.speaking) {
                 window.speechSynthesis.cancel();
