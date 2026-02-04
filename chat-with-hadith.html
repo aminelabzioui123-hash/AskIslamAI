@@ -1346,6 +1346,7 @@
 
         /**
          * جلب القرآن الكامل من API
+         * المصدر: https://github.com/risan/quran-json
          * ملاحظة مهمة جداً: النص القرآني يُحفظ كما هو بالضبط دون أي تعديل
          * حتى الكسرة الأخيرة لا نحركها
          */
@@ -1358,8 +1359,8 @@
             try {
                 console.log('جاري تحميل القرآن الكريم من API...');
                 
-                // جلب القرآن الكامل باللغة العربية
-                const response = await fetch('https://cdn.jsdelivr.net/gh/fawazahmed0/quran-api@1/editions/ara-quranacademy.json');
+                // جلب القرآن الكامل من المصدر الوحيد: risan/quran-json
+                const response = await fetch('https://raw.githubusercontent.com/risan/quran-json/master/dist/quran.json');
                 
                 if (!response.ok) {
                     throw new Error(`فشل تحميل القرآن: ${response.status}`);
@@ -1368,26 +1369,30 @@
                 const data = await response.json();
                 
                 // حفظ البيانات كما هي بالضبط دون أي معالجة
-                if (data && data.quran) {
-                    // تنظيم البيانات للوصول السريع
-                    data.quran.forEach((verse, index) => {
-                        // verse هو object يحتوي على: {verse: النص, chapter: رقم السورة, verseNumber: رقم الآية}
-                        const surahNum = verse.chapter;
-                        const ayahNum = verse.verseNumber || (index + 1);
-                        const verseText = verse.verse; // النص الأصلي بدون أي تعديل
-                        
-                        // حفظ الآية بمفتاح فريد
-                        const key = `${surahNum}-${ayahNum}`;
-                        quranData.verses[key] = verseText;
+                if (data && Array.isArray(data)) {
+                    // البيانات عبارة عن array من السور
+                    data.forEach((surah) => {
+                        const surahNum = surah.id;
                         
                         // تنظيم السور
-                        if (!quranData.surahs[surahNum]) {
-                            quranData.surahs[surahNum] = {
-                                number: surahNum,
-                                verses: {}
-                            };
+                        quranData.surahs[surahNum] = {
+                            number: surahNum,
+                            name: surah.name,
+                            verses: {}
+                        };
+                        
+                        // معالجة الآيات
+                        if (surah.verses && Array.isArray(surah.verses)) {
+                            surah.verses.forEach((verse) => {
+                                const ayahNum = verse.id;
+                                const verseText = verse.text; // النص الأصلي بدون أي تعديل
+                                
+                                // حفظ الآية بمفتاح فريد
+                                const key = `${surahNum}-${ayahNum}`;
+                                quranData.verses[key] = verseText;
+                                quranData.surahs[surahNum].verses[ayahNum] = verseText;
+                            });
                         }
-                        quranData.surahs[surahNum].verses[ayahNum] = verseText;
                     });
                     
                     quranData.loaded = true;
@@ -1399,39 +1404,6 @@
                 
             } catch (error) {
                 console.error('❌ خطأ في تحميل القرآن:', error);
-                // في حالة الفشل، نحاول مصدر بديل
-                try {
-                    console.log('محاولة تحميل من مصدر بديل...');
-                    const backupResponse = await fetch('https://api.alquran.cloud/v1/quran/ar.asad');
-                    const backupData = await backupResponse.json();
-                    
-                    if (backupData && backupData.data && backupData.data.surahs) {
-                        backupData.data.surahs.forEach(surah => {
-                            const surahNum = surah.number;
-                            quranData.surahs[surahNum] = {
-                                number: surahNum,
-                                name: surah.name,
-                                verses: {}
-                            };
-                            
-                            surah.ayahs.forEach(ayah => {
-                                const ayahNum = ayah.numberInSurah;
-                                const verseText = ayah.text; // النص الأصلي بدون تعديل
-                                const key = `${surahNum}-${ayahNum}`;
-                                
-                                quranData.verses[key] = verseText;
-                                quranData.surahs[surahNum].verses[ayahNum] = verseText;
-                            });
-                        });
-                        
-                        quranData.loaded = true;
-                        console.log('✅ تم تحميل القرآن من المصدر البديل');
-                        return quranData;
-                    }
-                } catch (backupError) {
-                    console.error('❌ فشل تحميل القرآن من المصدر البديل:', backupError);
-                }
-                
                 return null;
             }
         }
