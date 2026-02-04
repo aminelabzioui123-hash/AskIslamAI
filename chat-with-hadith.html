@@ -1050,6 +1050,12 @@
 
                 // 9. استخراج الإجابة بطريقة آمنة ومرنة
                 let aiResponse = '';
+                let isIslamicQuestion = true;
+                
+                // التحقق من تصنيف السؤال
+                if (data.is_islamic === false) {
+                    isIslamicQuestion = false;
+                }
                 
                 if (data.error) {
                     aiResponse = `عذراً، حدث خطأ: ${data.error}`;
@@ -1073,12 +1079,17 @@
                     aiResponse = "عذراً، لم أحصل على إجابة. الرجاء المحاولة مرة أخرى.";
                 }
                 
-                // 11. استخراج المصدر والأسئلة المشابهة
-                const source = extractSource(aiResponse);
-                const similarQuestions = generateSimilarQuestions(message);
+                // 11. استخراج المصدر والأسئلة المشابهة (فقط للأسئلة الإسلامية)
+                const source = isIslamicQuestion ? extractSource(aiResponse) : null;
+                const similarQuestions = isIslamicQuestion ? generateSimilarQuestions(message) : [];
                 
                 // 12. عرض الإجابة
                 addMessageToUI(aiResponse, 'assistant', source, similarQuestions, true);
+                
+                // عرض معلومات التصنيف في Console للتصحيح
+                if (data.classification) {
+                    console.log('تصنيف السؤال:', data.classification);
+                }
                 
             } catch (error) {
                 // معالجة الأخطاء
@@ -1100,62 +1111,8 @@
             }
         }
 
-        // Check if question is Islamic - نسخة محسّنة وأقل صرامة
-        function isIslamicQuestion(text) {
-            // إذا كان السؤال قصير جداً (أقل من 3 أحرف)، نرفضه
-            if (text.length < 3) return false;
-            
-            // قائمة الكلمات المفتاحية الإسلامية (مختصرة للأهم)
-            const islamicKeywords = [
-                // أساسيات
-                'الله', 'رب', 'إسلام', 'مسلم', 'دين', 'شريعة', 'فقه', 'عقيدة',
-                'قرآن', 'سورة', 'آية', 'حديث', 'نبي', 'رسول', 'محمد', 'نبوي',
-                
-                // العبادات
-                'صلاة', 'صلوات', 'وضوء', 'زكاة', 'صوم', 'صيام', 'رمضان', 'حج', 'عمرة',
-                'دعاء', 'ذكر', 'تسبيح', 'استغفار', 'توبة',
-                
-                // العقيدة
-                'إيمان', 'توحيد', 'جنة', 'نار', 'قيامة', 'آخرة', 'ملائكة', 'قدر',
-                
-                // الفقه والأحكام
-                'حلال', 'حرام', 'مكروه', 'مستحب', 'واجب', 'فرض', 'سنة', 'حكم', 'فتوى',
-                'طهارة', 'نجاسة', 'ركوع', 'سجود',
-                
-                // المعاملات
-                'زواج', 'نكاح', 'طلاق', 'ميراث', 'وصية', 'ربا', 'بيع', 'شراء',
-                
-                // أخرى
-                'سيرة', 'صحابة', 'تفسير', 'شرح', 'أخلاق', 'صبر', 'شكر', 'تقوى',
-                'مسجد', 'كعبة', 'مكة', 'مدينة', 'قبلة', 'خطبة', 'إمام'
-            ];
-            
-            const lowerText = text.toLowerCase();
-            
-            // فحص 1: هل يحتوي على كلمات مفتاحية؟
-            const hasKeyword = islamicKeywords.some(keyword => lowerText.includes(keyword));
-            
-            if (hasKeyword) return true;
-            
-            // فحص 2: هل هو سؤال ديني عام؟ (يحتوي على علامة استفهام + كلمات دينية)
-            const hasQuestionMark = text.includes('؟') || text.includes('?');
-            const hasQuestionWords = /\b(ما|كيف|لماذا|متى|أين|من|هل|لو|أ|هل)\b/i.test(text);
-            const hasReligiousContext = /\b(علاقة|فرق|حكم|معنى|تفسير|شرح|فضل|ثواب|عقاب|أجر|حسنات|سيئات)\b/i.test(lowerText);
-            
-            if ((hasQuestionMark || hasQuestionWords) && hasReligiousContext) {
-                return true;
-            }
-            
-            // فحص 3: السماح بأي سؤال طويل نسبياً (أكثر من 15 حرف) يحتوي على استفهام
-            // هذا يعطي فرصة للذكاء الاصطناعي لتحديد إذا كان السؤال إسلامي أم لا
-            if (text.length > 15 && (hasQuestionMark || hasQuestionWords)) {
-                return true;
-            }
-            
-            // افتراضياً، نقبل السؤال ونترك للـ AI تحديد ما إذا كان إسلامي
-            // هذا أفضل من رفض أسئلة قد تكون مشروعة
-            return true;
-        }
+        // تم نقل فحص الأسئلة الإسلامية إلى Worker لمزيد من الذكاء والدقة
+        // Worker يستخدم نظام تصنيف ذكي مع AI للتحقق من طبيعة السؤال
 
         // Add message to UI and save to chat
         function addMessageToUI(content, role, source = null, similarQuestions = [], saveToChat = true) {
