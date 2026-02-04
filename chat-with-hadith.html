@@ -711,6 +711,52 @@
             transform: translateY(-2px);
         }
         
+        /* شاشة تحميل القرآن */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-text {
+            margin-top: 2rem;
+            font-size: 1.2rem;
+            color: var(--gold);
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 80%;
+            max-width: 400px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -751,10 +797,28 @@
                 padding: 1rem;
                 max-height: 400px;
             }
+            
+            .progress-bar {
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- شاشة تحميل القرآن -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="loading-text" id="loadingText">جاري تحميل القرآن الكريم...</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="loading-text" id="progressText">0%</div>
+    </div>
+    
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar glass" id="sidebar">
@@ -843,11 +907,16 @@
         const modeToggleBtn = document.getElementById('modeToggleBtn');
         const answerModeSelector = document.getElementById('answerModeSelector');
         const modeOptions = document.querySelectorAll('.mode-option');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const loadingText = document.getElementById('loadingText');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
         
         let chats = [];
         let currentChatId = null;
         let selectedAnswerMode = 'short';
         let quranData = {}; // لتخزين بيانات القرآن
+        let surahNames = {}; // لتخزين أسماء السور
 
         // ============================================
         // مصادر القرآن الكريم - المصدر الوحيد (مقدم من المستخدم)
@@ -855,22 +924,196 @@
         const API_ENDPOINT = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
         const QURAN_SOURCE = 'https://raw.githubusercontent.com/risan/quran-json/refs/heads/main/data/quran.json';
 
-        // تحميل بيانات القرآن من المصدر الوحيد
+        // جدول أسماء السور العربية
+        const ARABIC_SURAH_NAMES = {
+            1: "الفاتحة",
+            2: "البقرة",
+            3: "آل عمران",
+            4: "النساء",
+            5: "المائدة",
+            6: "الأنعام",
+            7: "الأعراف",
+            8: "الأنفال",
+            9: "التوبة",
+            10: "يونس",
+            11: "هود",
+            12: "يوسف",
+            13: "الرعد",
+            14: "إبراهيم",
+            15: "الحجر",
+            16: "النحل",
+            17: "الإسراء",
+            18: "الكهف",
+            19: "مريم",
+            20: "طه",
+            21: "الأنبياء",
+            22: "الحج",
+            23: "المؤمنون",
+            24: "النور",
+            25: "الفرقان",
+            26: "الشعراء",
+            27: "النمل",
+            28: "القصص",
+            29: "العنكبوت",
+            30: "الروم",
+            31: "لقمان",
+            32: "السجدة",
+            33: "الأحزاب",
+            34: "سبأ",
+            35: "فاطر",
+            36: "يس",
+            37: "الصافات",
+            38: "ص",
+            39: "الزمر",
+            40: "غافر",
+            41: "فصلت",
+            42: "الشورى",
+            43: "الزخرف",
+            44: "الدخان",
+            45: "الجاثية",
+            46: "الأحقاف",
+            47: "محمد",
+            48: "الفتح",
+            49: "الحجرات",
+            50: "ق",
+            51: "الذاريات",
+            52: "الطور",
+            53: "النجم",
+            54: "القمر",
+            55: "الرحمن",
+            56: "الواقعة",
+            57: "الحديد",
+            58: "المجادلة",
+            59: "الحشر",
+            60: "الممتحنة",
+            61: "الصف",
+            62: "الجمعة",
+            63: "المنافقون",
+            64: "التغابن",
+            65: "الطلاق",
+            66: "التحريم",
+            67: "الملك",
+            68: "القلم",
+            69: "الحاقة",
+            70: "المعارج",
+            71: "نوح",
+            72: "الجن",
+            73: "المزمل",
+            74: "المدثر",
+            75: "القيامة",
+            76: "الإنسان",
+            77: "المرسلات",
+            78: "النبأ",
+            79: "النازعات",
+            80: "عبس",
+            81: "التكوير",
+            82: "الإنفطار",
+            83: "المطففين",
+            84: "الإنشقاق",
+            85: "البروج",
+            86: "الطارق",
+            87: "الأعلى",
+            88: "الغاشية",
+            89: "الفجر",
+            90: "البلد",
+            91: "الشمس",
+            92: "الليل",
+            93: "الضحى",
+            94: "الشرح",
+            95: "التين",
+            96: "العلق",
+            97: "القدر",
+            98: "البينة",
+            99: "الزلزلة",
+            100: "العاديات",
+            101: "القارعة",
+            102: "التكاثر",
+            103: "العصر",
+            104: "الهمزة",
+            105: "الفيل",
+            106: "قريش",
+            107: "الماعون",
+            108: "الكوثر",
+            109: "الكافرون",
+            110: "النصر",
+            111: "المسد",
+            112: "الإخلاص",
+            113: "الفلق",
+            114: "الناس"
+        };
+
+        // تحميل بيانات القرآن من المصدر الوحيد مع شريط التقدم
         async function loadQuranData() {
             console.log('🔄 جاري تحميل القرآن من المصدر المعتمد...');
+            loadingText.textContent = 'جاري تحميل القرآن الكريم...';
             
             try {
                 const response = await fetch(QURAN_SOURCE);
                 if (response.ok) {
-                    quranData = await response.json();
+                    const allData = await response.json();
+                    
+                    // تحديث شريط التقدم
+                    progressFill.style.width = '50%';
+                    progressText.textContent = '50%';
+                    loadingText.textContent = 'جاري تنظيم بيانات القرآن...';
+                    
+                    // تنظيم البيانات في هيكل أفضل
+                    quranData = allData;
+                    
+                    // تحديث شريط التقدم
+                    progressFill.style.width = '100%';
+                    progressText.textContent = '100%';
+                    loadingText.textContent = 'تم تحميل القرآن الكريم بنجاح!';
+                    
                     console.log(`✅ تم تحميل بيانات القرآن من المصدر المعتمد. عدد السور: ${Object.keys(quranData).length}`);
+                    
+                    // إخفاء شاشة التحميل بعد ثانية
+                    setTimeout(() => {
+                        loadingScreen.classList.add('hidden');
+                    }, 1000);
+                    
                 } else {
                     throw new Error(`فشل التحميل: ${response.status}`);
                 }
             } catch (error) {
                 console.error('❌ فشل تحميل القرآن من المصدر:', error);
-                quranData = {};
+                loadingText.textContent = 'عذراً، حدث خطأ في تحميل القرآن. جاري المحاولة مرة أخرى...';
+                
+                // محاولة مرة أخرى بعد 3 ثوان
+                setTimeout(() => {
+                    loadQuranData();
+                }, 3000);
             }
+        }
+
+        // الحصول على اسم السورة بالعربية
+        function getSurahName(surahNumber) {
+            return ARABIC_SURAH_NAMES[surahNumber] || `السورة ${surahNumber}`;
+        }
+
+        // البحث عن سورة بالاسم
+        function findSurahByName(name) {
+            const lowerName = name.toLowerCase().trim();
+            
+            // البحث في أسماء السور
+            for (const [number, arabicName] of Object.entries(ARABIC_SURAH_NAMES)) {
+                if (arabicName.toLowerCase().includes(lowerName) || 
+                    lowerName.includes(arabicName.toLowerCase())) {
+                    return parseInt(number);
+                }
+            }
+            
+            // محاولة مطابقة تقريبية
+            for (const [number, arabicName] of Object.entries(ARABIC_SURAH_NAMES)) {
+                const words = lowerName.split(' ');
+                for (const word of words) {
+                    if (word.length > 2 && arabicName.toLowerCase().includes(word)) {
+                        return parseInt(number);
+                    }
+                }
+            }
+            
+            return null;
         }
 
         // وظيفة التحقق من الآية في المصدر المعتمد
@@ -896,7 +1139,7 @@
             return {
                 verified: isMatch,
                 matchCount: isMatch ? 1 : 0,
-                surahName: `السورة ${surahNumber}`,
+                surahName: getSurahName(surahNumber),
                 surahNumber: surahNumber,
                 ayahNumber: ayahNumber,
                 text: ayah.text,
@@ -914,51 +1157,49 @@
             const results = [];
             const queryLower = query.trim();
             
-            // البحث في جميع السور والآيات
-            Object.keys(quranData).forEach(surahKey => {
-                const surahAyahs = quranData[surahKey];
-                
-                // البحث في الآيات
-                surahAyahs.forEach(ayah => {
-                    if (ayah.text && ayah.text.includes(query)) {
-                        const verification = verifyAyah(ayah.chapter, ayah.verse, ayah.text);
-                        
-                        if (verification.verified) {
-                            results.push({
-                                type: 'ayah',
-                                surahName: `السورة ${ayah.chapter}`,
-                                surahNumber: ayah.chapter,
-                                ayahNumber: ayah.verse,
-                                text: ayah.text,
-                                verified: true,
-                                verificationCount: 1,
-                                source: 'المصدر المعتمد'
-                            });
-                        }
-                    }
-                });
-            });
-            
-            // البحث عن سورة يوسف (كمثال للبحث الخاص)
-            if (results.length === 0 && queryLower.includes('يوسف')) {
-                const surah12 = quranData['12'];
-                if (surah12 && surah12.length > 0) {
-                    const firstAyah = surah12[0];
-                    const verification = verifyAyah(12, 1, firstAyah.text);
-                    
-                    if (verification.verified) {
+            // أولاً: البحث في أسماء السور
+            for (const [surahNumber, surahName] of Object.entries(ARABIC_SURAH_NAMES)) {
+                if (surahName.includes(query) || query.includes(surahName)) {
+                    const surahKey = surahNumber.toString();
+                    if (quranData[surahKey]) {
                         results.push({
-                            type: 'ayah',
-                            surahName: 'يوسف',
-                            surahNumber: 12,
-                            ayahNumber: 1,
-                            text: firstAyah.text,
+                            type: 'surah',
+                            name: surahName,
+                            number: parseInt(surahNumber),
+                            numberOfAyahs: quranData[surahKey].length,
                             verified: true,
-                            verificationCount: 1,
                             source: 'المصدر المعتمد'
                         });
                     }
                 }
+            }
+            
+            // ثانياً: البحث في نص الآيات
+            if (results.length === 0) {
+                Object.keys(quranData).forEach(surahKey => {
+                    const surahAyahs = quranData[surahKey];
+                    const surahNumber = parseInt(surahKey);
+                    
+                    // البحث في الآيات
+                    surahAyahs.forEach(ayah => {
+                        if (ayah.text && ayah.text.includes(query)) {
+                            const verification = verifyAyah(ayah.chapter, ayah.verse, ayah.text);
+                            
+                            if (verification.verified) {
+                                results.push({
+                                    type: 'ayah',
+                                    surahName: getSurahName(surahNumber),
+                                    surahNumber: surahNumber,
+                                    ayahNumber: ayah.verse,
+                                    text: ayah.text,
+                                    verified: true,
+                                    verificationCount: 1,
+                                    source: 'المصدر المعتمد'
+                                });
+                            }
+                        }
+                    });
+                });
             }
             
             return results.length > 0 ? results : null;
@@ -985,7 +1226,7 @@
             
             return {
                 text: ayah.text,
-                surahName: `السورة ${surahNumber}`,
+                surahName: getSurahName(surahNumber),
                 surahNumber: surahNumber,
                 ayahNumber: ayahNumber,
                 verified: verification.verified,
@@ -1000,35 +1241,30 @@
                 return null;
             }
             
-            let surahKey;
+            let surahNumber;
             
             // التحقق إذا كان الإدخال رقم أم نص
             if (typeof surahNumberOrName === 'number' || !isNaN(surahNumberOrName)) {
-                surahKey = surahNumberOrName.toString();
+                surahNumber = parseInt(surahNumberOrName);
             } else {
-                // البحث بالاسم (في هذا المصدر لا يوجد أسماء سور، فقط أرقام)
-                // يمكن إضافة تحسين لاحق إذا أضيفت أسماء السور
-                const query = surahNumberOrName.toLowerCase().trim();
-                if (query.includes('الفاتحة') || query.includes('فاتحة') || query === '1') {
-                    surahKey = '1';
-                } else if (query.includes('يوسف') || query === '12') {
-                    surahKey = '12';
-                } else {
-                    // محاولة استخراج رقم من النص
-                    const numberMatch = query.match(/\d+/);
-                    surahKey = numberMatch ? numberMatch[0] : null;
-                }
+                // البحث بالاسم
+                surahNumber = findSurahByName(surahNumberOrName);
             }
             
-            if (!surahKey || !quranData[surahKey]) {
+            if (!surahNumber) {
+                return null;
+            }
+            
+            const surahKey = surahNumber.toString();
+            if (!quranData[surahKey]) {
                 return null;
             }
             
             const surahAyahs = quranData[surahKey];
             
             return {
-                number: parseInt(surahKey),
-                name: `السورة ${surahKey}`,
+                number: surahNumber,
+                name: getSurahName(surahNumber),
                 numberOfAyahs: surahAyahs.length,
                 ayahs: surahAyahs.map(ayah => ({
                     number: ayah.verse,
@@ -1063,7 +1299,10 @@
                 'عرض سورة',
                 'عرض سوره',
                 'سورة كاملة من القران',
-                'سوره كامله من القران'
+                'سوره كامله من القران',
+                'قراءة سورة',
+                'سماع سورة',
+                'تلاوة سورة'
             ];
             
             return keywords.some(keyword => lowerMessage.includes(keyword));
@@ -1084,8 +1323,13 @@
                 .replace(/اريد/gi, '')
                 .replace(/اكتب لي/gi, '')
                 .replace(/عرض/gi, '')
+                .replace(/قراءة/gi, '')
+                .replace(/سماع/gi, '')
+                .replace(/تلاوة/gi, '')
                 .replace(/من القران/gi, '')
                 .replace(/القران/gi, '')
+                .replace(/من القرآن/gi, '')
+                .replace(/القرآن/gi, '')
                 .trim();
             
             // إذا بقي نص، فهو اسم السورة
@@ -1112,22 +1356,35 @@
             
             // رأس السورة
             html += '<div class="complete-surah-header">';
-            html += `<div class="surah-name">سورة ${surahData.number}</div>`;
+            html += `<div class="surah-name">سورة ${surahData.name}</div>`;
             html += '<div class="surah-info">';
             html += `<span>رقم السورة: ${surahData.number}</span>`;
             html += `<span>عدد الآيات: ${surahData.numberOfAyahs}</span>`;
             html += '</div>';
             html += '</div>';
             
-            // عرض الآيات
-            surahData.ayahs.forEach(ayah => {
+            // عرض الآيات (تحديد عدد للعرض الأولي)
+            const ayahsToShow = Math.min(surahData.ayahs.length, 50); // عرض أول 50 آية فقط
+            const hasMoreAyahs = surahData.ayahs.length > ayahsToShow;
+            
+            for (let i = 0; i < ayahsToShow; i++) {
+                const ayah = surahData.ayahs[i];
                 html += '<div class="ayah-container">';
                 html += `<div class="ayah-text">﴿ ${ayah.text} ﴾</div>`;
                 html += `<div style="text-align: left; margin-top: 0.5rem;">`;
                 html += `<span class="ayah-number">${ayah.number}</span>`;
                 html += '</div>';
                 html += '</div>';
-            });
+            }
+            
+            // زر عرض المزيد إذا كانت السورة طويلة
+            if (hasMoreAyahs) {
+                html += `<div style="text-align: center; margin: 1rem 0;">`;
+                html += `<button class="show-surah-btn" onclick="showRemainingAyahs(${surahData.number}, ${ayahsToShow})">`;
+                html += `📖 عرض الآيات المتبقية (${surahData.ayahs.length - ayahsToShow} آية)`;
+                html += `</button>`;
+                html += `</div>`;
+            }
             
             html += '<div class="source-info" style="margin-top: 1.5rem;">';
             html += `<span class="verification-badge">✓ تم التحقق من المصدر المعتمد</span>`;
@@ -1137,6 +1394,36 @@
             html += '</div>';
             
             return html;
+        }
+
+        // دالة لعرض الآيات المتبقية من السورة
+        function showRemainingAyahs(surahNumber, startIndex) {
+            const surahData = getCompleteSurah(surahNumber);
+            if (!surahData) return;
+            
+            let html = '<div class="complete-surah-container">';
+            html += `<div style="text-align: center; padding: 1rem; color: var(--gold);">`;
+            html += `الآيات من ${startIndex + 1} إلى ${surahData.ayahs.length}`;
+            html += `</div>`;
+            
+            for (let i = startIndex; i < surahData.ayahs.length; i++) {
+                const ayah = surahData.ayahs[i];
+                html += '<div class="ayah-container">';
+                html += `<div class="ayah-text">﴿ ${ayah.text} ﴾</div>`;
+                html += `<div style="text-align: left; margin-top: 0.5rem;">`;
+                html += `<span class="ayah-number">${ayah.number}</span>`;
+                html += '</div>';
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            
+            // إنشاء رسالة جديدة لعرض الآيات المتبقية
+            const div = document.createElement('div');
+            div.className = 'message assistant-message';
+            div.innerHTML = `<div class="message-content">${html}</div>`;
+            chatArea.appendChild(div);
+            chatArea.scrollTop = chatArea.scrollHeight;
         }
 
         // التعليمات البرمجية للذكاء الاصطناعي - معدلة للعمل مع مصدر واحد
@@ -1410,7 +1697,7 @@
                         if (chat) {
                             chat.messages.push({
                                 role: 'assistant',
-                                content: `عرض سورة ${surahData.number} كاملة (${surahData.numberOfAyahs} آية)`,
+                                content: `عرض سورة ${surahData.name} كاملة (${surahData.numberOfAyahs} آية)`,
                                 source: 'القرآن الكريم - مصدر واحد مُحقق',
                                 questions: []
                             });
@@ -1419,7 +1706,7 @@
                         
                         // تحديث عنوان المحادثة إذا كانت أول رسالة
                         if (chat && chat.messages.length === 2) { // رسالة المستخدم + هذه الرسالة
-                            chat.title = `سورة ${surahData.number} كاملة`;
+                            chat.title = `سورة ${surahData.name} كاملة`;
                             saveChatsToStorage();
                             renderChats();
                         }
@@ -1449,40 +1736,6 @@
             if (isQuranQuestion) {
                 console.log('🔍 سؤال عن القرآن - بدء البحث في المصدر المحدد...');
                 
-                // معالجة خاصة للآية الأولى من سورة يوسف
-                const messageLower = message.toLowerCase();
-                if ((messageLower.includes('يوسف') && (messageLower.includes('أول') || messageLower.includes('الأولى') || messageLower.includes('اولى'))) ||
-                    (messageLower.includes('يوسف') && messageLower.includes('آية') && (messageLower.includes('1') || messageLower.includes('١')))) {
-                    
-                    const quranResults = searchQuran('يوسف');
-                    
-                    if (quranResults && quranResults.length > 0) {
-                        addMessageToUI(message, 'user', null, [], true);
-                        
-                        let response = '';
-                        const firstAyah = quranResults.find(r => r.type === 'ayah' && r.ayahNumber === 1);
-                        
-                        if (firstAyah) {
-                            response += `﴿ ${firstAyah.text} ﴾\n\n`;
-                            response += `<div class="source-info">`;
-                            response += `📍 ${firstAyah.surahName} - آية ${firstAyah.ayahNumber}\n`;
-                            response += `<span class="verification-badge">✓ تم التحقق من المصدر المعتمد</span>`;
-                            response += `</div>\n\n`;
-                            
-                            // إضافة زر لعرض السورة كاملة
-                            response += `<button class="show-surah-btn" onclick="showCompleteSurah(12)">📖 عرض سورة يوسف كاملة</button>`;
-                            
-                            addMessageToUI(response, 'assistant', 'القرآن الكريم - مصدر واحد مُحقق', [], true);
-                        } else {
-                            addMessageToUI('لم أتمكن من العثور على هذه الآية في المصدر المحدد. يرجى إعادة صياغة السؤال.', 'assistant', null, [], true);
-                        }
-                        
-                        userInput.value = '';
-                        userInput.style.height = 'auto';
-                        return;
-                    }
-                }
-                
                 const quranResults = searchQuran(message);
                 
                 if (quranResults && quranResults.length > 0) {
@@ -1491,12 +1744,12 @@
                     let response = '';
                     quranResults.forEach(result => {
                         if (result.type === 'surah') {
-                            response += `📖 سورة ${result.surahName}\n`;
-                            response += `رقم السورة: ${result.surahNumber}\n`;
+                            response += `📖 سورة ${result.name}\n`;
+                            response += `رقم السورة: ${result.number}\n`;
                             response += `عدد الآيات: ${result.numberOfAyahs}\n`;
                             response += `<span class="verification-badge">✓ تم التحقق من المصدر المعتمد</span>\n\n`;
                             // إضافة زر لعرض السورة كاملة
-                            response += `<button class="show-surah-btn" onclick="showCompleteSurah(${result.surahNumber})">📖 عرض سورة ${result.surahName} كاملة</button>\n\n`;
+                            response += `<button class="show-surah-btn" onclick="showCompleteSurah(${result.number})">📖 عرض سورة ${result.name} كاملة</button>\n\n`;
                         } else if (result.type === 'ayah' && result.verified) {
                             response += `﴿ ${result.text} ﴾\n\n`;
                             response += `<div class="source-info">`;
@@ -1617,7 +1870,7 @@
                 if (chat) {
                     chat.messages.push({
                         role: 'assistant',
-                        content: `عرض سورة ${surahData.number} كاملة (${surahData.numberOfAyahs} آية)`,
+                        content: `عرض سورة ${surahData.name} كاملة (${surahData.numberOfAyahs} آية)`,
                         source: 'القرآن الكريم - مصدر واحد مُحقق',
                         questions: []
                     });
