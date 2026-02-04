@@ -1517,12 +1517,39 @@
                 }
                 
                 // إذا لم يكن سؤالاً قرآنياً أو حديثاً، البحث في المصادر الأخرى
-                console.log('📚 البحث في المصادر الأخرى');
+                console.log('📚 البحث في المصادر');
+                
+                // محاولة البحث في القرآن بكلمات مفتاحية عامة
+                const words = message.split(' ').filter(w => w.length > 3);
+                let foundInQuran = false;
+                
+                for (const word of words) {
+                    const quranResults = searchQuran(word);
+                    if (quranResults && quranResults.length > 0) {
+                        let response = `وجدت نتائج من القرآن الكريم تتعلق بسؤالك:\n\n`;
+                        quranResults.slice(0, 3).forEach(result => {
+                            if (result.type === 'ayah') {
+                                response += `﴿ ${result.text} ﴾\n📍 ${result.surahName} - آية ${result.ayahNumber}\n\n`;
+                            }
+                        });
+                        addMessageToUI(response, 'assistant', 'القرآن الكريم', [], true);
+                        foundInQuran = true;
+                        return;
+                    }
+                }
+                
+                // محاولة البحث في الأحاديث
+                const hadithResults = searchHadithInDatabase(message);
+                if (hadithResults && hadithResults.length > 0) {
+                    displayHadithResults(hadithResults.slice(0, 3), message);
+                    return;
+                }
+                
+                // إذا لم نجد شيئاً، نعطي رداً افتراضياً
                 const similarQuestions = getSimilarQuestions(message);
                 const sources = getSourcesByTopic(message);
-                
                 const response = generateResponse(message, sources);
-                addMessageToUI(response, 'assistant', sources.length > 0 ? 'مصادر متعددة مُحَققَة' : null, similarQuestions, true);
+                addMessageToUI(response, 'assistant', sources.length > 0 ? 'مصادر متعددة' : null, similarQuestions, true);
                 
             } catch (error) {
                 console.error('❌ خطأ في معالجة الاستعلام:', error);
@@ -2466,14 +2493,20 @@
                 response += `📚 المصادر: صحيح البخاري، صحيح مسلم`;
             }
             else {
-                response = `أهلاً وسهلاً بك. يمكنني مساعدتك في:\n\n`;
-                response += `• تفسير الآيات القرآنية\n`;
-                response += `• شرح الأحاديث النبوية\n`;
-                response += `• الفقه وأحكام الشريعة الإسلامية\n`;
-                response += `• الأخلاق والآداب الإسلامية\n`;
-                response += `• السيرة النبوية والتاريخ الإسلامي\n\n`;
-                response += `يرجى تحديد سؤالك بشكل أكثر دقة للحصول على إجابة مفصلة.\n\n`;
-                response += `📚 المصادر المعتمدة: صحيح البخاري، صحيح مسلم، القرآن الكريم`;
+                response = `عذراً، لم أجد إجابة مباشرة لسؤالك.\n\n`;
+                response += `💡 **اقتراحات:**\n`;
+                response += `• جرب البحث بكلمات من آية قرآنية\n`;
+                response += `• ابحث عن حديث بكتابة جزء منه\n`;
+                response += `• اسأل عن حكم شرعي محدد\n\n`;
+                response += `📚 **المصادر المتاحة:**\n`;
+                response += `✓ القرآن الكريم (114 سورة)\n`;
+                response += `✓ صحيح البخاري ومسلم\n`;
+                response += `✓ السنن الأربعة\n`;
+                response += `✓ مسند الإمام أحمد\n\n`;
+                response += `💭 **أمثلة على الأسئلة:**\n`;
+                response += `• "ما هي الآية الأولى من سورة البقرة؟"\n`;
+                response += `• "حديث عن الصلاة"\n`;
+                response += `• "ما حكم الصيام في الإسلام؟"`;
             }
             
             return response;
