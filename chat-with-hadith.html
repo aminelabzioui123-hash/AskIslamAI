@@ -59,7 +59,11 @@
             flex-direction: column; 
             padding: 1.5rem; 
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            z-index: 100;
             overflow: hidden;
         }
         
@@ -72,6 +76,11 @@
             .sidebar.show {
                 transform: translateX(0);
             }
+            
+            /* إظهار الـ sidebar عند عدم إخفائه */
+            .sidebar:not(.collapsed) {
+                transform: translateX(0);
+            }
         }
         
         .sidebar.collapsed {
@@ -80,6 +89,10 @@
         
         /* توسيع منطقة المحادثة على الحاسوب عند إخفاء الـ sidebar */
         @media (min-width: 769px) {
+            .sidebar {
+                position: relative;
+            }
+            
             .sidebar.collapsed ~ .chat-section {
                 margin-right: 0;
                 max-width: 100%;
@@ -95,6 +108,30 @@
             .sidebar.collapsed ~ .chat-section .input-wrapper {
                 max-width: 1400px;
                 margin: 0 auto;
+            }
+            
+            .sidebar.collapsed ~ .chat-section .top-bar {
+                max-width: 100%;
+            }
+        }
+        
+        /* توسيع منطقة المحادثة على الموبايل دائماً */
+        @media (max-width: 768px) {
+            .chat-section {
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .chat-section #chatArea {
+                max-width: 100%;
+            }
+            
+            .chat-section .input-wrapper {
+                max-width: 100%;
+            }
+            
+            .chat-section .top-bar {
+                max-width: 100%;
             }
         }
         
@@ -744,7 +781,7 @@
             border: 3px solid var(--gold);
             font-size: 1.5rem;
             cursor: pointer;
-            z-index: 1000;
+            z-index: 1001;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             animation: pulse 2s infinite;
@@ -772,32 +809,34 @@
             }
         }
         
+        /* Overlay للسايدبار على الموبايل */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 99;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar-overlay.show {
+            display: block;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
-            }
-            
-            /* overlay للشريط الجانبي */
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 99;
-                backdrop-filter: blur(4px);
-            }
-            
-            .sidebar-overlay.show {
-                display: block;
+                padding: 0;
+                gap: 0;
             }
             
             .sidebar {
-                position: fixed;
-                right: 0;
+                box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+            }
                 top: 0;
                 height: 100vh;
                 z-index: 100;
@@ -1059,6 +1098,9 @@
             </div>
         </aside>
         
+        <!-- Overlay للسايدبار على الموبايل -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+        
         <!-- Floating Toggle Button -->
         <button class="floating-toggle" id="floatingToggle">☰</button>
         
@@ -1270,6 +1312,11 @@
         loadChatsFromStorage();
         renderChats();
         
+        // إخفاء السايدبار تلقائياً على الموبايل عند البداية
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('collapsed');
+        }
+        
         if (chats.length === 0) {
             createNewChat();
             showWelcomeMessage();
@@ -1321,12 +1368,39 @@
         }
 
         // Sidebar Toggle
-        toggleSidebarBtn.addEventListener('click', function() {
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        // دالة لفتح/إغلاق السايدبار
+        function toggleSidebar() {
             sidebar.classList.toggle('collapsed');
+            if (sidebarOverlay) {
+                sidebarOverlay.classList.toggle('show');
+            }
+        }
+        
+        toggleSidebarBtn.addEventListener('click', function() {
+            toggleSidebar();
         });
 
         floatingToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
+            toggleSidebar();
+        });
+        
+        // إغلاق السايدبار عند النقر على الـ overlay
+        if (sidebarOverlay) {
+            sidebarOverlay.addEventListener('click', function() {
+                toggleSidebar();
+            });
+        }
+        
+        // التأكد من إظهار السايدبار على الشاشات الكبيرة
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('collapsed');
+                if (sidebarOverlay) {
+                    sidebarOverlay.classList.remove('show');
+                }
+            }
         });
         
         // Top Bar Menu Button - تم حذف الزر من التصميم
