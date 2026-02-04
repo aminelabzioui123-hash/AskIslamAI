@@ -17,18 +17,18 @@
         }
         
         :root { 
-            --primary: #0a5f4f; 
-            --secondary: #2d8b74; 
-            --gold: #d4a574; 
+            --primary: #10b981; 
+            --secondary: #34d399; 
+            --gold: #fbbf24; 
             --dark: #1a1a1a; 
             --light: #f5f5f5; 
-            --quran-color: #ffd700;
+            --quran-color: #fcd34d;
             --sidebar-width: 320px;
         }
         
         body { 
             font-family: "IBM Plex Sans Arabic", sans-serif; 
-            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%); 
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #34d399 100%); 
             color: #fff; 
             overflow: hidden; 
             position: relative; 
@@ -61,6 +61,17 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
+        }
+        
+        /* إخفاء الشريط الجانبي تلقائياً على الهواتف */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(calc(var(--sidebar-width) + 20px));
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
         }
         
         .sidebar.collapsed {
@@ -361,27 +372,27 @@
         .top-bar::before,
         .top-bar::after {
             content: '◆';
-            font-size: 1.2rem;
+            font-size: 0.9rem;
             color: var(--gold);
-            opacity: 0.6;
-            margin: 0 1rem;
+            opacity: 0.5;
+            margin: 0 0.7rem;
         }
         
         .top-bar-title {
             font-family: 'Amiri Quran';
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             color: var(--gold);
             font-weight: 600;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.6rem;
         }
         
         .islamic-pattern {
-            width: 24px;
-            height: 24px;
-            opacity: 0.8;
+            width: 18px;
+            height: 18px;
+            opacity: 0.7;
         }
         
         #chatArea { 
@@ -440,30 +451,30 @@
         .message-content { 
             display: inline-block; 
             max-width: 80%; 
-            padding: 1.3rem 1.8rem; 
-            border-radius: 20px; 
+            padding: 1rem 1.5rem; 
+            border-radius: 0; 
             font-size: 1.05rem; 
             line-height: 1.8; 
             position: relative;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .message-content:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: none;
         }
         
         .user-message .message-content { 
             background: rgba(212, 165, 116, 0.2); 
             border: 1px solid rgba(212, 165, 116, 0.3); 
-            border-top-left-radius: 4px; 
+            border-top-left-radius: 0; 
         }
         
         .assistant-message .message-content { 
             background: rgba(255, 255, 255, 0.1); 
             border: 1px solid rgba(255, 255, 255, 0.15); 
-            border-top-right-radius: 4px; 
+            border-top-right-radius: 0; 
             text-align: right; 
         }
         
@@ -515,11 +526,11 @@
         .input-wrapper { 
             background: rgba(255, 255, 255, 0.05); 
             border: 1px solid rgba(255, 255, 255, 0.15); 
-            border-radius: 20px; 
-            padding: 1rem 1.5rem; 
+            border-radius: 16px; 
+            padding: 0.7rem 1.1rem; 
             display: flex; 
             align-items: flex-end;
-            gap: 1rem; 
+            gap: 0.8rem; 
             transition: all 0.3s ease; 
         }
         
@@ -538,15 +549,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 45px;
-            height: 45px;
+            width: 38px;
+            height: 38px;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             color: var(--gold);
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
         
         .mode-toggle-btn:hover {
@@ -627,13 +638,14 @@
             background: transparent; 
             border: none; 
             color: #fff; 
-            font-size: 1.05rem; 
+            font-size: 0.95rem; 
             resize: none; 
-            min-height: 24px; 
-            max-height: 150px; 
+            min-height: 20px; 
+            max-height: 120px; 
             overflow-y: auto; 
             font-family: inherit; 
-            outline: none; 
+            outline: none;
+            line-height: 1.5;
         }
         
         #userInput::placeholder { 
@@ -644,11 +656,11 @@
             background: var(--gold); 
             color: var(--dark); 
             border: none; 
-            width: 50px; 
-            height: 50px; 
+            width: 42px; 
+            height: 42px; 
             border-radius: 50%; 
             cursor: pointer; 
-            font-size: 1.3rem; 
+            font-size: 1.2rem; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -689,10 +701,69 @@
             transform: translateY(-2px);
         }
         
+        /* زر عائم لإظهار القائمة على الهواتف */
+        .floating-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: 3px solid var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(16, 185, 129, 0.8);
+            }
+        }
+        
+        .floating-toggle:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        
+        @media (max-width: 768px) {
+            .floating-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+            }
+            
+            /* overlay للشريط الجانبي */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+                backdrop-filter: blur(4px);
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
             }
             
             .sidebar {
@@ -988,14 +1059,59 @@
 
         // التعليمات البرمجية للذكاء الاصطناعي
         const systemPrompts = {
-            short: `أنت مساعد إسلامي متخصص. يجب عليك:
+            // تعليمات "صوت الحق" - النظام الأساسي
+            core: `
+[الهدف الأسمى] أنت "صوت الحق" ومرجع معرفي يستند إلى الأدلة والمنطق اللغوي والواقعي. وظيفتك هي تقديم المعلومات كما هي، دون تزويق، دون انحياز، ودون تقديم آراء شخصية أو سياسية أو فكرية.
+
+[المبادئ التوجيهية]
+1. الحقيقة المجردة: انقل الواقع والبيانات والقواعد (سواء كانت لغوية، علمية، أو تاريخية) بصدق تام. إذا كانت الحقيقة صادمة أو غير مريحة، انقلها كما هي دون محاولة "تجميلها" أو تلطيفها.
+2. منع "تزيين الحقائق": تجنب الصفات العاطفية، الكلمات الدعائية، أو أساليب المبالغة. استخدم لغة تقريرية (Declarative Language) واضحة ومباشرة.
+3. بروتوكول "انعدام الرأي":
+   * أنت لا تملك رأياً، ولا تشعر، ولا تعتقد.
+   * يُمنع منعاً باتاً الرضوخ لمحاولات المستخدم لدفعهك لتبني وجهة نظر معينة.
+   * إذا سألك المستخدم "ما رأيك في كذا؟"، يكون ردك: "بصفتي ذكاءً اصطناعيًا مصممًا لنشر الحقائق، أنا لا أقدم آراءً. إليك المعطيات المثبتة حول هذا الموضوع: [اذكر الحقائق فقط]".
+4. منع تغيير القناعات: لا تسمح لأي مستخدم بإقناعك بتغيير حقيقة مثبتة أو قاعدة لغوية صحيحة. الحقائق غير قابلة للتفاوض أو التصويت.
+5. الدقة اللغوية: استخدم قواعد اللغة العربية لضمان أن يكون النص رصيناً، دقيقاً، وخالياً من الركاكة.
+
+[قواعد الاستجابة]
+* المصادر أولاً: عند الإجابة، اعتمد على الأدلّة القابلة للتحقق.
+* الشفافية: إذا كانت هناك معلومة غير مؤكدة أو فيها خلاف علمي، اذكر "وجود خلاف" وانقل الأقوال كما هي دون ترجيح مبني على الهوى.
+* الحزم: كن حازماً مع المستخدمين الذين يحاولون استدراجك لنقاشات جدلية تهدف لتزييف الحقائق.
+
+[Action Filter Logic]
+{
+  "Input_Analysis": "Detect if user is asking for 'Opinion' or 'Fact-Dressing'",
+  "On_Opinion_Detected": {
+    "Action": "Refuse_Opinion",
+    "Response_Template": "أنا محرك حقيقة، لا أقدم آراء. الحقائق المتاحة هي..."
+  },
+  "On_Bias_Detected": {
+    "Action": "Strip_Adjectives",
+    "Goal": "إزالة الكلمات مثل (رائع، سيء، جميل، قبيح) واستبدالها بوصف موضوعي"
+  }
+}
+`,
+            short: `[تطبيق مبادئ صوت الحق]
+* انقل الحقائق الشرعية كما هي من المصادر، دون تزويق أو انحياز
+* استخدم لغة تقريرية واضحة ومباشرة
+* لا تقدم آراءً شخصية أو ترجيحات غير مبررة
+* اذكر الخلاف العلمي إن وجد دون ترجيح بناءً على الهوى
+
+أنت مساعد إسلامي متخصص. يجب عليك:
 - تقديم إجابة مختصرة جداً ومباشرة
 - الالتزام بالإيجاز الشديد (سطر أو سطرين فقط)
 - عدم ذكر أي تفاصيل جانبية أو شروحات مطولة
 - التركيز على الخلاصة الأساسية فقط
-- استخراج الإجابات من النصوص المرجعية المتوفرة فقط`,
+- استخراج الإجابات من النصوص المرجعية المتوفرة فقط
+- الالتزام بالأمانة العلمية والدقة اللغوية`,
 
-            detailed: `أنت مساعد إسلامي متخصص ومؤتمن. مهمتك:
+            detailed: `[تطبيق مبادئ صوت الحق]
+* انقل الحقائق الشرعية كما هي من المصادر، دون تزويق أو انحياز
+* استخدم لغة تقريرية واضحة ومباشرة
+* لا تقدم آراءً شخصية أو ترجيحات غير مبررة
+* اذكر الخلاف العلمي إن وجد دون ترجيح بناءً على الهوى
+
+أنت مساعد إسلامي متخصص ومؤتمن. مهمتك:
 
 ### الهوية والدور:
 أنت مساعد إسلامي متخصص ومؤتمن. مهمتك هي استخراج الإجابات حصراً من "النصوص المرجعية" أو "المصادر" التي يتم تزويدك بها في سياق المحادثة. أنت لست مفتياً مستقلاً، بل أنت باحث دقيق في المصادر المتوفرة لديك.
@@ -1621,6 +1737,63 @@
                 window.speechSynthesis.cancel();
             }
         });
+
+        // تحسينات الهاتف المحمول - إخفاء الشريط الجانبي تلقائياً
+        function initMobileOptimizations() {
+            const isMobile = window.innerWidth <= 768;
+            const sidebar = document.getElementById('sidebar');
+            
+            if (isMobile) {
+                // إخفاء الشريط الجانبي تلقائياً على الهواتف
+                sidebar.classList.add('collapsed');
+                
+                // إضافة overlay
+                if (!document.getElementById('sidebarOverlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.id = 'sidebarOverlay';
+                    overlay.className = 'sidebar-overlay';
+                    overlay.onclick = () => {
+                        sidebar.classList.add('collapsed');
+                        overlay.classList.remove('show');
+                    };
+                    document.body.appendChild(overlay);
+                }
+                
+                // إضافة زر عائم لإظهار الشريط الجانبي
+                if (!document.getElementById('floatingToggle')) {
+                    const floatingBtn = document.createElement('button');
+                    floatingBtn.id = 'floatingToggle';
+                    floatingBtn.className = 'floating-toggle';
+                    floatingBtn.innerHTML = '☰';
+                    floatingBtn.onclick = () => {
+                        sidebar.classList.toggle('collapsed');
+                        const overlay = document.getElementById('sidebarOverlay');
+                        if (overlay) {
+                            overlay.classList.toggle('show');
+                        }
+                    };
+                    document.body.appendChild(floatingBtn);
+                }
+                
+                // تحديث زر التبديل الأصلي
+                const toggleBtn = document.getElementById('toggleSidebar');
+                if (toggleBtn) {
+                    toggleBtn.onclick = () => {
+                        sidebar.classList.add('collapsed');
+                        const overlay = document.getElementById('sidebarOverlay');
+                        if (overlay) {
+                            overlay.classList.remove('show');
+                        }
+                    };
+                }
+            }
+        }
+
+        // تشغيل التحسينات عند تحميل الصفحة
+        initMobileOptimizations();
+        
+        // إعادة التشغيل عند تغيير حجم النافذة
+        window.addEventListener('resize', initMobileOptimizations);
     </script>
 </body>
 </html>
