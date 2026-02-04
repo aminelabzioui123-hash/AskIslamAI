@@ -1159,10 +1159,12 @@
             let html = `<div class="message-content">${formattedContent}`;
             
             if (role === 'assistant') {
+                // إنشاء معرّف فريد للنص
+                const textId = 'text-' + Date.now();
+                
                 // إضافة زر الاستماع
-                const cleanText = content.replace(/['"`]/g, '');
                 html += `
-                    <button class="speak-btn" onclick="toggleSpeech(this, '${cleanText}')">
+                    <button class="speak-btn" data-text-id="${textId}">
                         <i class="fas fa-volume-up"></i> استماع للنص
                     </button>`;
                 
@@ -1179,6 +1181,16 @@
             html += `</div>`;
             div.innerHTML = html;
             chatArea.appendChild(div);
+            
+            // إضافة مستمع الحدث للزر بعد إضافته إلى الصفحة
+            if (role === 'assistant') {
+                const btn = div.querySelector('.speak-btn');
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        toggleSpeech(this, content);
+                    });
+                }
+            }
             
             setTimeout(() => {
                 chatArea.scrollTop = chatArea.scrollHeight;
@@ -1350,13 +1362,27 @@
             // تنظيف جميع الأزرار الأخرى
             resetButtons();
 
+            // تنظيف النص من علامات HTML والتنسيق
+            let cleanText = text
+                .replace(/<[^>]*>/g, '')           // إزالة HTML tags
+                .replace(/&nbsp;/g, ' ')           // إزالة &nbsp;
+                .replace(/&quot;/g, '"')           // إزالة &quot;
+                .replace(/&amp;/g, '&')            // إزالة &amp;
+                .replace(/&lt;/g, '<')             // إزالة &lt;
+                .replace(/&gt;/g, '>')             // إزالة &gt;
+                .replace(/\s+/g, ' ')              // إزالة المسافات الزائدة
+                .replace(/المصدر:.*?(?:\n|$)/g, '') // إزالة المصدر
+                .replace(/الراوي:.*?(?:\n|$)/g, '')  // إزالة الراوي
+                .trim();
+
             // إعداد النص للقراءة
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new SpeechSynthesisUtterance(cleanText);
             
             // إجبار المتصفح على استخدام اللغة العربية
             utterance.lang = 'ar-SA'; 
             utterance.rate = 0.9;  // سرعة هادئة ومناسبة للنصوص الدينية
             utterance.pitch = 1.0; // طبقة صوت طبيعية
+            utterance.volume = 1.0; // مستوى الصوت
 
             // تغيير حالة الزر عند البدء
             utterance.onstart = () => {
@@ -1366,6 +1392,12 @@
 
             // إعادة الزر لحالته عند الانتهاء
             utterance.onend = () => {
+                resetButtons();
+            };
+
+            // معالجة الأخطاء
+            utterance.onerror = (event) => {
+                console.error('خطأ في تحويل النص إلى صوت:', event);
                 resetButtons();
             };
 
