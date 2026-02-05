@@ -790,13 +790,29 @@
             typingIndicator.classList.add('active');
 
             try {
+                // إضافة تعليمات "التدقيق الخماسي" في سياق الرسالة
+                let strictPrompt = text;
+                const containsQuranReference = text.includes("آية") || text.includes("سورة") || 
+                                              text.includes("قرآن") || text.includes("القرآن") ||
+                                              text.includes("آيات") || text.includes("السورة");
+                
+                if (containsQuranReference) {
+                    strictPrompt = `⚠️ تنبيه صارم للنموذج: 
+يرجى التحقق من الآية المطلوبة 5 مرات من المصدر قبل كتابتها.
+يُمنع منعاً باتاً الخطأ في نص القرآن الكريم.
+إذا لم تكن متأكداً 100% من دقة الآية، قل "لا أستطيع التأكد من دقة الآية حالياً".
+لا تحاول كتابة الآية من الذاكرة، بل تحقق من المصادر المتوفرة.
+
+السؤال الأصلي: ${text}`;
+                }
+
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        message: text,
+                        message: strictPrompt, // إرسال السؤال مع تعليمات التدقيق
                         chatHistory: chatHistory.slice(-6), // إرسال آخر 6 رسائل فقط لتوفير التوكنز
                         mode: 'comprehensive'     // الوضع الصارم الشامل
                     })
