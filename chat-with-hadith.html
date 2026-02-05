@@ -577,10 +577,13 @@
 
 هذه التعليمات إلزامية ولا استثناءات عليها.`;
 
+        // --- إعدادات الاتصال بالـ Worker الجديد ---
+        const WORKER_URL = 'https://ask-islam-ai.aminelabzioui123-hash.workers.dev/api/chat';
+        const USE_AI_WORKER = true;
 
-        const API_URL = '/api/chat';
         let currentChatId = null;
         let chats = [];
+        let chatHistory = []; // مصفوفة لتخزين نص المحادثة
         let isProcessing = false;
 
         // تهيئة العناصر
@@ -661,6 +664,7 @@
             };
             
             chats.unshift(newChat);
+            chatHistory = []; // مسح تاريخ المحادثة للمحادثة الجديدة
             saveChatsToStorage();
             renderChatsList();
             loadChat(chatId);
@@ -699,6 +703,12 @@
                     </div>
                 </div>
             `;
+            
+            // إعادة بناء تاريخ المحادثة
+            chatHistory = [];
+            chat.messages.forEach(msg => {
+                chatHistory.push({ role: msg.role, content: msg.content });
+            });
             
             // Load messages
             chat.messages.forEach(msg => {
@@ -771,21 +781,24 @@
             sendBtn.textContent = 'جاري الإرسال...';
 
             addMessageToUI(text, 'user', null, [], true);
+            
+            // إضافة رسالة المستخدم إلى تاريخ المحادثة
+            chatHistory.push({ role: 'user', content: text });
+            
             userInput.value = '';
             userInput.style.height = 'auto';
             typingIndicator.classList.add('active');
 
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: { 
+                    headers: {
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({ 
+                    body: JSON.stringify({
                         message: text,
-                        system: SYSTEM_PROMPT,
-                        attachedFiles: ['quran.txt', 'hadith.txt', 'fiqh.txt'] // Replace with actual files
+                        chatHistory: chatHistory.slice(-6), // إرسال آخر 6 رسائل فقط لتوفير التوكنز
+                        mode: 'comprehensive'     // الوضع الصارم الشامل
                     })
                 });
 
@@ -794,13 +807,16 @@
                 }
 
                 const data = await response.json();
-
-                if (data.choices && data.choices[0]) {
-                    const aiText = data.choices[0].message.content;
+                
+                if (data.content) {
+                    const aiText = data.content;
                     const source = extractSource(aiText);
                     const questions = generateSimilarQuestions(text);
                     
                     addMessageToUI(aiText, 'assistant', source, questions, true);
+                    
+                    // تحديث الذاكرة برد البوت
+                    chatHistory.push({ role: 'assistant', content: aiText });
                     
                     // Update chat title if first message
                     const chat = chats.find(c => c.id === currentChatId);
@@ -809,13 +825,15 @@
                         saveChatsToStorage();
                         renderChatsList();
                     }
+                } else if (data.error) {
+                    addMessageToUI('عذراً، حدث خطأ في النظام: ' + data.error, 'assistant');
                 } else {
-                    throw new Error('Invalid response format');
+                    addMessageToUI('عذراً، لم أجد إجابة في المصادر المتاحة حالياً.', 'assistant');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 addMessageToUI(
-                    "عذراً، حدث خطأ في الاتصال بالسيرفر. يرجى المحاولة مرة أخرى.", 
+                    "حدث خطأ في الاتصال. تأكد من أن الـ Worker مفعل في Cloudflare.", 
                     'assistant',
                     null,
                     [],
