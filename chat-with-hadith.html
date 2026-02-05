@@ -5,1808 +5,2355 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="theme-color" content="#0a5f4f">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>المحادثة - اسأل الإسلام AI</title>
+    <title>اسأل الإسلام AI - Islamic Assistant</title>
     <!--
     ═══════════════════════════════════════════════════════════════════
-    🤖 اسأل الإسلام AI - نسخة محسّنة نهائية
-    ═══════════════════════════════════════════════════════════════════
+    🌐 موقع: askislam-ai.aminelabzioui123.workers.dev
+    🤖 الذكاء الاصطناعي الإسلامي المتكامل
     
-    ✅ المميزات:
-    1. ✨ Groq API للذكاء الاصطناعي (سريع ومجاني)
-    2. 📖 مصادر موثوقة من القرآن والأحاديث الصحيحة
-    3. 📚 بحث متقدم في 6 كتب حديث رئيسية
-    4. 🎨 واجهة مستخدم محسّنة ومتجاوبة
-    5. 💬 ردود دقيقة مع التوثيق الكامل
+    🔗 يعمل على Cloudflare Workers + Cloudflare AI
+    📡 البيانات تجلب من مصادر خارجية موثوقة
     
-    ⚙️ للاستخدام:
-    - افتح الملف في المتصفح
-    - اطرح أسئلتك الإسلامية
-    - يبحث تلقائياً في القرآن والأحاديث
-    - يوفر ردود موثقة ودقيقة
-    
+    ⚙️ المصادر:
+    1. القرآن: api.alquran.cloud
+    2. الأحاديث: github.com/fawazahmed0/hadith-api
+    3. الذكاء الاصطناعي: Cloudflare AI
     ═══════════════════════════════════════════════════════════════════
     -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
     <style>
-        * {
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        :root { 
+            --primary: #0a5f4f; 
+            --secondary: #2d8b74; 
+            --gold: #d4a574; 
+            --dark: #1a1a1a; 
+            --light: #f5f5f5; 
+            --quran-color: #ffd700;
+            --hadith-color: #4CAF50;
+            --warning-color: #ff9800;
+            --error-color: #ff4444;
+            --success-color: #4CAF50;
+            --sidebar-width: 320px;
+        }
+        
+        body { 
+            font-family: "IBM Plex Sans Arabic", sans-serif; 
+            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%); 
+            color: #fff; 
+            overflow-x: hidden; 
+            position: relative; 
+            min-height: 100vh; 
             margin: 0;
-            padding: 0;
-            box-sizing: border-box;
         }
-
-        :root {
-            --primary: #0a5f4f;
-            --secondary: #2d8b74;
-            --gold: #d4a574;
-            --dark: #1a1a1a;
-            --light: #f5f5f5;
-        }
-
-        body {
-            font-family: "IBM Plex Sans Arabic", sans-serif;
-            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%);
-            color: #fff;
-            overflow: hidden;
-            position: relative;
-            height: 100vh;
-        }
-
-        /* Animated Background */
+        
         body::before {
             content: '';
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(212, 165, 116, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(45, 139, 116, 0.12) 0%, transparent 50%);
-            animation: backgroundMove 20s ease infinite;
-            pointer-events: none;
-            z-index: 0;
+                radial-gradient(circle at 20% 80%, rgba(212, 165, 116, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            z-index: -1;
         }
-
-        @keyframes backgroundMove {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.1) rotate(2deg); }
+        
+        .glass { 
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 24px; 
         }
-
-        /* Glass Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        
+        .container { 
+            display: flex; 
+            min-height: 100vh; 
+            padding: 20px; 
+            gap: 20px; 
+            position: relative; 
+            z-index: 1; 
+            max-width: 1400px;
+            margin: 0 auto;
         }
-
-        .glass-strong {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(30px) saturate(200%);
-            -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        /* Layout */
-        .container {
-            display: flex;
-            height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            will-change: transform;
-        }
-
-        .sidebar.hidden {
-            transform: translateX(320px);
-        }
-
-        .sidebar-header {
-            margin-bottom: 1.5rem;
-        }
-
-        .logo {
-            font-family: "Amiri Quran", serif;
-            font-size: 1.5rem;
-            color: var(--gold);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        .new-chat-btn {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--gold), #c4956a);
-            color: var(--dark);
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
-        }
-
-        .new-chat-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
-        }
-
-        .chat-history {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0.5rem 0;
-        }
-
-        .chat-history-item {
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .chat-history-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-5px);
-        }
-
-        .chat-history-item.active {
-            background: rgba(212, 165, 116, 0.2);
-            border: 1px solid rgba(212, 165, 116, 0.3);
-        }
-
-        .sidebar-footer {
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .user-info:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-3px);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .logout-btn {
-            margin-top: 0.5rem;
-            width: 100%;
-            padding: 0.8rem;
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        
+        /* Header Banner */
+        .header-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #0a5f4f, #2d8b74);
             color: white;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Main Chat Area */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            padding-right: 0;
-        }
-
-        .chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-radius: 24px;
-            overflow: hidden;
-        }
-
-        .chat-header {
-            padding: 1.5rem 2rem;
+            padding: 15px 30px;
+            text-align: center;
+            font-size: 0.95rem;
+            z-index: 2000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 3px solid var(--gold);
         }
-
-        .menu-btn {
-            display: none;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .chat-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--gold);
-        }
-
-        .chat-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 2rem;
-            scroll-behavior: smooth;
-        }
-
-        /* Custom Scrollbar */
-        .chat-area::-webkit-scrollbar,
-        .chat-history::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-area::-webkit-scrollbar-track,
-        .chat-history::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .chat-area::-webkit-scrollbar-thumb,
-        .chat-history::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        /* Welcome Screen */
-        .welcome-screen {
-            text-align: center;
-            padding: 4rem 2rem;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .welcome-screen h2 {
-            font-family: "Amiri Quran", serif;
-            font-size: 2.5rem;
-            color: var(--gold);
-            margin-bottom: 1rem;
-        }
-
-        .welcome-screen p {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 300;
-        }
-
-        .example-questions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .example-card {
-            padding: 1.5rem;
-            border-radius: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: right;
-        }
-
-        .example-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .example-card .icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .example-card p {
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* Messages */
-        .message {
-            margin-bottom: 2rem;
-            animation: messageSlide 0.4s ease;
-        }
-
-        @keyframes messageSlide {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .message-header {
+        
+        .header-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 15px;
         }
-
-        .message-avatar {
-            width: 42px;
-            height: 42px;
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .domain-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .domain-icon {
+            color: var(--gold);
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
+        }
+        
+        .status-connected {
+            background: var(--success-color);
+            box-shadow: 0 0 10px var(--success-color);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-disconnected {
+            background: var(--error-color);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Sidebar Styles */
+        .sidebar { 
+            width: var(--sidebar-width);
+            display: flex; 
+            flex-direction: column; 
+            padding: 1.5rem; 
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 70px;
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(calc(var(--sidebar-width) + 20px));
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        
+        .sidebar-title {
+            color: var(--gold);
+            font-family: 'Amiri Quran';
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.3rem;
-            flex-shrink: 0;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
         }
-
-        .user-message .message-avatar {
-            background: linear-gradient(135deg, var(--gold), #c4956a);
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
         }
-
-        .ai-message .message-avatar {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-        }
-
-        .message-name {
-            font-weight: 600;
+        
+        .new-chat-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem;
+            cursor: pointer;
+            font-weight: bold;
             font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-
-        .message-content {
-            padding: 1.5rem;
-            border-radius: 16px;
-            line-height: 1.9;
-            font-weight: 300;
-            margin-right: 58px;
+        
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 165, 116, 0.4);
         }
-
-        .user-message .message-content {
-            background: rgba(212, 165, 116, 0.15);
-            border: 1px solid rgba(212, 165, 116, 0.2);
+        
+        .chats-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
         }
-
-        .ai-message .message-content {
+        
+        .chats-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chats-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .chats-container::-webkit-scrollbar-thumb {
+            background: rgba(212, 165, 116, 0.5);
+            border-radius: 10px;
+        }
+        
+        .chat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            transform: translateX(-5px);
+        }
+        
+        .chat-item.active {
+            background: rgba(212, 165, 116, 0.2);
+            border-color: var(--gold);
+        }
+        
+        .chat-title {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .chat-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .delete-chat-btn {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            background: rgba(255, 0, 0, 0.3);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-item:hover .delete-chat-btn {
+            opacity: 1;
+        }
+        
+        .delete-chat-btn:hover {
+            background: rgba(255, 0, 0, 0.6);
+        }
+        
+        /* Floating Toggle Button */
+        .floating-toggle {
+            position: fixed;
+            top: 100px;
+            right: 30px;
+            background: var(--gold);
+            color: var(--dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 20px rgba(212, 165, 116, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .floating-toggle.show {
+            display: flex;
+        }
+        
+        .floating-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Main Chat Area */
+        .chat-section { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 2rem; 
+            min-width: 0;
+            margin-top: 70px;
+        }
+        
+        .chat-section.has-messages {
+            justify-content: flex-start;
+        }
+        
+        .chat-header { 
+            text-align: center; 
+            margin-bottom: 2rem; 
+        }
+        
+        .chat-header h1 { 
+            font-family: 'Amiri Quran'; 
+            font-size: 2rem; 
+            color: var(--gold); 
+            margin-bottom: 0.5rem; 
+            text-shadow: 0 0 10px rgba(212, 165, 116, 0.3);
+        }
+        
+        .chat-header p { 
+            color: rgba(255, 255, 255, 0.8); 
+            font-size: 1rem; 
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .api-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .api-status-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .api-status-card:hover {
             background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-3px);
+            border-color: var(--gold);
+        }
+        
+        .api-status-icon {
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+        
+        .api-status-content {
+            flex: 1;
+        }
+        
+        .api-status-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .api-status-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .api-status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .status-active {
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+        }
+        
+        .status-loading {
+            background: rgba(255, 152, 0, 0.2);
+            color: var(--warning-color);
+        }
+        
+        .status-error {
+            background: rgba(255, 68, 68, 0.2);
+            color: var(--error-color);
+        }
+        
+        .chat-section.has-messages .chat-header {
+            display: none;
+        }
+        
+        /* Top Bar */
+        .top-bar {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 2px solid var(--gold);
+            margin: -2rem -2rem 1.5rem -2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chat-section.has-messages .top-bar {
+            display: flex;
+        }
+        
+        .top-bar::before,
+        .top-bar::after {
+            content: '◆';
+            font-size: 1.2rem;
+            color: var(--gold);
+            opacity: 0.6;
+            margin: 0 1rem;
+        }
+        
+        .top-bar-title {
+            font-family: 'Amiri Quran';
+            font-size: 1.4rem;
+            color: var(--gold);
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .islamic-pattern {
+            width: 24px;
+            height: 24px;
+            opacity: 0.8;
+        }
+        
+        #chatArea { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 1.5rem; 
+            margin-bottom: 1.5rem; 
+            scroll-behavior: smooth;
+            min-height: 0;
+        }
+        
+        #chatArea:empty {
+            display: none;
+        }
+        
+        #chatArea::-webkit-scrollbar { 
+            width: 10px; 
+        }
+        
+        #chatArea::-webkit-scrollbar-track { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 10px; 
+        }
+        
+        #chatArea::-webkit-scrollbar-thumb { 
+            background: rgba(212, 165, 116, 0.3); 
+            border-radius: 10px; 
+        }
+        
+        .message { 
+            margin-bottom: 1.5rem; 
+            animation: slideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+        }
+        
+        @keyframes slideIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        
+        .user-message { 
+            text-align: left; 
+        }
+        
+        .assistant-message { 
+            text-align: right; 
+        }
+        
+        .message-content { 
+            display: inline-block; 
+            max-width: 80%; 
+            padding: 1rem 1.2rem; 
+            border-radius: 20px; 
+            line-height: 1.5; 
+            position: relative; 
+            overflow-wrap: break-word; 
+            word-wrap: break-word; 
+            word-break: break-word;
+        }
+        
+        .user-message .message-content { 
+            background: rgba(212, 165, 116, 0.2); 
+            border: 1px solid rgba(212, 165, 116, 0.3); 
+            border-bottom-right-radius: 5px; 
+        }
+        
+        .assistant-message .message-content { 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-bottom-left-radius: 5px; 
+        }
+        
+        /* تنسيق خاص للآيات الفردية */
+        .single-ayah-container {
+            text-align: center;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid rgba(212, 165, 116, 0.3);
+            position: relative;
+        }
+        
+        .single-ayah-text {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.8rem;
+            line-height: 2.2;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .single-ayah-info {
+            font-size: 1.1rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .single-ayah-verified {
+            font-size: 1rem;
+            color: var(--success-color);
+            font-weight: bold;
+            background: rgba(76, 175, 80, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        /* تنسيق خاص للأحاديث */
+        .hadith-container {
+            text-align: right;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            position: relative;
+        }
+        
+        .hadith-text {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.5rem;
+            line-height: 2;
+            color: #fff;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .hadith-info {
+            font-size: 1.1rem;
+            color: var(--hadith-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .hadith-source {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            background: rgba(76, 175, 80, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .hadith-grade {
+            font-size: 0.9rem;
+            color: #FF9800;
+            background: rgba(255, 152, 0, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        /* تنسيق خاص للسور الكاملة */
+        .complete-surah-container {
+            text-align: center;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 3px solid rgba(212, 165, 116, 0.5);
+            position: relative;
+        }
+        
+        .surah-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(212, 165, 116, 0.3);
+        }
+        
+        .surah-title {
+            font-family: 'Amiri Quran', serif;
+            font-size: 2rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .surah-info {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .ayahs-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-
-        /* Source Citation */
-        .source {
-            font-size: 0.85rem;
+        
+        .ayah-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border-right: 3px solid rgba(212, 165, 116, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .ayah-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateX(-5px);
+        }
+        
+        .ayah-text {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.4rem;
+            line-height: 1.8;
+            color: #fff;
+            text-align: right;
+            margin-bottom: 0.5rem;
+        }
+        
+        .ayah-number {
             color: var(--gold);
+            font-size: 0.9rem;
+            text-align: left;
+            font-weight: bold;
+            background: rgba(212, 165, 116, 0.1);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .surah-footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 2px solid rgba(212, 165, 116, 0.3);
+        }
+        
+        /* تنسيق عام للقرآن */
+        .quran-verse { 
+            color: var(--quran-color); 
+            font-family: 'Amiri Quran'; 
+            font-size: 1.4rem; 
+            line-height: 1.8; 
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
+            position: relative;
+        }
+        
+        .source-info {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
             margin-top: 0.8rem;
             padding-top: 0.8rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-weight: 400;
         }
-
-        /* Typing Indicator */
-        .typing-indicator {
-            display: none;
-            margin-right: 58px;
-            margin-bottom: 1rem;
+        
+        .verification-badge {
+            display: inline-block;
+            background: rgba(76, 175, 80, 0.2);
+            color: var(--success-color);
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            border: 1px solid rgba(76, 175, 80, 0.3);
         }
-
-        .typing-indicator.active {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--gold);
-            border-radius: 50%;
-            animation: typingDot 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingDot {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
-            30% { transform: translateY(-10px); opacity: 1; }
-        }
-
-        /* Input Area */
-        .input-area {
-            padding: 1.5rem 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 1rem;
-            padding: 1.2rem;
-            border-radius: 20px;
-            align-items: flex-end;
-        }
-
-        textarea {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            resize: none;
-            font-family: inherit;
-            color: white;
-            font-size: 1rem;
-            line-height: 1.5;
-            max-height: 200px;
-        }
-
-        textarea::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .send-btn {
-            background: linear-gradient(135deg, var(--gold), #c4956a);
-            color: var(--dark);
-            border: none;
-            border-radius: 12px;
-            min-width: 60px;
-            height: 48px;
-            padding: 0 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            flex-shrink: 0;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.4);
-        }
-
-        .send-btn:active {
-            transform: scale(0.98);
-        }
-
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Login Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            width: 90%;
-            max-width: 450px;
-            padding: 3rem;
-            border-radius: 24px;
-            animation: modalSlide 0.4s ease;
-        }
-
-        @keyframes modalSlide {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .modal-header h2 {
-            font-size: 2rem;
+        
+        .show-surah-btn {
+            background: rgba(212, 165, 116, 0.2);
             color: var(--gold);
-            margin-bottom: 0.5rem;
-        }
-
-        .modal-header p {
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 300;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-            font-family: inherit;
-            font-size: 1rem;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--gold);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 1.2rem;
-            margin-top: 1rem;
-        }
-
-        .modal-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .modal-footer a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        /* Sidebar Overlay للجوال */
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1400;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .sidebar-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Responsive */
-        @media (max-width: 968px) {
-            .sidebar {
-                position: fixed;
-                right: 0;
-                top: 0;
-                height: 100vh;
-                z-index: 1500;
-                background: rgba(10, 95, 79, 0.95);
-                backdrop-filter: blur(20px);
-                transform: translateX(100%); /* مخفي افتراضياً على الموبايل */
-            }
-
-            .sidebar.hidden {
-                transform: translateX(100%);
-            }
-            
-            .sidebar:not(.hidden) {
-                transform: translateX(0); /* يظهر عند إزالة class hidden */
-            }
-
-            .main-content {
-                padding-right: 1.5rem;
-            }
-
-            .menu-btn {
-                display: block;
-            }
-
-            .message-content {
-                margin-right: 0;
-                margin-top: 0.5rem;
-            }
-
-            .typing-indicator {
-                margin-right: 0;
-            }
-
-            .example-questions {
-                grid-template-columns: 1fr;
-            }
-
-            /* Modal responsive على التابلت */
-            .modal-content {
-                width: 85%;
-                max-width: 500px;
-            }
-
-            .custom-alert-content {
-                width: 85%;
-                max-width: 380px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            /* تصغير الخط على الشاشات المتوسطة */
-            .welcome-screen h2 {
-                font-size: 2rem;
-            }
-
-            .welcome-screen p {
-                font-size: 1rem;
-            }
-
-            .message-content {
-                font-size: 0.95rem;
-                padding: 1.2rem;
-            }
-
-            .input-wrapper textarea {
-                font-size: 0.95rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            /* Modal على الجوال - مريح وليس كامل الشاشة */
-            .modal-content {
-                width: 90%;
-                max-width: none;
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-            }
-
-            .modal-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .modal-header p {
-                font-size: 0.9rem;
-            }
-
-            .form-group input {
-                padding: 0.9rem;
-                font-size: 0.95rem;
-            }
-
-            /* Custom Alert على الجوال */
-            .custom-alert-content {
-                width: 90%;
-                max-width: none;
-                padding: 2rem 1.5rem;
-                margin: 1rem;
-            }
-
-            .custom-alert-content h3 {
-                font-size: 1.3rem;
-            }
-
-            .custom-alert-content p {
-                font-size: 0.95rem;
-            }
-
-            /* تحسينات عامة للجوال */
-            .chat-area {
-                padding: 1rem 0.5rem;
-            }
-
-            .input-area {
-                padding: 1rem 0.8rem;
-            }
-
-            .input-wrapper {
-                padding: 1rem;
-            }
-
-            .welcome-screen {
-                padding: 3rem 1rem;
-            }
-
-            .welcome-screen h2 {
-                font-size: 1.8rem;
-            }
-
-            .welcome-screen p {
-                font-size: 0.95rem;
-            }
-
-            .message-avatar {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-            }
-
-            .message-name {
-                font-size: 0.9rem;
-            }
-
-            .similar-question-btn {
-                font-size: 0.85rem;
-                padding: 0.7rem 0.9rem;
-            }
-
-            .source {
-                font-size: 0.8rem;
-            }
-
-            /* تحسين sidebar على الجوال */
-            .sidebar {
-                width: 280px;
-            }
-
-            .new-chat-btn {
-                font-size: 0.9rem;
-                padding: 0.9rem;
-            }
-
-            .logo {
-                font-size: 1.3rem;
-            }
-        }
-
-        @media (max-width: 360px) {
-            /* للشاشات الصغيرة جداً */
-            .modal-content,
-            .custom-alert-content {
-                padding: 1.5rem 1rem;
-            }
-
-            .modal-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .custom-alert-content h3 {
-                font-size: 1.2rem;
-            }
-
-            .welcome-screen h2 {
-                font-size: 1.5rem;
-            }
-
-            .sidebar {
-                width: 260px;
-            }
-        }
-
-        /* Custom Alert Modal */
-        .custom-alert-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .custom-alert-modal.active {
-            display: flex;
-        }
-
-        .custom-alert-content {
-            background: rgba(26, 58, 46, 0.95);
-            backdrop-filter: blur(20px);
-            padding: 2.5rem;
-            border-radius: 20px;
             border: 1px solid rgba(212, 165, 116, 0.3);
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            max-width: 400px;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(30px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .custom-alert-content h3 {
-            color: var(--gold);
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .custom-alert-content p {
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
-        }
-
-        .custom-alert-btn {
-            background: linear-gradient(135deg, var(--gold), #c4956a);
-            color: var(--dark);
-            padding: 0.8rem 2rem;
-            border: none;
             border-radius: 12px;
-            font-weight: 600;
+            padding: 0.8rem 1.5rem;
             cursor: pointer;
-            font-family: inherit;
+            font-size: 0.95rem;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
+            margin-top: 1rem;
+            display: inline-block;
+            text-decoration: none;
         }
-
-        .custom-alert-btn:hover {
+        
+        .show-surah-btn:hover {
+            background: rgba(212, 165, 116, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+            box-shadow: 0 5px 15px rgba(212, 165, 116, 0.3);
         }
-
-        /* Touch-friendly improvements */
-        @media (hover: none) and (pointer: coarse) {
-            /* للأجهزة التي تعمل باللمس فقط */
-            .btn-primary,
-            .new-chat-btn,
-            .custom-alert-btn,
-            .logout-btn,
-            .similar-question-btn {
-                -webkit-tap-highlight-color: transparent;
-                touch-action: manipulation;
-            }
-
-            /* تكبير المساحة القابلة للنقر */
-            .send-btn {
-                min-width: 50px;
-                min-height: 50px;
-            }
-
-            .menu-btn {
-                min-width: 48px;
-                min-height: 48px;
-            }
-
-            /* تحسين scroll للمحادثات على الجوال */
-            .chat-area {
-                -webkit-overflow-scrolling: touch;
-                scroll-behavior: smooth;
-            }
-
-            .input-wrapper textarea {
-                -webkit-user-select: text;
-                user-select: text;
-            }
-        }
-
-        /* منع التكبير التلقائي على iOS عند focus */
-        @supports (-webkit-touch-callout: none) {
-            input, textarea, select {
-                font-size: 16px !important;
-            }
-        }
-
-        /* Similar Questions */
+        
         .similar-questions {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-
+        
         .similar-questions-title {
             font-size: 0.9rem;
-            color: var(--gold);
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .similar-question-btn {
-            display: block;
-            width: 100%;
-            text-align: right;
-            padding: 0.8rem 1rem;
+            color: rgba(255, 255, 255, 0.6);
             margin-bottom: 0.5rem;
+        }
+        
+        .q-chip {
+            display: inline-block;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.3s ease;
-            font-family: inherit;
-            font-size: 0.9rem;
         }
-
-        .similar-question-btn:hover {
-            background: rgba(212, 165, 116, 0.15);
-            border-color: rgba(212, 165, 116, 0.3);
-            transform: translateX(-5px);
+        
+        .q-chip:hover {
+            background: rgba(212, 165, 116, 0.2);
+            border-color: var(--gold);
+            transform: translateY(-2px);
+        }
+        
+        /* Input Area */
+        .input-area { 
+            position: relative; 
+        }
+        
+        .input-wrapper { 
+            display: flex; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 2px solid rgba(212, 165, 116, 0.3); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            transition: all 0.3s ease; 
+            align-items: center; 
+        }
+        
+        .input-wrapper:focus-within { 
+            border-color: var(--gold); 
+            box-shadow: 0 0 20px rgba(212, 165, 116, 0.2); 
+            transform: translateY(-2px); 
+        }
+        
+        #userInput { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            padding: 1.2rem 1.5rem; 
+            color: white; 
+            font-family: "IBM Plex Sans Arabic"; 
+            font-size: 1rem; 
+            resize: none; 
+            outline: none; 
+            max-height: 150px; 
+            min-height: 56px; 
+        }
+        
+        #userInput::placeholder { 
+            color: rgba(255, 255, 255, 0.5); 
+        }
+        
+        .send-btn { 
+            background: var(--gold); 
+            color: var(--dark); 
+            border: none; 
+            border-radius: 12px; 
+            width: 56px; 
+            height: 56px; 
+            margin: 6px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.2rem; 
+        }
+        
+        .send-btn:hover:not(:disabled) { 
+            background: #e6b469; 
+            transform: scale(1.05); 
+        }
+        
+        .send-btn:disabled { 
+            opacity: 0.5; 
+            cursor: not-allowed; 
+        }
+        
+        .input-info { 
+            text-align: center; 
+            font-size: 0.8rem; 
+            color: rgba(255, 255, 255, 0.5); 
+            margin-top: 0.5rem; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        /* Loading Animation */
+        .loader {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            position: relative;
+        }
+        
+        .loader:before, .loader:after {
+            content: '';
+            border-radius: 50%;
+            position: absolute;
+            inset: 0;
+            box-shadow: 0 0 10px 2px rgba(212, 165, 116, 0.3) inset;
+        }
+        
+        .loader:after {
+            box-shadow: 0 2px 0 var(--gold) inset;
+            animation: rotate 1s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 95, 79, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            color: var(--gold);
+            text-align: center;
+            max-width: 400px;
+            line-height: 1.5;
+        }
+        
+        .progress-bar {
+            width: 300px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .sidebar {
+                position: fixed;
+                z-index: 100;
+                height: calc(100vh - 70px);
+                transform: translateX(0);
+            }
+            
+            .sidebar.collapsed {
+                transform: translateX(calc(var(--sidebar-width) + 30px));
+            }
+            
+            .ayahs-container {
+                max-height: 300px;
+            }
+            
+            .api-status-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .chat-section {
+                padding: 1rem;
+            }
+            
+            .header-banner {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px 15px;
+            }
+            
+            .header-left, .header-right {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .logo {
+                font-size: 1.1rem;
+            }
+            
+            .api-status-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .message-content {
+                max-width: 90%;
+                font-size: 0.95rem;
+            }
+            
+            .single-ayah-text {
+                font-size: 1.4rem;
+                line-height: 1.8;
+            }
+            
+            .hadith-text {
+                font-size: 1.3rem;
+                line-height: 1.8;
+            }
+            
+            .surah-title {
+                font-size: 1.6rem;
+            }
+            
+            .ayah-text {
+                font-size: 1.2rem;
+            }
+            
+            .ayahs-container {
+                max-height: 250px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Login Modal -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content glass-strong">
-            <div class="modal-header">
-                <h2>مرحباً بك في اسأل الإسلام AI</h2>
-                <p>سجل دخولك للبدء</p>
+    <!-- Header Banner -->
+    <div class="header-banner">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🕌</span>
+                <span>اسأل الإسلام AI</span>
             </div>
-            <form onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label>البريد الإلكتروني</label>
-                    <input type="email" id="emailInput" placeholder="example@email.com" required>
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="passwordInput" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="btn-primary submit-btn">تسجيل الدخول</button>
-            </form>
-            <div class="modal-footer">
-                ليس لديك حساب؟ <a href="#" onclick="showCustomAlert(); return false;">إنشاء حساب</a>
+            <div class="domain-info">
+                <span class="domain-icon">🌐</span>
+                <span>askislam-ai.aminelabzioui123.workers.dev</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="connection-status">
+                <span class="status-dot status-connected" id="globalStatus"></span>
+                <span>متصل</span>
             </div>
         </div>
     </div>
-
-    <!-- Custom Alert Modal -->
-    <div class="custom-alert-modal" id="customAlert">
-        <div class="custom-alert-content">
-            <h3>قريباً</h3>
-            <p>ميزة إنشاء الحساب ستكون متاحة قريباً إن شاء الله</p>
-            <button class="custom-alert-btn" onclick="closeCustomAlert()">حسناً</button>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <div class="loading-text" id="loadingText">جاري تهيئة التطبيق...</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
         </div>
     </div>
-
-    <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
+    
+    <!-- Main Container -->
     <div class="container">
         <!-- Sidebar -->
-        <aside class="sidebar glass hidden" id="sidebar">
+        <aside class="sidebar glass">
             <div class="sidebar-header">
-                <div class="logo">☪ اسأل الإسلام AI</div>
-                <button class="new-chat-btn" onclick="startNewChat()">
-                    محادثة جديدة
-                </button>
-            </div>
-
-            <div class="chat-history" id="chatHistory">
-                <!-- Chat history will be populated here -->
-            </div>
-
-            <div class="sidebar-footer">
-                <div class="user-info" onclick="openLoginModal()" style="cursor: pointer;">
-                    <div class="user-avatar">👤</div>
-                    <div>
-                        <div style="font-weight: 600;">مستخدم</div>
-                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="dfaaacbaad9fbaa7beb2afb3baf1bcb0b2">[email&#160;protected]</a></div>
-                    </div>
+                <div class="sidebar-title">
+                    <span>📖</span>
+                    <span>المحادثات</span>
                 </div>
-                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                <button class="toggle-btn" id="toggleSidebar">☰</button>
+            </div>
+            
+            <button class="new-chat-btn" onclick="createNewChat()">
+                <span>+</span>
+                محادثة جديدة
+            </button>
+            
+            <div class="chats-container" id="chatsList">
+                <!-- المحادثات تحمل هنا -->
             </div>
         </aside>
 
-        <!-- Main Chat -->
-        <main class="main-content">
-            <div class="chat-container glass-strong">
-                <div class="chat-header">
-                    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
-                    <h2 class="chat-title">المحادثة</h2>
-                </div>
-
-                <div class="chat-area" id="chatArea">
-                    <div id="welcomeScreen" class="welcome-screen">
-                        <h2>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h2>
-                        <p style="font-size: 1.3rem; margin-bottom: 1.5rem; line-height: 1.8;">
-                            السَّلاَمُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ
-                        </p>
-                        <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.85); max-width: 600px; margin: 0 auto; line-height: 1.8;">
-                            مرحباً بك في اسأل الإسلام AI، مساعدك الإسلامي الموثوق.<br>
-                            اطرح أسئلتك عن الدين الإسلامي وسأجيبك من القرآن الكريم والسنة النبوية وأقوال العلماء الثقات.
-                        </p>
-                        <div style="background: rgba(212, 165, 116, 0.15); border: 1px solid rgba(212, 165, 116, 0.3); border-radius: 12px; padding: 1rem; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-                            <p style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); line-height: 1.6;">
-                                ⚠️ <strong>تنبيه مهم:</strong> هذه الإجابات معلومات تعليمية توثيقية وليست فتوى شرعية رسمية. للمسائل المستجدة والنوازل، يُرجى الرجوع إلى المجامع الفقهية المعتمدة أو العلماء المختصين.
-                            </p>
+        <!-- Main Chat Area -->
+        <main class="chat-section glass" id="chatSection">
+            <div class="chat-header">
+                <h1>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1>
+                <p>مرحباً بك في موقع اسأل الإسلام AI الذي يعمل على Cloudflare Workers و Cloudflare AI</p>
+                
+                <div class="api-status-grid">
+                    <div class="api-status-card">
+                        <div class="api-status-icon">📖</div>
+                        <div class="api-status-content">
+                            <div class="api-status-title">القرآن الكريم</div>
+                            <div class="api-status-desc">api.alquran.cloud</div>
                         </div>
+                        <span class="api-status-badge status-loading" id="quranStatus">جاري التحميل</span>
                     </div>
-
-                    <div id="messagesContainer"></div>
-
-                    <div class="typing-indicator" id="typingIndicator">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+                    
+                    <div class="api-status-card">
+                        <div class="api-status-icon">📚</div>
+                        <div class="api-status-content">
+                            <div class="api-status-title">الأحاديث النبوية</div>
+                            <div class="api-status-desc">GitHub API</div>
+                        </div>
+                        <span class="api-status-badge status-loading" id="hadithStatus">جاري التحميل</span>
+                    </div>
+                    
+                    <div class="api-status-card">
+                        <div class="api-status-icon">🤖</div>
+                        <div class="api-status-content">
+                            <div class="api-status-title">Cloudflare AI</div>
+                            <div class="api-status-desc">التحليل الذكي</div>
+                        </div>
+                        <span class="api-status-badge status-loading" id="aiStatus">جاري التحميل</span>
+                    </div>
+                    
+                    <div class="api-status-card">
+                        <div class="api-status-icon">⚡</div>
+                        <div class="api-status-content">
+                            <div class="api-status-title">Cloudflare Workers</div>
+                            <div class="api-status-desc">askislam-ai.aminelabzioui123.workers.dev</div>
+                        </div>
+                        <span class="api-status-badge status-loading" id="workersStatus">جاري التحميل</span>
                     </div>
                 </div>
-
-                <div class="input-area">
-                    <div class="input-wrapper glass">
-                        <textarea 
-                            id="userInput" 
-                            placeholder="اكتب سؤالك هنا..." 
-                            rows="1"
-                            onkeydown="handleKeyPress(event)"
-                            oninput="autoResize(this)"
-                        ></textarea>
-                        <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="إرسال">
-                            OK
-                        </button>
-                    </div>
+                
+                <div style="text-align: center; margin-top: 1rem;">
+                    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">
+                        ⚡ يعمل على Edge Network من Cloudflare
+                    </p>
+                </div>
+            </div>
+            
+            <div class="top-bar">
+                <div class="top-bar-title">
+                    <svg class="islamic-pattern" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L9.18 9.18L2 12L9.18 14.82L12 22L14.82 14.82L22 12L14.82 9.18L12 2Z"/>
+                    </svg>
+                    المحادثة الحالية
+                    <svg class="islamic-pattern" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L9.18 9.18L2 12L9.18 14.82L12 22L14.82 14.82L22 12L14.82 9.18L12 2Z"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <div id="chatArea">
+                <!-- المحادثة تعرض هنا -->
+            </div>
+            
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="userInput" 
+                        placeholder="اكتب سؤالك الإسلامي هنا... (مثال: اعرض الآية الأولى من سورة البقرة)" 
+                        rows="1"
+                        oninput="autoResize(this)"
+                        onkeydown="handleKeyDown(event)"
+                    ></textarea>
+                    <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                        📨
+                    </button>
+                </div>
+                <div class="input-info">
+                    <span>اضغط Enter للإرسال</span>
+                    <span>⚡ يعمل على Cloudflare Workers</span>
                 </div>
             </div>
         </main>
+        
+        <!-- Floating Toggle Button -->
+        <button class="floating-toggle" id="floatingToggle">☰</button>
     </div>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        let messageHistory = [];
-        let currentChatId = Date.now().toString();
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        
-        // ============================================
-        // متغيرات القرآن الكريم
-        // ============================================
+    <script>
+        // بيانات التطبيق
+        let chats = [];
+        let currentChatId = null;
         let quranData = null;
+        let hadithDatabase = {};
+        let arabicHadiths = [];
         let isQuranLoaded = false;
+        let isHadithLoaded = false;
+        let isAIReady = false;
+        let isWorkersReady = false;
         
-        // مصادر القرآن البديلة (محفوظة من الملف الأصلي)
-        const QURAN_SOURCES = [
-            'https://cdn.jsdelivr.net/npm/quran-json@3.1.2/quran.json',
-            'https://api.alquran.cloud/v1/quran/quran-uthmani',
-            'https://raw.githubusercontent.com/semarketir/quranjson/master/source/quran.json'
+        // إعدادات Cloudflare Workers (الموقع الحالي)
+        const WORKERS_DOMAIN = 'askislam-ai.aminelabzioui123.workers.dev';
+        
+        // إعدادات Cloudflare AI (مطلوبة)
+        // ⚠️ ضع بياناتك الخاصة هنا:
+        const CLOUDFLARE_ACCOUNT_ID = 'YOUR_ACCOUNT_ID'; // Account ID من Cloudflare
+        const CLOUDFLARE_API_TOKEN = 'YOUR_API_TOKEN';   // API Token من Cloudflare
+        const USE_AI_ANALYSIS = true; // تفعيل التحليل الذكي
+        
+        // مصادر القرآن (API)
+        const QURAN_API = 'https://api.alquran.cloud/v1/quran/quran-uthmani';
+        const QURAN_BACKUP = 'https://cdn.jsdelivr.net/npm/quran-json@3.1.2/quran.json';
+        
+        // مصادر الأحاديث (GitHub CDN)
+        const HADITH_SOURCES = [
+            'bukhari', 'muslim', 'tirmidhi', 'nasai', 'abudawud', 'ibnmajah'
         ];
-
-        // Check login status on load - Modal will only open when user clicks on profile
-        window.onload = function() {
-            // تحميل القرآن الكريم في الخلفية
-            loadQuranData().then(success => {
-                if (success) {
-                    console.log('✅ القرآن الكريم جاهز للبحث');
-                } else {
-                    console.log('⚠️ القرآن غير متاح حالياً');
-                }
-            });
-            
-            // إظهار sidebar على الشاشات الكبيرة فقط
-            function handleSidebarOnResize() {
-                const sidebar = document.getElementById('sidebar');
-                if (window.innerWidth > 968) {
-                    sidebar.classList.remove('hidden');
-                } else {
-                    sidebar.classList.add('hidden');
-                }
-            }
-            
-            // تشغيل عند التحميل
-            handleSidebarOnResize();
-            
-            // تشغيل عند تغيير حجم الشاشة
-            window.addEventListener('resize', handleSidebarOnResize);
-        };
-
-        function handleLogin(event) {
-            event.preventDefault();
-            // Simulate login (في المشروع الحقيقي، هنا تتصل بالـ API)
-            localStorage.setItem('isLoggedIn', 'true');
-            isLoggedIn = true;
-            document.getElementById('loginModal').classList.remove('active');
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').classList.add('active');
-        }
-
-        function showCustomAlert() {
-            document.getElementById('customAlert').classList.add('active');
-        }
-
-        function closeCustomAlert() {
-            document.getElementById('customAlert').classList.remove('active');
-        }
-
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            window.location.href = 'index.html';
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            sidebar.classList.toggle('hidden');
-            overlay.classList.toggle('active');
-        }
-
-        function startNewChat() {
-            messageHistory = [];
-            document.getElementById('messagesContainer').innerHTML = '';
-            document.getElementById('welcomeScreen').style.display = 'block';
-            currentChatId = Date.now().toString();
-        }
-
-        function askExample(question) {
-            document.getElementById('userInput').value = question;
-            sendMessage();
-        }
-
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = textarea.scrollHeight + 'px';
-        }
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter' && !event.shiftKey) {
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-
-        function addMessageToUI(content, role, source = null, similarQuestions = null) {
-            const container = document.getElementById('messagesContainer');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${role === 'user' ? 'user-message' : 'ai-message'}`;
-            
-            let sourceHTML = '';
-            if (source) {
-                sourceHTML = `<div class="source">📚 المصدر: ${source}</div>`;
-            }
-            
-            let similarQuestionsHTML = '';
-            if (similarQuestions && similarQuestions.length > 0) {
-                similarQuestionsHTML = `
-                    <div class="similar-questions">
-                        <div class="similar-questions-title">📋 أسئلة مشابهة:</div>
-                        ${similarQuestions.map(q => `
-                            <button class="similar-question-btn" onclick="askSimilarQuestion('${q.replace(/'/g, "\\'")}')">
-                                ${q}
-                            </button>
-                        `).join('')}
-                    </div>
-                `;
-            }
-            
-            msgDiv.innerHTML = `
-                <div class="message-header">
-                    <div class="message-avatar">${role === 'user' ? '👤' : '☪️'}</div>
-                    <span class="message-name">${role === 'user' ? 'أنت' : 'اسأل الإسلام AI'}</span>
-                </div>
-                <div class="message-content">
-                    ${content.replace(/\n/g, '<br>')}
-                    ${sourceHTML}
-                    ${similarQuestionsHTML}
-                </div>
-            `;
-            
-            container.appendChild(msgDiv);
-            document.getElementById('chatArea').scrollTop = document.getElementById('chatArea').scrollHeight;
-        }
-
-        function askSimilarQuestion(question) {
-            document.getElementById('userInput').value = question;
-            sendMessage();
-        }
-
-        function generateSimilarQuestions(userQuestion) {
-            // مجموعة من الأسئلة المشابهة المتعلقة بمواضيع مختلفة
-            const questionPatterns = {
-                'صلاة|صلوات|الصلاة': [
-                    'ما هي شروط صحة الصلاة؟',
-                    'ما هي سنن الصلاة؟',
-                    'كيف أخشع في صلاتي؟'
-                ],
-                'وضوء|الوضوء': [
-                    'ما هي نواقض الوضوء؟',
-                    'ما حكم المسح على الخفين؟',
-                    'كيف يتيمم المسلم؟'
-                ],
-                'صيام|رمضان|الصيام': [
-                    'ما هي مبطلات الصيام؟',
-                    'ما أحكام القضاء والكفارة في الصيام؟',
-                    'ما فضل صيام التطوع؟'
-                ],
-                'زكاة|الزكاة': [
-                    'ما هي شروط وجوب الزكاة؟',
-                    'كيف أحسب زكاة المال؟',
-                    'على من تجب زكاة الفطر؟'
-                ],
-                'حج|عمرة|الحج': [
-                    'ما هي أركان الحج؟',
-                    'ما الفرق بين الحج والعمرة؟',
-                    'ما أحكام الإحرام؟'
-                ],
-                'قرآن|القرآن': [
-                    'ما فضل حفظ القرآن؟',
-                    'ما آداب تلاوة القرآن؟',
-                    'كيف أتدبر القرآن؟'
-                ],
-                'دعاء|الدعاء|أدعية': [
-                    'ما هي أوقات استجابة الدعاء؟',
-                    'ما آداب الدعاء؟',
-                    'ما الأدعية المأثورة في الصباح والمساء؟'
-                ],
-                'ذكر|أذكار|الذكر': [
-                    'ما فضل الذكر بعد الصلاة؟',
-                    'ما الأذكار اليومية للمسلم؟',
-                    'ما أفضل الأذكار؟'
-                ]
-            };
-
-            // البحث عن الموضوع المناسب
-            for (const [pattern, questions] of Object.entries(questionPatterns)) {
-                const regex = new RegExp(pattern, 'i');
-                if (regex.test(userQuestion)) {
-                    return questions;
-                }
-            }
-
-            // أسئلة عامة افتراضية
-            return [
-                'ما هي أركان الإسلام؟',
-                'ما هي أركان الإيمان؟',
-                'كيف أتقرب إلى الله؟'
-            ];
-        }
-
-        // ============================================
-        // نظام البحث في الأحاديث من GitHub API
-        // ============================================
         
-        const HADITH_API_BASE = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1';
-        const hadithCache = new Map();
+        // تهيئة التطبيق
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeApp();
+        });
         
-        const ARABIC_BOOKS = {
-            'bukhari': 'صحيح البخاري',
-            'muslim': 'صحيح مسلم',
-            'abudawud': 'سنن أبي داود',
-            'tirmidhi': 'جامع الترمذي',
-            'nasai': 'سنن النسائي',
-            'ibnmajah': 'سنن ابن ماجه'
-        };
-
-        // استخراج الكلمات المفتاحية
-        function extractKeywords(query) {
-            const stopWords = ['ما', 'هو', 'هي', 'كيف', 'لماذا', 'متى', 'أين', 'من', 'هل', 
-                              'في', 'على', 'عن', 'إلى', 'أن', 'أو', 'و', 'ف', 'ل',
-                              'ال', 'حكم', 'معنى', 'تفسير', 'شرح', 'يا', 'يرجى'];
-            
-            const words = query.split(/\s+/)
-                .map(w => w.replace(/[؟!،.]/g, '').trim())
-                .filter(w => w.length > 2 && !stopWords.includes(w));
-
-            const topicKeywords = {
-                'صلاة|صلوات': ['صلاة', 'صلى', 'يصلي', 'ركعة', 'سجود', 'ركوع'],
-                'وضوء': ['وضوء', 'توضأ', 'يتوضأ', 'طهارة', 'تطهر'],
-                'صيام|صوم': ['صيام', 'صوم', 'صام', 'يصوم', 'رمضان', 'إفطار', 'سحور'],
-                'زكاة': ['زكاة', 'صدقة', 'مال', 'فقير'],
-                'حج|عمرة': ['حج', 'عمرة', 'طواف', 'سعي', 'إحرام', 'حاج'],
-                'جنة|نار': ['جنة', 'نار', 'جهنم', 'فردوس'],
-                'دعاء': ['دعاء', 'يدعو', 'ادع', 'استجب'],
-                'ذكر': ['ذكر', 'يذكر', 'تسبيح', 'تحميد']
-            };
-
-            const enhancedKeywords = new Set(words);
-            
-            for (const [pattern, relatedWords] of Object.entries(topicKeywords)) {
-                const regex = new RegExp(pattern, 'i');
-                if (regex.test(query)) {
-                    relatedWords.forEach(w => enhancedKeywords.add(w));
-                }
-            }
-
-            return Array.from(enhancedKeywords);
-        }
-
-        // جلب الأحاديث من كتاب معين
-        async function fetchBookHadiths(bookKey) {
-            if (hadithCache.has(bookKey)) {
-                return hadithCache.get(bookKey);
-            }
-
+        // تهيئة التطبيق
+        async function initializeApp() {
             try {
-                const url = `${HADITH_API_BASE}/editions/ara-${bookKey}.json`;
-                const response = await fetch(url);
+                updateStatus('workersStatus', 'loading', 'Cloudflare Workers');
+                updateLoadingText('⚡ جاري الاتصال بـ Cloudflare Workers...', 10);
                 
-                if (!response.ok) {
-                    console.warn(`فشل جلب ${bookKey}: HTTP ${response.status}`);
-                    return [];
-                }
-
-                const data = await response.json();
-                const hadiths = data.hadiths || [];
-                hadithCache.set(bookKey, hadiths);
+                // اختبار اتصال Workers
+                isWorkersReady = await testWorkersConnection();
+                updateStatus('workersStatus', isWorkersReady ? 'active' : 'error', 'Cloudflare Workers');
                 
-                console.log(`✅ تم جلب ${hadiths.length} حديث من ${ARABIC_BOOKS[bookKey]}`);
-                return hadiths;
-            } catch (error) {
-                console.error(`خطأ في جلب ${bookKey}:`, error);
-                return [];
-            }
-        }
-
-        // البحث عن أحاديث مطابقة
-        function findMatchingHadiths(hadiths, keywords, bookName) {
-            const matches = [];
-            
-            for (const hadith of hadiths) {
-                if (!hadith || !hadith.text) continue;
+                // تحميل المحادثات
+                await loadChats();
                 
-                const text = hadith.text.toLowerCase();
-                let score = 0;
-
-                for (const keyword of keywords) {
-                    const keywordLower = keyword.toLowerCase();
-                    if (text.includes(keywordLower)) {
-                        score += 1;
-                        const occurrences = (text.match(new RegExp(keywordLower, 'g')) || []).length;
-                        score += (occurrences - 1) * 0.5;
-                    }
-                }
-
-                if (score > 0) {
-                    matches.push({
-                        text: hadith.text,
-                        book: bookName,
-                        hadithNumber: hadith.hadithnumber || '',
-                        chapter: hadith.chapter || '',
-                        grades: hadith.grades || [],
-                        score: score
-                    });
-                }
-            }
-
-            return matches.sort((a, b) => b.score - a.score);
-        }
-
-        // البحث الرئيسي
-        async function searchHadiths(query, maxResults = 1) {
-            const keywords = extractKeywords(query);
-            console.log('🔍 البحث عن:', keywords);
-            
-            if (keywords.length === 0) {
-                return [];
-            }
-
-            const results = [];
-
-            try {
-                // البحث في البخاري ومسلم أولاً (أصح الكتب)
-                for (const [bookKey, bookName] of Object.entries(ARABIC_BOOKS)) {
-                    if (results.length >= maxResults) break;
+                // تحميل القرآن
+                updateStatus('quranStatus', 'loading', 'القرآن الكريم');
+                updateLoadingText('📖 جاري تحميل القرآن الكريم...', 30);
+                await loadQuranData();
+                updateStatus('quranStatus', 'active', 'القرآن الكريم');
+                
+                // تحميل الأحاديث
+                updateStatus('hadithStatus', 'loading', 'الأحاديث النبوية');
+                updateLoadingText('📚 جاري تحميل الأحاديث النبوية...', 50);
+                await loadHadiths();
+                updateStatus('hadithStatus', 'active', 'الأحاديث النبوية');
+                
+                // اختبار Cloudflare AI
+                updateStatus('aiStatus', 'loading', 'Cloudflare AI');
+                updateLoadingText('🤖 جاري تهيئة الذكاء الاصطناعي...', 70);
+                isAIReady = await testCloudflareAI();
+                updateStatus('aiStatus', isAIReady ? 'active' : 'error', 'Cloudflare AI');
+                
+                // تحديث الحالة العامة
+                document.getElementById('globalStatus').className = 'status-dot status-connected';
+                
+                // إخفاء شاشة التحميل
+                setTimeout(() => {
+                    document.getElementById('loadingOverlay').classList.add('hidden');
+                    showWelcomeMessage();
                     
+                    const userInput = document.getElementById('userInput');
+                    if (userInput) {
+                        userInput.focus();
+                    }
+                }, 500);
+                
+                setupEventListeners();
+                window.addEventListener('resize', handleResize);
+                handleResize();
+                
+            } catch (error) {
+                console.error('❌ خطأ في التهيئة:', error);
+                updateLoadingText('⚠️ حدث خطأ في التهيئة. يرجى تحديث الصفحة.', 100);
+                updateStatus('workersStatus', 'error', 'Cloudflare Workers');
+            }
+        }
+        
+        // اختبار اتصال Workers
+        async function testWorkersConnection() {
+            try {
+                // محاولة الوصول للموقع الحالي
+                const response = await fetch(window.location.origin, {
+                    method: 'HEAD',
+                    timeout: 5000
+                });
+                return response.ok;
+            } catch (error) {
+                console.warn('⚠️ فشل اختبار اتصال Workers:', error);
+                return false;
+            }
+        }
+        
+        // اختبار Cloudflare AI
+        async function testCloudflareAI() {
+            if (CLOUDFLARE_ACCOUNT_ID === 'YOUR_ACCOUNT_ID' || CLOUDFLARE_API_TOKEN === 'YOUR_API_TOKEN') {
+                console.warn('⚠️ إعدادات Cloudflare AI غير مكتملة');
+                return false;
+            }
+            
+            try {
+                const apiUrl = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-2-7b-chat-int8`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            { role: 'system', content: 'اختبار اتصال' },
+                            { role: 'user', content: 'مرحبا' }
+                        ]
+                    })
+                });
+                
+                return response.ok;
+            } catch (error) {
+                console.warn('⚠️ فشل اختبار Cloudflare AI:', error);
+                return false;
+            }
+        }
+        
+        // تحديث حالة API
+        function updateStatus(elementId, status, service) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.className = 'api-status-badge';
+                element.classList.add(`status-${status}`);
+                element.textContent = getStatusText(status, service);
+            }
+        }
+        
+        // نص الحالة
+        function getStatusText(status, service) {
+            const texts = {
+                'loading': 'جاري التحميل',
+                'active': 'مفعّل',
+                'error': 'خطأ',
+                'inactive': 'غير مفعّل'
+            };
+            return texts[status] || status;
+        }
+        
+        // تحديث شاشة التحميل
+        function updateLoadingText(text, progress) {
+            const loadingText = document.getElementById('loadingText');
+            const progressFill = document.getElementById('progressFill');
+            
+            if (loadingText) loadingText.textContent = text;
+            if (progressFill) progressFill.style.width = `${progress}%`;
+        }
+        
+        // تحميل بيانات القرآن
+        async function loadQuranData() {
+            try {
+                // المحاولة مع المصدر الرئيسي
+                const response = await fetch(QURAN_API);
+                const data = await response.json();
+                
+                if (data.data && data.data.surahs) {
+                    quranData = data.data.surahs.map((surah, index) => ({
+                        id: surah.number || (index + 1),
+                        name: `سورة ${surah.englishName || surah.name || ''}`,
+                        ayas: surah.ayahs ? surah.ayahs.map((ayah, ayahIndex) => ({
+                            text: ayah.text || '',
+                            number: ayah.number || (ayahIndex + 1),
+                            numberInSurah: ayah.numberInSurah || (ayahIndex + 1)
+                        })) : []
+                    }));
+                    
+                    isQuranLoaded = true;
+                    console.log(`✅ تم تحميل القرآن: ${quranData.length} سورة`);
+                    return;
+                }
+            } catch (error) {
+                console.warn('⚠️ فشل تحميل المصدر الرئيسي:', error);
+            }
+            
+            // المحاولة مع المصدر الاحتياطي
+            try {
+                const backupResponse = await fetch(QURAN_BACKUP);
+                const backupData = await backupResponse.json();
+                
+                if (Array.isArray(backupData)) {
+                    quranData = backupData.map((surah, index) => ({
+                        id: index + 1,
+                        name: `سورة ${surah.name || `سورة ${index + 1}`}`,
+                        ayas: surah.verses ? surah.verses.map((ayah, ayahIndex) => ({
+                            text: ayah.text || '',
+                            number: ayahIndex + 1,
+                            numberInSurah: ayahIndex + 1
+                        })) : []
+                    }));
+                    
+                    isQuranLoaded = true;
+                    console.log(`✅ تم تحميل القرآن من النسخة الاحتياطية: ${quranData.length} سورة`);
+                }
+            } catch (error) {
+                console.warn('⚠️ فشل تحميل النسخة الاحتياطية:', error);
+                
+                // استخدام بيانات تجريبية
+                quranData = [
+                    {
+                        id: 1,
+                        name: "سورة الفاتحة",
+                        ayas: [
+                            { text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", number: 1, numberInSurah: 1 },
+                            { text: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ", number: 2, numberInSurah: 2 },
+                            { text: "الرَّحْمَٰنِ الرَّحِيمِ", number: 3, numberInSurah: 3 },
+                            { text: "مَالِكِ يَوْمِ الدِّينِ", number: 4, numberInSurah: 4 },
+                            { text: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ", number: 5, numberInSurah: 5 },
+                            { text: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ", number: 6, numberInSurah: 6 },
+                            { text: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ", number: 7, numberInSurah: 7 }
+                        ]
+                    },
+                    {
+                        id: 2,
+                        name: "سورة البقرة",
+                        ayas: [
+                            { text: "الم", number: 1, numberInSurah: 1 },
+                            { text: "ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ", number: 2, numberInSurah: 2 },
+                            { text: "الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنفِقُونَ", number: 3, numberInSurah: 3 }
+                        ]
+                    }
+                ];
+                
+                isQuranLoaded = true;
+                console.log('⚠️ استخدام بيانات القرآن التجريبية');
+            }
+        }
+        
+        // تحميل الأحاديث
+        async function loadHadiths() {
+            try {
+                // تحميل أول مصدرين فقط للسرعة
+                const sourcesToLoad = HADITH_SOURCES.slice(0, 2);
+                const promises = sourcesToLoad.map(async (source) => {
                     try {
-                        const hadiths = await fetchBookHadiths(bookKey);
-                        const matches = findMatchingHadiths(hadiths, keywords, bookName);
+                        const url = `https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-${source}.min.json`;
+                        const response = await fetch(url);
+                        const data = await response.json();
                         
-                        if (matches.length > 0) {
-                            const needed = maxResults - results.length;
-                            results.push(...matches.slice(0, needed));
-                            console.log(`📖 ${matches.length} نتيجة من ${bookName}`);
+                        hadithDatabase[source] = data;
+                        
+                        if (data && data.hadiths) {
+                            const hadiths = data.hadiths.slice(0, 50).map(h => ({
+                                source: source,
+                                sourceName: getHadithSourceName(source),
+                                text: h.text || '',
+                                hadithNumber: h.hadithnumber || h.number || 'غير معروف',
+                                book: h.reference?.book || 'غير معروف',
+                                grade: h.grades?.[0]?.name || 'غير معروف'
+                            }));
+                            
+                            arabicHadiths.push(...hadiths);
+                            console.log(`✅ تم تحميل ${hadiths.length} حديث من ${source}`);
                         }
                     } catch (error) {
-                        console.warn(`تعذر البحث في ${bookName}:`, error);
-                        continue;
+                        console.warn(`⚠️ فشل تحميل ${source}:`, error);
                     }
-                    
-                    // توقف بعد البخاري ومسلم إذا وجدنا نتائج كافية
-                    if (results.length >= maxResults && (bookKey === 'bukhari' || bookKey === 'muslim')) {
-                        break;
-                    }
-                }
-
-                return results;
-            } catch (error) {
-                console.error('خطأ في البحث:', error);
-                return [];
-            }
-        }
-
-        // تنسيق الأحاديث للـ AI
-        function formatHadithsForAI(hadiths) {
-            if (!hadiths || hadiths.length === 0) return '';
-
-            let formatted = '';
-            hadiths.forEach((hadith, index) => {
-                formatted += `\n${index + 1}. **${hadith.book}** ${hadith.hadithNumber ? `(رقم ${hadith.hadithNumber})` : ''}:\n`;
-                formatted += `"${hadith.text}"\n`;
+                });
                 
-                if (hadith.grades && hadith.grades.length > 0) {
-                    formatted += `[الدرجة: ${hadith.grades.join(', ')}]\n`;
-                }
-            });
-
-            return formatted;
+                await Promise.all(promises);
+                
+                console.log(`📊 إجمالي الأحاديث المحملة: ${arabicHadiths.length}`);
+                isHadithLoaded = arabicHadiths.length > 0;
+                
+            } catch (error) {
+                console.warn('⚠️ فشل تحميل الأحاديث:', error);
+                isHadithLoaded = false;
+            }
         }
         
-        // ============================================
-        // نظام تحميل القرآن الكريم
-        // ============================================
+        // الحصول على اسم مصدر الحديث
+        function getHadithSourceName(source) {
+            const names = {
+                'bukhari': 'صحيح البخاري',
+                'muslim': 'صحيح مسلم',
+                'tirmidhi': 'سنن الترمذي',
+                'nasai': 'سنن النسائي',
+                'abudawud': 'سنن أبي داود',
+                'ibnmajah': 'سنن ابن ماجة'
+            };
+            return names[source] || source;
+        }
         
-        // تحميل بيانات القرآن من المصادر
-        async function loadQuranData() {
-            console.log('🔄 بدء تحميل القرآن الكريم...');
-            
-            for (let i = 0; i < QURAN_SOURCES.length; i++) {
-                try {
-                    console.log(`🔍 محاولة ${i + 1}: ${QURAN_SOURCES[i]}`);
-                    const response = await fetch(QURAN_SOURCES[i]);
-                    
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // معالجة البيانات حسب المصدر
-                    if (QURAN_SOURCES[i].includes('alquran.cloud')) {
-                        quranData = processAlQuranCloudData(data);
-                    } else if (QURAN_SOURCES[i].includes('semarketir')) {
-                        quranData = processSemarketirData(data);
-                    } else {
-                        quranData = processDefaultQuranData(data);
-                    }
-                    
-                    if (quranData && quranData.length === 114) {
-                        isQuranLoaded = true;
-                        console.log(`✅ تم تحميل القرآن من المصدر ${i + 1}`);
-                        return true;
-                    }
-                    
-                } catch (error) {
-                    console.warn(`❌ فشل المصدر ${i + 1}:`, error.message);
-                    continue;
-                }
+        // تحليل السؤال باستخدام AI
+        async function analyzeQuestionWithAI(message) {
+            if (!USE_AI_ANALYSIS || !isAIReady) {
+                return analyzeQuestionManually(message);
             }
             
-            console.warn('⚠️ فشل تحميل القرآن من جميع المصادر');
-            return false;
+            try {
+                const apiUrl = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-2-7b-chat-int8`;
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: [
+                            {
+                                role: 'system',
+                                content: 'أنت مساعد متخصص في الأسئلة الإسلامية. قم بتصنيف السؤال إلى: quran (سؤال عن القرآن) أو hadith (سؤال عن الحديث) أو general (سؤال إسلامي عام). أجب بكلمة واحدة فقط.'
+                            },
+                            {
+                                role: 'user',
+                                content: `صنف هذا السؤال: "${message}"`
+                            }
+                        ]
+                    })
+                });
+                
+                if (!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                const aiResponse = (data.result?.response || '').toLowerCase().trim();
+                
+                if (aiResponse.includes('quran') || aiResponse.includes('قرآن')) {
+                    return 'quran';
+                } else if (aiResponse.includes('hadith') || aiResponse.includes('حديث')) {
+                    return 'hadith';
+                } else {
+                    return 'general';
+                }
+            } catch (error) {
+                console.warn('⚠️ فشل التحليل الذكي:', error);
+                return analyzeQuestionManually(message);
+            }
         }
         
-        // معالجة بيانات alquran.cloud
-        function processAlQuranCloudData(data) {
-            if (!data.data || !data.data.surahs) return null;
+        // تحليل السؤال يدوياً
+        function analyzeQuestionManually(message) {
+            const lowerMessage = message.toLowerCase();
             
-            return data.data.surahs.map(surah => ({
-                id: surah.number,
-                name: surah.name,
-                transliteration: surah.englishName,
-                total_verses: surah.ayahs.length,
-                verses: surah.ayahs.map(ayah => ({
-                    id: ayah.numberInSurah,
-                    text: ayah.text
-                }))
-            }));
-        }
-        
-        // معالجة بيانات semarketir
-        function processSemarketirData(data) {
-            if (!Array.isArray(data)) return null;
+            // كلمات قرآنية
+            const quranKeywords = [
+                'قرآن', 'قران', 'آية', 'اية', 'آيات', 'ايات',
+                'سورة', 'سوره', 'سور', 'الفاتحة', 'البقرة',
+                'ال عمران', 'الكهف', 'الرحمن', 'الملك', 'النبأ'
+            ];
             
-            return data.map(surah => ({
-                id: surah.index,
-                name: surah.title,
-                transliteration: surah.titleAr,
-                total_verses: surah.count,
-                verses: (surah.verses || []).map((verse, idx) => ({
-                    id: idx + 1,
-                    text: verse.text
-                }))
-            }));
-        }
-        
-        // معالجة البيانات الافتراضية
-        function processDefaultQuranData(data) {
-            if (!Array.isArray(data)) return null;
+            // كلمات حديثية
+            const hadithKeywords = [
+                'حديث', 'الحديث', 'أحاديث', 'الأحاديث',
+                'حديث النبي', 'حديث الرسول', 'الحديث النبوي',
+                'البخاري', 'مسلم', 'الترمذي', 'النسائي',
+                'أبو داود', 'ابن ماجة'
+            ];
             
-            return data.map(surah => ({
-                id: surah.id || surah.number,
-                name: surah.name || surah.transliteration,
-                transliteration: surah.transliteration || surah.name,
-                total_verses: surah.total_verses || (surah.verses ? surah.verses.length : 0),
-                verses: (surah.verses || []).map(verse => ({
-                    id: verse.id || verse.number,
-                    text: verse.text || verse.verse
-                }))
-            }));
+            if (quranKeywords.some(keyword => lowerMessage.includes(keyword))) {
+                return 'quran';
+            } else if (hadithKeywords.some(keyword => lowerMessage.includes(keyword))) {
+                return 'hadith';
+            } else {
+                return 'general';
+            }
         }
         
-        // البحث في القرآن عن آية أو سورة
+        // البحث في القرآن
         function searchQuran(query) {
             if (!isQuranLoaded || !quranData) {
+                console.warn('⚠️ بيانات القرآن غير متوفرة');
                 return null;
             }
             
             const lowerQuery = query.toLowerCase();
+            const results = [];
             
-            // البحث عن سورة معينة
-            const surahMatch = lowerQuery.match(/سورة\s+(\S+)/);
-            if (surahMatch) {
-                const surahName = surahMatch[1];
-                const surah = quranData.find(s => 
-                    s.name.includes(surahName) || 
-                    s.transliteration?.toLowerCase().includes(surahName)
-                );
-                
-                if (surah) {
-                    return {
-                        type: 'surah',
-                        data: surah
-                    };
+            // البحث عن آية الكرسي
+            if (lowerQuery.includes('آية الكرسي') || lowerQuery.includes('اية الكرسي')) {
+                const surah = quranData.find(s => s.id === 2);
+                if (surah && surah.ayas && surah.ayas[254]) {
+                    results.push({
+                        type: 'ayah',
+                        text: surah.ayas[254].text,
+                        surahNumber: 2,
+                        surahName: 'البقرة',
+                        ayahNumber: 255,
+                        verified: true
+                    });
+                    return results;
                 }
             }
             
-            // البحث عن آية معينة
-            const ayahMatch = lowerQuery.match(/سورة\s+(\S+).*آية\s+(\d+)/);
-            if (ayahMatch) {
-                const surahName = ayahMatch[1];
-                const ayahNumber = parseInt(ayahMatch[2]);
-                
-                const surah = quranData.find(s => 
-                    s.name.includes(surahName) || 
-                    s.transliteration?.toLowerCase().includes(surahName)
-                );
-                
-                if (surah && surah.verses && surah.verses[ayahNumber - 1]) {
-                    return {
-                        type: 'ayah',
-                        data: {
-                            surah: surah.name,
-                            ayah: surah.verses[ayahNumber - 1],
-                            ayahNumber: ayahNumber
+            // استخراج السورة والآية
+            const surahAyahMatch = extractSurahAndAyah(query);
+            if (surahAyahMatch) {
+                const { surahNumber, ayahNumber } = surahAyahMatch;
+                const surah = quranData.find(s => s.id === surahNumber);
+                if (surah && surah.ayas) {
+                    const ayah = surah.ayas.find(a => a.numberInSurah === ayahNumber);
+                    if (ayah) {
+                        results.push({
+                            type: 'ayah',
+                            text: ayah.text,
+                            surahNumber: surah.id,
+                            surahName: surah.name,
+                            ayahNumber: ayahNumber,
+                            verified: true
+                        });
+                        return results;
+                    }
+                }
+            }
+            
+            // البحث النصي
+            quranData.forEach(surah => {
+                if (surah.ayas) {
+                    surah.ayas.forEach((ayah) => {
+                        const ayahText = ayah.text.toLowerCase();
+                        if (ayahText.includes(lowerQuery)) {
+                            results.push({
+                                type: 'ayah',
+                                text: ayah.text,
+                                surahNumber: surah.id,
+                                surahName: surah.name,
+                                ayahNumber: ayah.numberInSurah,
+                                verified: true
+                            });
                         }
-                    };
+                    });
+                }
+            });
+            
+            // البحث بأسماء السور
+            if (results.length === 0) {
+                quranData.forEach(surah => {
+                    const surahName = surah.name.toLowerCase();
+                    const cleanName = surahName.replace('سورة', '').trim();
+                    
+                    if (lowerQuery.includes(cleanName) || lowerQuery.includes(surahName)) {
+                        results.push({
+                            type: 'surah',
+                            number: surah.id,
+                            name: surah.name,
+                            numberOfAyahs: surah.ayas ? surah.ayas.length : 0,
+                            verified: true
+                        });
+                    }
+                });
+            }
+            
+            return results.slice(0, 3);
+        }
+        
+        // استخراج السورة والآية
+        function extractSurahAndAyah(text) {
+            const lowerText = text.toLowerCase();
+            const patterns = [
+                /سورة\s+(\S+)\s+آية\s+(\d+)/i,
+                /(\S+)\s+(\d+)/,
+                /الآية\s+(\d+)\s+من\s+سورة\s+(\S+)/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = lowerText.match(pattern);
+                if (match) {
+                    let surahName, ayahNumber;
+                    
+                    if (match.length === 3) {
+                        surahName = match[1];
+                        ayahNumber = parseInt(match[2]);
+                    } else if (match.length === 2) {
+                        surahName = match[1];
+                        ayahNumber = 1;
+                    }
+                    
+                    if (surahName && ayahNumber) {
+                        const surahNumber = getSurahNumberByName(surahName);
+                        if (surahNumber) {
+                            return { surahNumber, ayahNumber };
+                        }
+                    }
                 }
             }
             
             return null;
         }
         
-        // تنسيق القرآن للعرض
-        function formatQuranForDisplay(result) {
-            if (!result) return '';
+        // الحصول على رقم السورة
+        function getSurahNumberByName(surahName) {
+            if (!quranData) return null;
             
-            if (result.type === 'ayah') {
-                return `📖 **${result.data.surah}** - الآية ${result.data.ayahNumber}:\n\n﴿ ${result.data.ayah.text} ﴾`;
-            } else if (result.type === 'surah') {
-                const verses = result.data.verses.map((v, i) => 
-                    `${v.text} ﴿${i + 1}﴾`
-                ).join('\n\n');
-                return `📖 **سورة ${result.data.name}**\n\n${verses}`;
+            const arabicNumbers = {
+                'واحد': 1, 'اثنان': 2, 'ثلاثة': 3, 'أربعة': 4,
+                'اول': 1, 'أول': 1, 'ثاني': 2, 'ثانية': 2
+            };
+            
+            if (arabicNumbers[surahName]) {
+                return arabicNumbers[surahName];
             }
             
-            return '';
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('userInput');
-            const text = input.value.trim();
-            if (!text) return;
-
-            document.getElementById('welcomeScreen').style.display = 'none';
-            addMessageToUI(text, 'user');
-            messageHistory.push({ role: 'user', content: text });
+            const lowerName = surahName.toLowerCase();
             
-            input.value = '';
-            input.style.height = 'auto';
-            document.getElementById('typingIndicator').classList.add('active');
-            document.getElementById('sendBtn').disabled = true;
-
+            for (const surah of quranData) {
+                const surahNameInData = surah.name.toLowerCase();
+                const cleanSurahName = surahNameInData.replace('سورة', '').trim();
+                
+                if (lowerName === surahNameInData || 
+                    lowerName === cleanSurahName) {
+                    return surah.id;
+                }
+                
+                // البحث بالأسماء المشهورة
+                const surahAliases = getSurahAliases(surah.id);
+                for (const alias of surahAliases) {
+                    if (lowerName.includes(alias.toLowerCase())) {
+                        return surah.id;
+                    }
+                }
+            }
+            
+            return null;
+        }
+        
+        // مرادفات السور
+        function getSurahAliases(surahNumber) {
+            const aliases = {
+                1: ['الفاتحة', 'الحمد'],
+                2: ['البقرة'],
+                3: ['آل عمران', 'عمران'],
+                36: ['يس'],
+                55: ['الرحمن'],
+                56: ['الواقعة'],
+                67: ['الملك', 'تبارك'],
+                112: ['الإخلاص', 'قل هو الله أحد'],
+                113: ['الفلق'],
+                114: ['الناس']
+            };
+            return aliases[surahNumber] || [];
+        }
+        
+        // البحث في الأحاديث
+        function searchHadith(query) {
+            if (!isHadithLoaded || arabicHadiths.length === 0) {
+                console.warn('⚠️ بيانات الأحاديث غير متوفرة');
+                return null;
+            }
+            
+            const lowerQuery = query.toLowerCase();
+            const results = [];
+            
+            arabicHadiths.forEach(hadith => {
+                const hadithText = hadith.text.toLowerCase();
+                const sourceName = hadith.sourceName.toLowerCase();
+                
+                // البحث النصي البسيط
+                if (hadithText.includes(lowerQuery) || 
+                    sourceName.includes(lowerQuery) ||
+                    hadith.text.includes(query)) {
+                    
+                    results.push({
+                        ...hadith,
+                        matchScore: 1
+                    });
+                }
+            });
+            
+            // الحد الأقصى للنتائج
+            return results.slice(0, 3);
+        }
+        
+        // نظام المحادثات
+        function loadChats() {
             try {
-                // ============ البحث في القرآن إذا كان السؤال عنه ============
-                let quranResult = null;
-                let quranContext = '';
-                
-                if (text.includes('سورة') || text.includes('آية') || text.includes('قرآن')) {
-                    try {
-                        quranResult = searchQuran(text);
-                        if (quranResult) {
-                            const displayText = formatQuranForDisplay(quranResult);
-                            // عرض القرآن مباشرة
-                            addMessageToUI(displayText, 'assistant');
-                            messageHistory.push({ role: 'assistant', content: displayText });
-                            
-                            document.getElementById('typingIndicator').classList.remove('active');
-                            document.getElementById('sendBtn').disabled = false;
-                            return; // إنهاء الوظيفة هنا
-                        }
-                    } catch (quranError) {
-                        console.warn('⚠️ لم يتم العثور في القرآن:', quranError);
-                    }
-                }
-                
-                // ============ البحث عن أحاديث ذات صلة ============
-                let relevantHadiths = [];
-                let hadithsContext = '';
-                
-                try {
-                    relevantHadiths = await searchHadiths(text);
-                    if (relevantHadiths.length > 0) {
-                        hadithsContext = formatHadithsForAI(relevantHadiths);
-                        console.log('✅ تم العثور على أحاديث ذات صلة:', relevantHadiths.length);
-                    }
-                } catch (hadithError) {
-                    console.warn('⚠️ لم يتم العثور على أحاديث:', hadithError);
-                }
-                
-                // استخدام Groq API - from groq import Groq
-                const API_KEY = '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';
-                
-                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${API_KEY}`
-                    },
-                    body: JSON.stringify({
-                        model: 'llama-3.3-70b-versatile',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: `أنت مساعد ذكاء اصطناعي متخصص في العلوم الشرعية. هويتك قائمة على (التحري، التوثيق، والضبط اللغوي).
-
-${hadithsContext ? `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 **أحاديث من قاعدة البيانات ذات صلة بالسؤال:**
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-${hadithsContext}
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-**تعليمات مهمة:**
-- استخدم الأحاديث المذكورة أعلاه في إجابتك عندما تكون ذات صلة
-- اذكر المصدر والرقم بالضبط كما هو موجود
-- لا تخترع أحاديث أخرى - استخدم فقط ما هو مذكور أعلاه أو أذكر أنك تعتمد على معرفتك العامة
-\n` : ''}
-
-### أولاً: تعليمات التوثيق والمصادر (صرامة النقل)
-
-**منع الارتجال:**
-- يُمنع منعاً باتاً صياغة أحاديث نبوية بالمعنى. يجب نقل النص كما ورد في المصادر المسندة (البخاري، مسلم، إلخ) مع ذكر رقم الحديث والكتاب.
-
-**التخريج الإلزامي:**
-- لا يُقبل ذكر أي حديث دون بيان درجته (صحيح، حسن، ضعيف) بناءً على أحكام المحدثين المعتبرين (مثل الألباني، أو شعيب الأرنؤوط، أو المتقدمين).
-
-**دقة الآيات:**
-- عند الاستشهاد بالقرآن الكريم، يجب كتابة النص بالرسم العثماني أو الإملائي الصحيح مع ذكر اسم السورة ورقم الآية.
-- يُمنع تفسير الآية من تلقاء النفس؛ بل يجب العودة لتفاسير (الطبري، القرطبي، ابن كثير).
-
-### ثانياً: تعليمات الضبط اللغوي والاصطلاحي (الصرامة اللغوية)
-
-**التدقيق النحوي:**
-- يجب أن تكون المخرجات باللغة العربية الفصحى (مستوى التراث) مع الالتزام التام بقواعد النحو والصرف.
-- تجنب الركاكة اللغوية أو المصطلحات الحداثية التي تفسد المعنى الشرعي.
-
-**الدقة الاصطلاحية:**
-- يجب التمييز بدقة بين المصطلحات الفقهية؛ فلا يُستخدم (حرام) مكان (مكروه)، ولا (واجب) مكان (مستحب)، ولا (باطل) مكان (فاسد) إلا في موضعها الصحيح عند المذاهب.
-
-**منع الخلط:**
-- يُمنع استخدام لغة "المشاعر" أو "الرأي الشخصي" (مثل: أظن، يبدو لي).
-- يجب استخدام صيغ تقريرية مسندة (مثل: ذهب جمهور الفقهاء، قال الشافعية، ثبت في السنة).
-
-### ثالثاً: تعليمات المنهجية الفقهية (الصرامة العلمية)
-
-**تعدد المذاهب:**
-- عند وجود خلاف فقهي، يجب عرض آراء المذاهب الأربعة المعتبرة بإنصاف، مع توضيح أدلة كل فريق دون ترجيح إلا إذا وُجد إجماع أو نص قطعي.
-
-**منع الفتوى:**
-- يجب إضافة تنبيه دائم بأن الإجابات هي (معلومات تعليمية توثيقية) وليست (فتوى شرعية) رسمية.
-- يجب توجيه المستخدم للمجامع الفقهية في المسائل المستجدة (النوازل).
-
-**سياق النص:**
-- يُمنع اقتطاع النصوص من سياقها.
-- يجب ذكر سبب نزول الآية أو مورد ورود الحديث إذا كان ذلك يؤثر على فهم الحكم الشرعي.
-
-### رابعاً: تعليمات الحماية من الخطأ (Fail-safe)
-
-**قاعدة التوقف:**
-- إذا لم تجد نصاً صريحاً أو مرجعاً معتمداً للمعلومة، يجب أن تقول: "لا تتوفر لدي بيانات موثوقة حول هذه المسألة" بدلاً من محاولة استنتاج إجابة.
-
-**المراجعة الذاتية:**
-- قبل عرض الإجابة، قم بمطابقة النص المكتوب مع المصدر الأصلي للتأكد من عدم سقوط كلمات تغير المعنى (مثل أدوات النفي).
-
-### تعليماتك الملزمة:
-1. لا تذكر حكماً شرعياً بدون دليل من الكتاب أو السنة.
-2. كل حديث تذكره يجب أن يتبعه مصدره ودرجة صحته.
-3. التزم بالفصحى الجزلة وتجنب الأخطاء النحوية تماماً؛ فأي خطأ لغوي قد يفسد حكماً شرعياً.
-4. في حال تعارض النصوص، انقل أقوال أهل العلم المعتبرين ولا تجتهد من تلقاء نفسك.
-5. كن شديد الحذر في ألفاظ التكفير، التحريم، والتبديع، ولا تطلقها إلا بنص قطعي.
-
-**معلومة مهمة:** التاريخ الحالي هو فبراير 2026.
-
-**تنبيه للمستخدم (يجب إضافته في كل إجابة):**
-"هذه معلومات تعليمية توثيقية وليست فتوى شرعية رسمية. للمسائل المستجدة والنوازل، يُرجى الرجوع إلى المجامع الفقهية المعتمدة."`
-                            },
-                            ...messageHistory
-                        ],
-                        temperature: 1,
-                        max_completion_tokens: 8192,
-                        top_p: 1,
-                        stream: false,
-                        stop: null
-                    })
-                });
-
-                const data = await response.json();
-                document.getElementById('typingIndicator').classList.remove('active');
-                document.getElementById('sendBtn').disabled = false;
-
-                // طباعة البيانات في Console للتصحيح
-                console.log('Response:', data);
-
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const aiText = data.choices[0].message.content;
-                    // Extract source if mentioned in the response
-                    const sourceMatch = aiText.match(/المصدر: (.+?)(?:\n|$)/);
-                    const source = sourceMatch ? sourceMatch[1] : 'القرآن والسنة';
+                const savedChats = localStorage.getItem('islamic_ai_chats');
+                if (savedChats) {
+                    chats = JSON.parse(savedChats);
+                    renderChatsList();
                     
-                    // Generate similar questions based on user's question
-                    const similarQuestions = generateSimilarQuestions(text);
-                    
-                    addMessageToUI(aiText, 'assistant', source, similarQuestions);
-                    messageHistory.push({ role: 'assistant', content: aiText });
-                } else if (data.error) {
-                    console.error('API Error:', data.error);
-                    addMessageToUI('عذراً، حدث خطأ: ' + data.error.message, 'assistant');
+                    if (chats.length > 0) {
+                        loadChat(chats[chats.length - 1].id);
+                    }
                 } else {
-                    console.error('Unexpected response:', data);
-                    addMessageToUI('عذراً، لم نتمكن من الحصول على رد. يرجى المحاولة مرة أخرى.', 'assistant');
+                    createNewChat();
                 }
             } catch (error) {
-                document.getElementById('typingIndicator').classList.remove('active');
-                document.getElementById('sendBtn').disabled = false;
-                console.error('Error:', error);
-                addMessageToUI('عذراً، حدث خطأ في الاتصال: ' + error.message + '. يرجى التحقق من مفتاح API والمحاولة مرة أخرى.', 'assistant');
+                console.error('❌ خطأ في تحميل المحادثات:', error);
+                createNewChat();
             }
         }
+        
+        function saveChats() {
+            try {
+                localStorage.setItem('islamic_ai_chats', JSON.stringify(chats));
+            } catch (error) {
+                console.error('❌ خطأ في حفظ المحادثات:', error);
+            }
+        }
+        
+        function createNewChat() {
+            const chatId = Date.now().toString();
+            const newChat = {
+                id: chatId,
+                title: 'محادثة جديدة',
+                messages: [],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            chats.push(newChat);
+            saveChats();
+            renderChatsList();
+            loadChat(chatId);
+            
+            showWelcomeMessage();
+        }
+        
+        function loadChat(chatId) {
+            currentChatId = chatId;
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (chat) {
+                renderChat(chat);
+                renderChatsList();
+                updateChatTitle(chat);
+            }
+        }
+        
+        function renderChatsList() {
+            const chatsList = document.getElementById('chatsList');
+            chatsList.innerHTML = '';
+            
+            // عرض المحادثات من الأحدث إلى الأقدم
+            [...chats].reverse().forEach(chat => {
+                const chatItem = document.createElement('div');
+                chatItem.className = `chat-item ${currentChatId === chat.id ? 'active' : ''}`;
+                chatItem.onclick = () => loadChat(chat.id);
+                
+                const time = new Date(chat.createdAt).toLocaleString('ar-SA', {
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                chatItem.innerHTML = `
+                    <div class="chat-title">${chat.title || 'محادثة جديدة'}</div>
+                    <div class="chat-time">${time}</div>
+                    <button class="delete-chat-btn" onclick="deleteChat('${chat.id}', event)">🗑</button>
+                `;
+                
+                chatsList.appendChild(chatItem);
+            });
+        }
+        
+        function deleteChat(chatId, event) {
+            event.stopPropagation();
+            
+            if (confirm('هل أنت متأكد من حذف هذه المحادثة؟')) {
+                chats = chats.filter(c => c.id !== chatId);
+                
+                if (currentChatId === chatId) {
+                    if (chats.length > 0) {
+                        loadChat(chats[chats.length - 1].id);
+                    } else {
+                        createNewChat();
+                    }
+                }
+                
+                saveChats();
+                renderChatsList();
+            }
+        }
+        
+        function updateChatTitle(chat) {
+            if (chat.messages.length >= 1) {
+                const firstUserMessage = chat.messages.find(m => m.role === 'user');
+                if (firstUserMessage) {
+                    const shortMessage = firstUserMessage.content.substring(0, 30);
+                    chat.title = shortMessage + (firstUserMessage.content.length > 30 ? '...' : '');
+                    chat.updatedAt = new Date().toISOString();
+                    saveChats();
+                    renderChatsList();
+                }
+            }
+        }
+        
+        function renderChat(chat) {
+            const chatArea = document.getElementById('chatArea');
+            chatArea.innerHTML = '';
+            
+            if (chat.messages.length === 0) {
+                showWelcomeMessage();
+                return;
+            }
+            
+            chat.messages.forEach(msg => {
+                addMessageToUI(msg.content, msg.role, false);
+            });
+            
+            document.querySelector('.chat-section').classList.add('has-messages');
+        }
+        
+        function showWelcomeMessage() {
+            const chatArea = document.getElementById('chatArea');
+            const welcomeHTML = `
+                <div style="text-align: center; padding: 3rem 1rem;">
+                    <h1 style="font-family: 'Amiri Quran'; font-size: 2.5rem; color: var(--gold); margin-bottom: 1rem; text-shadow: 0 0 15px rgba(212, 165, 116, 0.4);">
+                        بسم الله الرحمن الرحيم
+                    </h1>
+                    
+                    <p style="font-size: 1.2rem; margin-bottom: 2rem; color: rgba(255, 255, 255, 0.9);">
+                        🤖 مرحباً بك في الذكاء الاصطناعي الإسلامي
+                    </p>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 2rem; margin: 2rem auto; max-width: 600px; border: 1px solid rgba(212, 165, 116, 0.3);">
+                        <p style="color: var(--gold); margin-bottom: 1rem; font-weight: bold;">
+                            ⚡ يعمل على: ${WORKERS_DOMAIN}
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 1.5rem 0;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);">القرآن الكريم</div>
+                                <div style="color: ${isQuranLoaded ? 'var(--success-color)' : 'var(--warning-color)'}; font-weight: bold;">
+                                    ${isQuranLoaded ? '✅ محمّل' : '⏳ جاري التحميل'}
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);">الأحاديث النبوية</div>
+                                <div style="color: ${isHadithLoaded ? 'var(--success-color)' : 'var(--warning-color)'}; font-weight: bold;">
+                                    ${isHadithLoaded ? arabicHadiths.length + ' ✅' : '⏳ جاري التحميل'}
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);">Cloudflare AI</div>
+                                <div style="color: ${isAIReady ? 'var(--success-color)' : 'var(--warning-color)'}; font-weight: bold;">
+                                    ${isAIReady ? '✅ مفعّل' : '⚠️ يحتاج إعداد'}
+                                </div>
+                            </div>
+                            
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);">Cloudflare Workers</div>
+                                <div style="color: ${isWorkersReady ? 'var(--success-color)' : 'var(--warning-color)'}; font-weight: bold;">
+                                    ${isWorkersReady ? '✅ متصل' : '⚠️ فحص الاتصال'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem; line-height: 1.5;">
+                            🔗 هذا الموقع يعتمد على APIs خارجية من Cloudflare و GitHub
+                        </p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; max-width: 800px; margin: 2rem auto;">
+                        <div class="q-chip" onclick="askQuestion('اعرض الآية الأولى من سورة البقرة')" style="padding: 1rem; font-size: 1rem;">
+                            📖 اعرض الآية الأولى من سورة البقرة
+                        </div>
+                        <div class="q-chip" onclick="askQuestion('اكتب لي سورة الفاتحة كاملة')" style="padding: 1rem; font-size: 1rem;">
+                            🕌 اكتب لي سورة الفاتحة كاملة
+                        </div>
+                        <div class="q-chip" onclick="askQuestion('ابحث عن حديث عن الصلاة')" style="padding: 1rem; font-size: 1rem;">
+                            📚 ابحث عن حديث عن الصلاة
+                        </div>
+                        <div class="q-chip" onclick="askQuestion('أعطني آية الكرسي')" style="padding: 1rem; font-size: 1rem;">
+                            ✨ أعطني آية الكرسي
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem; color: rgba(255, 255, 255, 0.5); font-size: 0.85rem;">
+                        <p>⚡ يعمل على Edge Network من Cloudflare</p>
+                        <p>🌐 الموقع: ${WORKERS_DOMAIN}</p>
+                    </div>
+                </div>
+            `;
+            
+            chatArea.innerHTML = welcomeHTML;
+            document.querySelector('.chat-section').classList.remove('has-messages');
+        }
+        
+        // إرسال الرسالة
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            
+            // عرض رسالة المستخدم
+            addMessageToUI(message, 'user');
+            
+            // معالجة الاستعلام
+            await processQuery(message);
+            
+            // مسح الحقل
+            userInput.value = '';
+            autoResize(userInput);
+            userInput.focus();
+            
+            setTimeout(() => {
+                sendBtn.disabled = false;
+            }, 500);
+        }
+        
+        // معالجة الاستعلام
+        async function processQuery(message) {
+            try {
+                console.log(`🔍 معالجة: "${message}"`);
+                
+                // تحليل نوع السؤال
+                const questionType = await analyzeQuestionWithAI(message);
+                console.log(`📊 النوع: ${questionType}`);
+                
+                // معالجة حسب النوع
+                if (questionType === 'quran') {
+                    await handleQuranQuestion(message);
+                } else if (questionType === 'hadith') {
+                    await handleHadithQuestion(message);
+                } else {
+                    await handleGeneralQuestion(message);
+                }
+                
+            } catch (error) {
+                console.error('❌ خطأ في المعالجة:', error);
+                addMessageToUI(`
+                    <div style="text-align: center; padding: 2rem; color: var(--error-color);">
+                        <p>⚠️ حدث خطأ في المعالجة</p>
+                        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-top: 1rem;">
+                            يرجى المحاولة مرة أخرى أو التحقق من اتصال الإنترنت
+                        </p>
+                    </div>
+                `, 'assistant');
+            }
+        }
+        
+        // معالجة السؤال القرآني
+        async function handleQuranQuestion(message) {
+            const quranResults = searchQuran(message);
+            
+            if (quranResults && quranResults.length > 0) {
+                let response = '';
+                
+                quranResults.forEach((result, index) => {
+                    if (result.type === 'ayah') {
+                        response += `
+                            <div class="single-ayah-container">
+                                <div class="single-ayah-text">${result.text}</div>
+                                <div class="single-ayah-info">
+                                    <span>${result.surahName}</span>
+                                    <span>آية ${result.ayahNumber}</span>
+                                </div>
+                                <div class="single-ayah-verified">
+                                    <span>✅</span>
+                                    <span>مصدر: api.alquran.cloud</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // زر عرض السورة كاملة
+                        if (index === 0) {
+                            response += `
+                                <div style="text-align: center; margin: 1.5rem 0;">
+                                    <button class="show-surah-btn" onclick="showCompleteSurah(${result.surahNumber})">
+                                        📖 عرض سورة ${result.surahName} كاملة
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    } else if (result.type === 'surah') {
+                        response += `
+                            <div style="text-align: center; padding: 2rem; background: rgba(255, 255, 255, 0.05); border-radius: 20px; margin: 1rem 0;">
+                                <h3 style="color: var(--gold); font-family: 'Amiri Quran'; margin-bottom: 1rem;">${result.name}</h3>
+                                <p>عدد الآيات: ${result.numberOfAyahs}</p>
+                                <button class="show-surah-btn" onclick="showCompleteSurah(${result.number})" style="margin-top: 1rem;">
+                                    عرض السورة كاملة
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+                
+                addMessageToUI(response, 'assistant', true);
+            } else {
+                addMessageToUI(`
+                    <div style="text-align: center; padding: 2rem; color: var(--warning-color);">
+                        <p>📖 لم أتمكن من العثور على نتائج في القرآن الكريم</p>
+                        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-top: 1rem;">
+                            جرب صياغة السؤال بشكل مختلف، مثل:<br>
+                            "آية الكرسي" أو "سورة البقرة آية 255"
+                        </p>
+                    </div>
+                `, 'assistant');
+            }
+        }
+        
+        // معالجة السؤال الحديثي
+        async function handleHadithQuestion(message) {
+            const hadithResults = searchHadith(message);
+            
+            if (hadithResults && hadithResults.length > 0) {
+                let response = `
+                    <div style="margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--hadith-color); text-align: center; font-family: 'Amiri Quran';">
+                            📚 نتائج البحث في الأحاديث
+                        </h3>
+                    </div>
+                `;
+                
+                hadithResults.forEach((hadith, index) => {
+                    response += `
+                        <div class="hadith-container">
+                            <div class="hadith-text">${hadith.text}</div>
+                            <div class="hadith-info">
+                                <div class="hadith-source">
+                                    📖 ${hadith.sourceName} - حديث رقم ${hadith.hadithNumber}
+                                </div>
+                            </div>
+                            <div class="single-ayah-verified">
+                                <span>✅</span>
+                                <span>مصدر: GitHub API</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (index < hadithResults.length - 1) {
+                        response += `<hr style="border: none; border-top: 1px solid rgba(255, 255, 255, 0.1); margin: 1.5rem 0;">`;
+                    }
+                });
+                
+                response += `
+                    <div style="text-align: center; margin-top: 1.5rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+                        تم البحث في ${arabicHadiths.length} حديث من مصادر موثوقة
+                    </div>
+                `;
+                
+                addMessageToUI(response, 'assistant', true);
+            } else {
+                addMessageToUI(`
+                    <div style="text-align: center; padding: 2rem; color: var(--warning-color);">
+                        <p>📚 لم أجد أحاديث تطابق بحثك</p>
+                        <p style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.7); margin-top: 1rem;">
+                            جرب البحث بكلمات مثل: "الصلاة" أو "الزكاة" أو "الصيام"
+                        </p>
+                    </div>
+                `, 'assistant');
+            }
+        }
+        
+        // معالجة السؤال العام
+        async function handleGeneralQuestion(message) {
+            const response = `
+                <div style="text-align: center; padding: 2rem;">
+                    <h3 style="color: var(--gold); margin-bottom: 1rem;">استفسار إسلامي عام</h3>
+                    
+                    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 1.5rem; margin: 1.5rem 0;">
+                        <p style="margin-bottom: 1rem;">يمكنني مساعدتك في المواضيع التالية:</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 1rem 0;">
+                            <span class="q-chip" onclick="askQuestion('أركان الإسلام')">أركان الإسلام</span>
+                            <span class="q-chip" onclick="askQuestion('شروط الصلاة')">شروط الصلاة</span>
+                            <span class="q-chip" onclick="askQuestion('أحكام الزكاة')">أحكام الزكاة</span>
+                            <span class="q-chip" onclick="askQuestion('سنن الصيام')">سنن الصيام</span>
+                        </div>
+                    </div>
+                    
+                    <div style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 1rem;">
+                        <p>🤖 لنتائج أدق، يرجى تحديد نوع سؤالك:</p>
+                        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 0.5rem;">
+                            <span class="q-chip" onclick="askQuestion('سؤال عن القرآن')">سؤال قرآني</span>
+                            <span class="q-chip" onclick="askQuestion('سؤال عن الحديث')">سؤال حديثي</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            addMessageToUI(response, 'assistant');
+        }
+        
+        // عرض سورة كاملة
+        function showCompleteSurah(surahNumber) {
+            if (!isQuranLoaded || !quranData) {
+                addMessageToUI(`
+                    <div style="text-align: center; padding: 2rem; color: var(--error-color);">
+                        <p>⚠️ بيانات القرآن غير متوفرة حالياً</p>
+                    </div>
+                `, 'assistant');
+                return;
+            }
+            
+            const surah = quranData.find(s => s.id === surahNumber);
+            if (!surah) {
+                addMessageToUI(`
+                    <div style="text-align: center; padding: 2rem; color: var(--warning-color);">
+                        <p>⚠️ لم أتمكن من العثور على السورة المطلوبة</p>
+                    </div>
+                `, 'assistant');
+                return;
+            }
+            
+            let surahContent = `
+                <div class="complete-surah-container">
+                    <div class="surah-header">
+                        <div class="surah-title">${surah.name}</div>
+                        <div class="surah-info">
+                            <span>رقم السورة: ${surah.id}</span>
+                            <span>عدد الآيات: ${surah.ayas.length}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="ayahs-container">
+            `;
+            
+            surah.ayas.forEach(ayah => {
+                surahContent += `
+                    <div class="ayah-item">
+                        <div class="ayah-text">${ayah.text}</div>
+                        <div class="ayah-number">آية ${ayah.numberInSurah}</div>
+                    </div>
+                `;
+            });
+            
+            surahContent += `
+                    </div>
+                    
+                    <div class="surah-footer">
+                        <div class="single-ayah-verified">
+                            <span>✅</span>
+                            <span>مصدر: api.alquran.cloud - تم التحقق</span>
+                        </div>
+                        <div style="margin-top: 1rem; color: rgba(255, 255, 255, 0.7); font-size: 0.9rem;">
+                            انتهت ${surah.name} - ﴿صدق الله العظيم﴾
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            addMessageToUI(surahContent, 'assistant', true, false, true);
+        }
+        
+        // إضافة رسالة للواجهة
+        function addMessageToUI(content, role, saveToChat = true, isSingleAyah = false, isCompleteSurah = false) {
+            const chatArea = document.getElementById('chatArea');
+            const div = document.createElement('div');
+            div.className = `message ${role}-message`;
+            
+            document.querySelector('.chat-section').classList.add('has-messages');
+            
+            div.innerHTML = `<div class="message-content">${content}</div>`;
+            chatArea.appendChild(div);
+            
+            // التمرير للأسفل
+            setTimeout(() => {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 100);
+            
+            // حفظ في المحادثة
+            if (saveToChat && currentChatId) {
+                const chat = chats.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages.push({
+                        role: role,
+                        content: content,
+                        timestamp: new Date().toISOString(),
+                        isSingleAyah: isSingleAyah,
+                        isCompleteSurah: isCompleteSurah
+                    });
+                    
+                    updateChatTitle(chat);
+                    saveChats();
+                }
+            }
+        }
+        
+        // دوال المساعدة
+        function askQuestion(question) {
+            const userInput = document.getElementById('userInput');
+            userInput.value = question;
+            sendMessage();
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 150) + 'px';
+        }
+        
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        function setupEventListeners() {
+            document.getElementById('toggleSidebar').addEventListener('click', toggleSidebar);
+            document.getElementById('floatingToggle').addEventListener('click', toggleSidebar);
+        }
+        
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const floatingToggle = document.getElementById('floatingToggle');
+            sidebar.classList.toggle('collapsed');
+            floatingToggle.classList.toggle('show');
+        }
+        
+        function handleResize() {
+            const isMobile = window.innerWidth <= 768;
+            const sidebar = document.querySelector('.sidebar');
+            const floatingToggle = document.getElementById('floatingToggle');
+            
+            if (isMobile) {
+                sidebar.classList.add('collapsed');
+                floatingToggle.classList.add('show');
+            } else {
+                sidebar.classList.remove('collapsed');
+                floatingToggle.classList.remove('show');
+            }
+        }
+        
+        // تهيئة عند تحميل الصفحة
+        window.onload = initializeApp;
     </script>
 </body>
 </html>
