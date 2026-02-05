@@ -438,6 +438,174 @@
             font-size: 0.9rem;
         }
 
+        /* ===== تنسيق صندوق القرآن المحسن ===== */
+        .quran-content-box {
+            background: linear-gradient(135deg, #fffcf5 0%, #f8f3e9 100%);
+            border: 2px solid var(--gold);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quran-content-box::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23d4a574" opacity="0.1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .quran-text-style {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.7rem;
+            color: var(--primary);
+            line-height: 2.8;
+            text-align: justify;
+            direction: rtl;
+            padding: 0 10px;
+        }
+
+        .quran-ornament {
+            font-family: 'Amiri Quran', serif;
+            color: var(--gold);
+            opacity: 0.6;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .quran-ornament.top {
+            margin-bottom: 15px;
+        }
+
+        .quran-ornament.bottom {
+            margin-top: 15px;
+        }
+
+        /* ===== تنسيق صندوق الحديث المحسن ===== */
+        .hadith-content-box {
+            background: linear-gradient(135deg, #f0f7f6 0%, #e8f2f1 100%);
+            border-right: 5px solid var(--primary);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 12px 12px 0;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(10, 95, 79, 0.08);
+        }
+
+        .hadith-content-box::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: -5px;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.1;
+        }
+
+        .hadith-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(10, 95, 79, 0.1);
+        }
+
+        .hadith-icon {
+            font-size: 1.2rem;
+            background: var(--primary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hadith-label {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .hadith-text-style {
+            font-style: italic;
+            color: #2a2a2a;
+            line-height: 1.9;
+            font-size: 1.1rem;
+            text-align: justify;
+            padding: 0 5px;
+        }
+
+        .hadith-footer {
+            text-align: left;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(10, 95, 79, 0.1);
+            color: var(--primary);
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.3rem;
+        }
+
+        /* ===== تنسيق العناصر الدينية المشتركة ===== */
+        .verse-reference {
+            background: rgba(212, 165, 116, 0.1);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin: 0 5px;
+        }
+
+        .narrator {
+            color: var(--secondary);
+            font-weight: 600;
+            background: rgba(45, 139, 116, 0.08);
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .quran-highlight {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(212, 165, 116, 0.08));
+            padding: 2px 8px;
+            border-radius: 8px;
+            border-right: 2px solid var(--gold);
+        }
+
+        .hadith-highlight {
+            background: rgba(10, 95, 79, 0.05);
+            padding: 4px 12px;
+            border-radius: 8px;
+            border-right: 3px solid var(--primary);
+            display: inline-block;
+            margin: 5px 0;
+        }
+
+        /* ===== تأثيرات تفاعلية ===== */
+        .quran-content-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .hadith-content-box:hover {
+            transform: translateX(-5px);
+            transition: all 0.3s ease;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .container {
@@ -468,6 +636,27 @@
             .message-content {
                 max-width: 95%;
                 font-size: 0.95rem;
+            }
+
+            /* تصميم متجاوب للأنماط الجديدة */
+            .quran-text-style {
+                font-size: 1.4rem;
+                line-height: 2.2;
+            }
+            
+            .hadith-text-style {
+                font-size: 1rem;
+                line-height: 1.7;
+            }
+            
+            .quran-content-box {
+                padding: 15px;
+                margin: 15px 0;
+            }
+            
+            .hadith-content-box {
+                padding: 15px;
+                margin: 12px 0;
             }
         }
     </style>
@@ -530,7 +719,6 @@
     </div>
 
     <script>
-
         // System Prompt - مع نظام المعالجة اللغوية المتقدم
         const SYSTEM_PROMPT = `أنت مساعد إسلامي متخصص بنظام معالجة لغوية عربية متقدم.
 
@@ -913,16 +1101,87 @@
             return hasKeyword || (hasQuestionMark && hasCommonReligiousWords);
         }
 
+        // دالة محسنة لمعالجة النصوص الإسلامية
+        function formatIslamicContent(text) {
+            if (!text) return '';
+            
+            let html = text;
+            
+            // 1. تزيين القرآن الكريم [Q] - النسخة المحسنة
+            html = html.replace(/\[Q\](.*?)\[\/Q\]/gs, `
+                <div class="quran-content-box">
+                    <div class="quran-ornament top">﷽</div>
+                    <div class="quran-text-style">﴿ $1 ﴾</div>
+                    <div class="quran-ornament bottom">﴿ ﴾</div>
+                </div>
+            `);
+            
+            // 2. تزيين الحديث النبوي [H] - النسخة المحسنة
+            html = html.replace(/\[H\](.*?)\[\/H\]/gs, `
+                <div class="hadith-content-box">
+                    <div class="hadith-header">
+                        <span class="hadith-icon">📜</span>
+                        <span class="hadith-label">حديث شريف</span>
+                    </div>
+                    <div class="hadith-text-style">« $1 »</div>
+                    <div class="hadith-footer">ﷺ</div>
+                </div>
+            `);
+            
+            // 3. تنسيق السور والآيات المرجعية
+            html = html.replace(/\(سورة (.*?) آية (\d+)\)/g, 
+                '<span class="verse-reference">(سورة $1، آية $2)</span>');
+            
+            // 4. تنسيق أسماء الصحابة والرواة
+            html = html.replace(/(عن|قال|روى) (\w+ بن \w+|\w+ بن \w+ بن \w+)/g, 
+                '$1 <span class="narrator">$2</span>');
+            
+            // 5. إضافة رمز الصلاة على النبي ﷺ
+            html = html.replace(/(النب[يى] محمد)/g, '$1 ﷺ');
+            html = html.replace(/(رسول الله)/g, '$1 ﷺ');
+            
+            return html;
+        }
+
+        // دالة تعزيز النصوص الدينية الشائعة
+        function enhanceReligiousText(text) {
+            let enhanced = text;
+            
+            // تحسين عرض الآيات القرآنية المكتوبة بشكل عادي
+            const quranPatterns = [
+                /(قال الله تعالى[:\s]*)(["'])(.*?)\2/g,
+                /(﴿.*?﴾)/g,
+                /(يَا أَيُّهَا.*?\.)/g
+            ];
+            
+            quranPatterns.forEach(pattern => {
+                enhanced = enhanced.replace(pattern, 
+                    '<span class="quran-highlight">$1</span>');
+            });
+            
+            // تحسين عرض الأحاديث
+            enhanced = enhanced.replace(/(قال رسول الله[:\s]*)(.*?)(?=[\.\n])/g, 
+                '<span class="hadith-highlight">$1$2</span>');
+            
+            return enhanced;
+        }
+
         // Add message to UI and save to chat
         function addMessageToUI(content, role, source = null, similarQuestions = [], saveToChat = true) {
             const div = document.createElement('div');
             div.className = `message ${role}-message`;
             
             // تنسيق المحتوى مع تزيين الآيات
-            let formattedContent = formatArabicText(content);
-            
-            // إضافة تزيين القرآن والحديث
-            formattedContent = formatIslamicContent(formattedContent);
+            let formattedContent;
+            if (role === 'assistant') {
+                // معالجة النص العربي أولاً ثم تزيين المحتوى الإسلامي
+                formattedContent = formatArabicText(content);
+                formattedContent = formatIslamicContent(formattedContent);
+                formattedContent = enhanceReligiousText(formattedContent);
+            } else {
+                // رسائل المستخدم: فقط تنظيف HTML
+                formattedContent = escapeHtml(content);
+            }
             
             let html = `<div class="message-content">${formattedContent}`;
             
@@ -988,6 +1247,15 @@
             const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
             text = text.replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
             
+            // تحسين الأرقام في الترقيم
+            text = text.replace(/(\d+)[\.\)](?=\s)/g, function(match, number) {
+                let arabicNumber = '';
+                for (let digit of number) {
+                    arabicNumber += arabicNumerals[parseInt(digit)];
+                }
+                return arabicNumber + '.';
+            });
+            
             // ===== المرحلة ٣: تزيين الآيات القرآنية =====
             // نمط 1: ﴿ آية ﴾
             text = text.replace(/﴿([^﴾]+)﴾/g, '<span class="quran-verse">﴿$1﴾</span>');
@@ -1011,8 +1279,9 @@
             text = text.replace(/\s*:\s*/g, ': ');
             text = text.replace(/\s*\.\s*/g, '. ');
             
-            // إضافة سطر جديد بعد النقطة (فقرة جديدة)
-            text = text.replace(/\.[\s]*(?=[^\s])/g, '.<br><br>');
+            // تحسين المسافات حول علامات الترقيم العربية
+            text = text.replace(/\s*([،؛:])\s*/g, '$1 ');
+            text = text.replace(/([.؟!])\s+/g, '$1<br><br>');
             
             // معالجة الأسطر المتعددة
             text = text.replace(/\n\n+/g, '<br><br>');
@@ -1022,28 +1291,6 @@
             text = text.replace(/\s{2,}/g, ' ');
             
             return text;
-        }
-        
-        // دالة تزيين المحتوى الإسلامي (القرآن والحديث)
-        function formatIslamicContent(text) {
-            let html = text;
-            
-            // تزيين القرآن
-            html = html.replace(/\[Q\](.*?)\[\/Q\]/gs, `
-                <div class="quran-box" style="font-family:'Amiri Quran'; background:#fffcf5; border:2px solid #d4a574; padding:25px; border-radius:15px; text-align:center; color:#0a5f4f; font-size:1.6rem; margin:15px 0; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
-                    ﴿ $1 ﴾
-                </div>
-            `);
-            
-            // تزيين الحديث
-            html = html.replace(/\[H\](.*?)\[\/H\]/gs, `
-                <div class="hadith-box" style="background:#f0f7f6; border-right:5px solid #0a5f4f; padding:15px 20px; margin:10px 0; font-style:italic; border-radius:0 10px 10px 0;">
-                    <span style="display:block; color:#0a5f4f; font-weight:bold; margin-bottom:5px;">📜 حديث شريف:</span>
-                    $1
-                </div>
-            `);
-            
-            return html;
         }
 
         // Extract source from response
