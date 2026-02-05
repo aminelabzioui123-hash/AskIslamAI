@@ -790,29 +790,13 @@
             typingIndicator.classList.add('active');
 
             try {
-                // إضافة تعليمات "التدقيق الخماسي" في سياق الرسالة
-                let strictPrompt = text;
-                const containsQuranReference = text.includes("آية") || text.includes("سورة") || 
-                                              text.includes("قرآن") || text.includes("القرآن") ||
-                                              text.includes("آيات") || text.includes("السورة");
-                
-                if (containsQuranReference) {
-                    strictPrompt = `⚠️ تنبيه صارم للنموذج: 
-يرجى التحقق من الآية المطلوبة 5 مرات من المصدر قبل كتابتها.
-يُمنع منعاً باتاً الخطأ في نص القرآن الكريم.
-إذا لم تكن متأكداً 100% من دقة الآية، قل "لا أستطيع التأكد من دقة الآية حالياً".
-لا تحاول كتابة الآية من الذاكرة، بل تحقق من المصادر المتوفرة.
-
-السؤال الأصلي: ${text}`;
-                }
-
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        message: strictPrompt, // إرسال السؤال مع تعليمات التدقيق
+                        message: text,
                         chatHistory: chatHistory.slice(-6), // إرسال آخر 6 رسائل فقط لتوفير التوكنز
                         mode: 'comprehensive'     // الوضع الصارم الشامل
                     })
@@ -934,8 +918,11 @@
             const div = document.createElement('div');
             div.className = `message ${role}-message`;
             
-            // تنسيق المحتوى مع تزيين الآيات فقط
+            // تنسيق المحتوى مع تزيين الآيات
             let formattedContent = formatArabicText(content);
+            
+            // إضافة تزيين القرآن والحديث
+            formattedContent = formatIslamicContent(formattedContent);
             
             let html = `<div class="message-content">${formattedContent}`;
             
@@ -1035,6 +1022,28 @@
             text = text.replace(/\s{2,}/g, ' ');
             
             return text;
+        }
+        
+        // دالة تزيين المحتوى الإسلامي (القرآن والحديث)
+        function formatIslamicContent(text) {
+            let html = text;
+            
+            // تزيين القرآن
+            html = html.replace(/\[Q\](.*?)\[\/Q\]/gs, `
+                <div class="quran-box" style="font-family:'Amiri Quran'; background:#fffcf5; border:2px solid #d4a574; padding:25px; border-radius:15px; text-align:center; color:#0a5f4f; font-size:1.6rem; margin:15px 0; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+                    ﴿ $1 ﴾
+                </div>
+            `);
+            
+            // تزيين الحديث
+            html = html.replace(/\[H\](.*?)\[\/H\]/gs, `
+                <div class="hadith-box" style="background:#f0f7f6; border-right:5px solid #0a5f4f; padding:15px 20px; margin:10px 0; font-style:italic; border-radius:0 10px 10px 0;">
+                    <span style="display:block; color:#0a5f4f; font-weight:bold; margin-bottom:5px;">📜 حديث شريف:</span>
+                    $1
+                </div>
+            `);
+            
+            return html;
         }
 
         // Extract source from response
