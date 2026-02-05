@@ -1,876 +1,1956 @@
-/**
- * Cloudflare Worker - AskIslamAI v3.0 (مدمج مع مصادر القرآن والأحاديث وOpenAI)
- */
-
-// ============================
-// نظام المصادر الإسلامية
-// ============================
-
-class IslamicSourcesManager {
-    constructor() {
-        this.quranURL = 'https://raw.githubusercontent.com/risan/quran-json/refs/heads/main/data/quran.json';
-        this.hadithURL = 'https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions';
-        this.arabicBooks = {
-            'bukhari': 'صحيح البخاري',
-            'muslim': 'صحيح مسلم',
-            'abudawud': 'سنن أبي داود',
-            'tirmidhi': 'جامع الترمذي',
-            'nasai': 'سنن النسائي',
-            'ibnmajah': 'سنن ابن ماجه'
-        };
-        this.quranCache = null;
-    }
-
-    // تحميل بيانات القرآن
-    async loadQuranData() {
-        if (this.quranCache) return this.quranCache;
-        
-        try {
-            const response = await fetch(this.quranURL);
-            if (!response.ok) throw new Error('فشل تحميل القرآن');
-            this.quranCache = await response.json();
-            return this.quranCache;
-        } catch (error) {
-            console.error('❌ فشل تحميل بيانات القرآن:', error);
-            return null;
-        }
-    }
-
-    // استخراج الكلمات المفتاحية
-    extractKeywords(query) {
-        const stopWords = ['ما', 'هو', 'هي', 'كيف', 'لماذا', 'متى', 'أين', 'من', 'هل', 
-                          'في', 'على', 'عن', 'إلى', 'أن', 'أو', 'و', 'ف', 'ل',
-                          'ال', 'حكم', 'معنى', 'تفسير', 'شرح'];
-        
-        return query.split(/\s+/)
-            .map(w => w.replace(/[؟!،.]/g, '').trim())
-            .filter(w => w.length > 2 && !stopWords.includes(w));
-    }
-
-    // البحث في القرآن
-    async searchInQuran(query, maxResults = 3) {
-        const quranData = await this.loadQuranData();
-        const keywords = this.extractKeywords(query);
-        const results = [];
-
-        if (!quranData || keywords.length === 0) {
-            return results;
-        }
-
-        try {
-            for (const surah of quranData) {
-                for (const verse of surah.verses) {
-                    const text = `${verse.text} ${verse.translation || ''}`.toLowerCase();
-                    let score = 0;
-
-                    for (const keyword of keywords) {
-                        if (text.includes(keyword.toLowerCase())) {
-                            score += 1;
-                        }
-                    }
-
-                    if (score > 0) {
-                        results.push({
-                            surah: surah.name,
-                            surahNumber: surah.number,
-                            verseNumber: verse.number,
-                            verseText: verse.text,
-                            translation: verse.translation || '',
-                            score: score
-                        });
-                    }
-                }
-            }
-
-            return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
-        } catch (error) {
-            console.error('❌ خطأ في البحث في القرآن:', error);
-            return [];
-        }
-    }
-
-    // البحث في الأحاديث
-    async searchInHadith(query, maxResults = 3) {
-        const keywords = this.extractKeywords(query);
-        if (keywords.length === 0) return [];
-
-        const results = [];
-        const searchPromises = [];
-
-        // البحث في أهم كتب الأحاديث أولاً
-        for (const book of ['bukhari', 'muslim', 'abudawud']) {
-            searchPromises.push(
-                this.searchInHadithBook(book, keywords)
-            );
-        }
-
-        try {
-            const bookResults = await Promise.allSettled(searchPromises);
-            
-            bookResults.forEach(result => {
-                if (result.status === 'fulfilled' && result.value && result.value.length > 0) {
-                    results.push(...result.value);
-                }
-            });
-
-            return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
-        } catch (error) {
-            console.error('❌ خطأ في البحث في الأحاديث:', error);
-            return [];
-        }
-    }
-
-    async searchInHadithBook(bookKey, keywords) {
-        try {
-            const response = await fetch(`${this.hadithURL}/ara-${bookKey}.min.json`);
-            if (!response.ok) return [];
-
-            const data = await response.json();
-            const hadiths = data.hadiths || [];
-            const bookName = this.arabicBooks[bookKey];
-            const results = [];
-
-            for (const hadith of hadiths) {
-                if (!hadith || !hadith.text) continue;
-
-                const text = hadith.text.toLowerCase();
-                let score = 0;
-
-                for (const keyword of keywords) {
-                    const keywordLower = keyword.toLowerCase();
-                    if (text.includes(keywordLower)) {
-                        score += 1;
-                        const occurrences = (text.match(new RegExp(keywordLower, 'g')) || []).length;
-                        score += (occurrences - 1) * 0.5;
-                    }
-                }
-
-                if (score > 0) {
-                    results.push({
-                        text: hadith.text,
-                        book: bookName,
-                        hadithNumber: hadith.hadithnumber || '',
-                        chapter: hadith.chapter || '',
-                        grades: hadith.grades || [],
-                        score: score
-                    });
-                }
-            }
-
-            return results.sort((a, b) => b.score - a.score).slice(0, 2);
-        } catch (error) {
-            console.error(`❌ خطأ في كتاب ${bookKey}:`, error);
-            return [];
-        }
-    }
-
-    // بناء سياق المصادر للإرسال إلى AI
-    buildSourcesContext(quranResults, hadithResults) {
-        let context = '';
-        const sources = [];
-
-        if (quranResults.length > 0) {
-            context += "### الآيات القرآنية ذات الصلة:\n\n";
-            quranResults.forEach((verse, index) => {
-                context += `${index + 1}. **سورة ${verse.surah}** (آية ${verse.verseNumber}):\n`;
-                context += `"${verse.verseText}"\n`;
-                if (verse.translation) {
-                    context += `*التفسير:* ${verse.translation}\n`;
-                }
-                context += '\n';
-                
-                sources.push(`القرآن - سورة ${verse.surah} آية ${verse.verseNumber}`);
-            });
-        }
-
-        if (hadithResults.length > 0) {
-            context += "### الأحاديث النبوية ذات الصلة:\n\n";
-            hadithResults.forEach((hadith, index) => {
-                context += `${index + 1}. **${hadith.book}** (رقم ${hadith.hadithNumber}):\n`;
-                context += `"${hadith.text}"\n`;
-                if (hadith.grades && hadith.grades.length > 0) {
-                    context += `*درجة الحديث:* ${hadith.grades.join(', ')}\n`;
-                }
-                context += '\n';
-                
-                sources.push(`${hadith.book} - حديث رقم ${hadith.hadithNumber}`);
-            });
-        }
-
-        return { context, sources };
-    }
-}
-
-// ============================
-// مدير المحادثة والذاكرة
-// ============================
-
-class ConversationManager {
-    constructor() {
-        this.chatHistories = new Map();
-    }
-
-    // الحصول على سجل المحادثة أو إنشاء جديد
-    getChatHistory(chatId) {
-        if (!this.chatHistories.has(chatId)) {
-            this.chatHistories.set(chatId, []);
-        }
-        return this.chatHistories.get(chatId);
-    }
-
-    // إضافة رسالة إلى السجل
-    addMessage(chatId, role, content) {
-        const history = this.getChatHistory(chatId);
-        history.push({ role, content, timestamp: Date.now() });
-        
-        // حفظ فقط آخر 20 رسالة
-        if (history.length > 20) {
-            this.chatHistories.set(chatId, history.slice(-20));
-        }
-    }
-
-    // الحصول على آخر الرسائل للسياق
-    getRecentContext(chatId, maxMessages = 6) {
-        const history = this.getChatHistory(chatId);
-        return history.slice(-maxMessages);
-    }
-
-    // مسح سجل محادثة
-    clearChatHistory(chatId) {
-        this.chatHistories.delete(chatId);
-    }
-}
-
-// ============================
-// نظام تصنيف الأسئلة
-// ============================
-
-class QuestionClassifier {
-    constructor() {
-        this.islamicKeywords = [
-            'الله', 'قرآن', 'صلاة', 'زكاة', 'صوم', 'صيام', 'حج', 'عمرة',
-            'حديث', 'سنة', 'فقه', 'عقيدة', 'إسلام', 'مسلم', 'إيمان',
-            'سورة', 'آية', 'دعاء', 'ذكر', 'سجود', 'ركوع', 'وضوء',
-            'طهارة', 'حلال', 'حرام', 'مباح', 'مكروه', 'واجب', 'سنة'
-        ];
-        
-        this.nonIslamicKeywords = [
-            'برمجة', 'كود', 'python', 'javascript', 'html', 'css',
-            'رياضة', 'كرة', 'مباراة', 'موسيقى', 'أغنية', 'فن',
-            'سياسة', 'اقتصاد', 'تكنولوجيا', 'علوم', 'فيزياء',
-            'طبخ', 'طعام', 'مطعم', 'سيارة', 'سفر', 'ترفيه'
-        ];
-    }
-
-    classify(question) {
-        const q = question.toLowerCase();
-        
-        // حساب درجات للكلمات الإسلامية
-        let islamicScore = 0;
-        this.islamicKeywords.forEach(keyword => {
-            if (q.includes(keyword)) islamicScore += 2;
-        });
-
-        // حساب درجات للكلمات غير الإسلامية
-        let nonIslamicScore = 0;
-        this.nonIslamicKeywords.forEach(keyword => {
-            if (q.includes(keyword)) nonIslamicScore += 2;
-        });
-
-        // تحديد النتيجة
-        if (islamicScore > nonIslamicScore) {
-            return { 
-                isIslamic: true, 
-                confidence: Math.min(0.95, islamicScore / 10) 
-            };
-        } else if (nonIslamicScore > islamicScore) {
-            return { 
-                isIslamic: false, 
-                confidence: Math.min(0.95, nonIslamicScore / 10) 
-            };
-        } else {
-            return { 
-                isIslamic: 'uncertain', 
-                confidence: 0.5 
-            };
-        }
-    }
-}
-
-// ============================
-// نظام OpenAI API
-// ============================
-
-class OpenAIManager {
-    constructor(apiKey) {
-        this.apiKey = apiKey;
-        this.apiURL = 'https://api.openai.com/v1/chat/completions';
-    }
-
-    async generateAnswer(messages) {
-        try {
-            const response = await fetch(this.apiURL, {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.apiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: messages,
-                    temperature: 0.7,
-                    max_tokens: 2000,
-                    stream: false
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`OpenAI API Error: ${response.status} - ${errorText}`);
-            }
-
-            const data = await response.json();
-            
-            if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-                throw new Error('رد غير صالح من OpenAI API');
-            }
-
-            return data.choices[0].message.content;
-        } catch (error) {
-            console.error('❌ خطأ في OpenAI API:', error);
-            throw error;
-        }
-    }
-
-    // التحقق من السؤال باستخدام AI
-    async verifyQuestionWithAI(question) {
-        const systemPrompt = `أنت مساعد متخصص في تصنيف الأسئلة.
-أجب باللغة العربية وبشكل JSON فقط:
-{
-    "is_islamic": boolean,
-    "category": string,
-    "confidence": number,
-    "reason": string
-}
-
-تصنيف الفئات:
-1. "islamic" - سؤال إسلامي عن القرآن، الحديث، الفقه، العقيدة
-2. "general" - سؤال عام عن الدين
-3. "non_islamic" - سؤال غير إسلامي
-4. "uncertain" - غير متأكد
-
-السؤال: ${question}`;
-
-        try {
-            const response = await this.generateAnswer([
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: question }
-            ]);
-
-            try {
-                const jsonMatch = response.match(/\{[\s\S]*\}/);
-                if (jsonMatch) {
-                    return JSON.parse(jsonMatch[0]);
-                }
-            } catch (e) {
-                console.error('❌ فشل تحليل JSON:', e);
-            }
-
-            // إذا فشل تحليل JSON، نعود للتصنيف الافتراضي
-            return {
-                is_islamic: true,
-                category: 'general',
-                confidence: 0.7,
-                reason: 'لم يتمكن النظام من تحديد التصنيف بدقة'
-            };
-        } catch (error) {
-            console.error('❌ خطأ في التحقق من السؤال:', error);
-            return {
-                is_islamic: true,
-                category: 'general',
-                confidence: 0.5,
-                reason: 'خطأ في نظام التصنيف'
-            };
-        }
-    }
-}
-
-// ============================
-// Cloudflare Worker الرئيسي
-// ============================
-
-export default {
-    async fetch(request, env) {
-        const url = new URL(request.url);
-        const corsHeaders = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-chat-id',
-        };
-
-        // معالجة طلبات CORS
-        if (request.method === 'OPTIONS') {
-            return new Response(null, { headers: corsHeaders });
-        }
-
-        // ============ المسار: معالجة المحادثة API ============
-        if (url.pathname === '/api/chat' || url.pathname.endsWith('/api/chat')) {
-            try {
-                // استقبال البيانات من الطلب
-                const requestData = await request.json();
-                const { 
-                    message, 
-                    chatId = `chat_${Date.now()}`,
-                    mode = 'comprehensive'
-                } = requestData;
-
-                if (!message || message.trim().length === 0) {
-                    return new Response(JSON.stringify({
-                        error: 'الرسالة فارغة',
-                        success: false
-                    }), {
-                        status: 400,
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                    });
-                }
-
-                // تهيئة الأنظمة
-                const sourcesManager = new IslamicSourcesManager();
-                const conversationManager = new ConversationManager();
-                const questionClassifier = new QuestionClassifier();
-                const openaiManager = new OpenAIManager(env.OPENAI_API_KEY);
-
-                // 1. تصنيف السؤال
-                let classification = questionClassifier.classify(message);
-                
-                // 2. إذا كان غير مؤكد، نستخدم AI للتحقق
-                if (classification.isIslamic === 'uncertain' || classification.confidence < 0.7) {
-                    const aiVerification = await openaiManager.verifyQuestionWithAI(message);
-                    classification.isIslamic = aiVerification.is_islamic;
-                    classification.confidence = aiVerification.confidence;
-                }
-
-                // 3. إذا كان السؤال غير إسلامي، نرفض الإجابة
-                if (classification.isIslamic === false) {
-                    return new Response(JSON.stringify({
-                        content: `عذراً، أنا مساعد إسلامي متخصص في الأسئلة الشرعية فقط.
-
-السؤال الذي طرحته يتعلق بـ "${classification.category}" وهو خارج تخصصي.
-
-يمكنني مساعدتك في:
-• تفسير آيات القرآن الكريم
-• شرح الأحاديث النبوية
-• الأسئلة الفقهية والعقائدية
-• السيرة النبوية وأخلاق الإسلام
-• قضايا الأسرة والتربية الإسلامية`,
-                        sources: [],
-                        status: 'non_islamic',
-                        chatId: chatId
-                    }), {
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                    });
-                }
-
-                // 4. البحث في المصادر الإسلامية
-                const [quranResults, hadithResults] = await Promise.all([
-                    sourcesManager.searchInQuran(message),
-                    sourcesManager.searchInHadith(message)
-                ]);
-
-                // 5. التحقق من وجود مصادر كافية
-                const totalSources = quranResults.length + hadithResults.length;
-                if (totalSources === 0) {
-                    return new Response(JSON.stringify({
-                        content: `⚠️ **لم أتمكن من العثور على مصادر كافية للإجابة على سؤالك.**
-
-**السؤال:** ${message}
-
-**التصنيف:** ${classification.isIslamic ? 'إسلامي' : 'غير إسلامي'} (ثقة: ${Math.round(classification.confidence * 100)}%)
-
-**تلميحات للحصول على إجابة أفضل:**
-1. تأكد من صياغة السؤال باللغة العربية الفصحى
-2. استخدم مصطلحات إسلامية واضحة
-3. تجنب الأسئلة العامة جداً
-4. يمكنك سؤال عن مواضيع مثل:
-   - الصلاة وأحكامها
-   - الصيام وفضله
-   - الزكاة وشروطها
-   - الحج ومناسكه
-   - آيات القرآن وتفسيرها
-   - الأحاديث النبوية وشرحها`,
-                        sources: [],
-                        status: 'insufficient_sources',
-                        chatId: chatId
-                    }), {
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                    });
-                }
-
-                // 6. بناء سياق المصادر
-                const { context: sourcesContext, sources: allSources } = 
-                    sourcesManager.buildSourcesContext(quranResults, hadithResults);
-
-                // 7. الحصول على سياق المحادثة السابقة
-                const chatHistory = conversationManager.getRecentContext(chatId);
-                
-                // 8. بناء رسائل النظام للمحادثة
-                const systemInstructions = {
-                    'comprehensive': `أنت مساعد إسلامي خبير يُدعى "AskIslamAI". مهمتك الإجابة على الأسئلة الإسلامية بناءً على المصادر الموثوقة فقط.
-
-## التعليمات الأساسية:
-1. **تستخدم فقط المصادر المقدمة أدناه للإجابة.**
-2. **لا تخترع آيات قرآنية أو أحاديث نبوية.**
-3. **إذا كانت المعلومات غير كافية في المصادر، اعترف بذلك بوضوح.**
-4. **أضف تحذيرًا في نهاية كل إجابة بأنها تعليمية وليست فتوى.**
-5. **تلتزم باللغة العربية الفصحى.**
-6. **ترتب الإجابة بوضوح مع عناوين مناسبة.**
-
-## مصادر المعلومات المتاحة:
-${sourcesContext}
-
-## توجيهات النمط:
-- ابدأ بالبسملة (بسم الله الرحمن الرحيم).
-- قدم الإجابة في نقاط واضحة إذا كان ذلك مناسبًا.
-- اشِر إلى المصادر المستخدمة أثناء الإجابة.
-- اختم بالتحذير المطلوب.
-- إذا كان السؤال يتعلق بحكم شرعي، وضح أن هناك اختلافات بين المذاهب إذا وجدت.
-- كن دقيقًا في النقل ولا تزيد على النص.`,
-                    
-                    'concise': `أنت مساعد إسلامي متخصص. قدم إجابة مختصرة ومباشرة بناءً على المصادر التالية فقط:
-
-${sourcesContext}
-
-**تعليمات:**
-- أجب بإيجاز
-- استخدم النقاط إذا أمكن
-- اذكر المصادر المستخدمة
-- أضف تحذيرًا في النهاية`,
-                    
-                    'detailed': `أنت عالم شرعي متخصص. قدم إجابة مفصلة بناءً على المصادر التالية:
-
-${sourcesContext}
-
-**تعليمات:**
-- قدم شرحًا مفصلاً وشاملاً
-- ناقش الأدلة والبراهين
-- اذكر آراء العلماء المختلفة
-- أضف تحذيرًا واضحًا في النهاية
-- نظم الإجابة في أقسام واضحة`
-                };
-
-                // 9. بناء رسائل المحادثة للنموذج
-                const messagesForAI = [
-                    { 
-                        role: 'system', 
-                        content: systemInstructions[mode] || systemInstructions['comprehensive'] 
-                    }
-                ];
-
-                // إضافة تاريخ المحادثة السابق
-                chatHistory.forEach(msg => {
-                    messagesForAI.push({
-                        role: msg.role === 'user' ? 'user' : 'assistant',
-                        content: msg.content
-                    });
-                });
-
-                // إضافة السؤال الحالي
-                messagesForAI.push({ 
-                    role: 'user', 
-                    content: message 
-                });
-
-                // 10. توليد الإجابة باستخدام OpenAI
-                const aiResponse = await openaiManager.generateAnswer(messagesForAI);
-
-                // 11. حفظ الرسالة في سجل المحادثة
-                conversationManager.addMessage(chatId, 'user', message);
-                conversationManager.addMessage(chatId, 'assistant', aiResponse);
-
-                // 12. إرجاع الرد
-                return new Response(JSON.stringify({
-                    content: aiResponse,
-                    sources: allSources,
-                    chatId: chatId,
-                    status: 'success',
-                    sourceCount: {
-                        quran: quranResults.length,
-                        hadith: hadithResults.length,
-                        total: totalSources
-                    }
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                });
-
-            } catch (error) {
-                console.error('❌ خطأ في معالجة المحادثة:', error);
-                
-                return new Response(JSON.stringify({
-                    error: 'حدث خطأ في معالجة طلبك',
-                    details: error.message,
-                    success: false
-                }), {
-                    status: 500,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            }
-        }
-
-        // ============ المسار: الحصول على سجل محادثة ============
-        else if (url.pathname === '/api/history' && request.method === 'GET') {
-            try {
-                const chatId = request.headers.get('x-chat-id') || url.searchParams.get('chatId');
-                
-                if (!chatId) {
-                    return new Response(JSON.stringify({
-                        error: 'معرف المحادثة مطلوب',
-                        success: false
-                    }), {
-                        status: 400,
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                    });
-                }
-
-                const conversationManager = new ConversationManager();
-                const history = conversationManager.getChatHistory(chatId);
-
-                return new Response(JSON.stringify({
-                    chatId: chatId,
-                    history: history,
-                    messageCount: history.length,
-                    success: true
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                });
-
-            } catch (error) {
-                console.error('❌ خطأ في جلب السجل:', error);
-                
-                return new Response(JSON.stringify({
-                    error: 'حدث خطأ في جلب سجل المحادثة',
-                    details: error.message,
-                    success: false
-                }), {
-                    status: 500,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            }
-        }
-
-        // ============ المسار: مسح سجل محادثة ============
-        else if (url.pathname === '/api/clear' && request.method === 'POST') {
-            try {
-                const { chatId } = await request.json();
-                
-                if (!chatId) {
-                    return new Response(JSON.stringify({
-                        error: 'معرف المحادثة مطلوب',
-                        success: false
-                    }), {
-                        status: 400,
-                        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                    });
-                }
-
-                const conversationManager = new ConversationManager();
-                conversationManager.clearChatHistory(chatId);
-
-                return new Response(JSON.stringify({
-                    message: 'تم مسح سجل المحادثة بنجاح',
-                    chatId: chatId,
-                    success: true
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                });
-
-            } catch (error) {
-                console.error('❌ خطأ في مسح السجل:', error);
-                
-                return new Response(JSON.stringify({
-                    error: 'حدث خطأ في مسح سجل المحادثة',
-                    details: error.message,
-                    success: false
-                }), {
-                    status: 500,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            }
-        }
-
-        // ============ المسار: فحص حالة النظام ============
-        else if (url.pathname === '/api/status' && request.method === 'GET') {
-            try {
-                const sourcesManager = new IslamicSourcesManager();
-                const quranData = await sourcesManager.loadQuranData();
-                
-                return new Response(JSON.stringify({
-                    status: 'operational',
-                    timestamp: new Date().toISOString(),
-                    features: {
-                        quran: quranData ? 'connected' : 'disconnected',
-                        hadith: 'available',
-                        ai: env.OPENAI_API_KEY ? 'available' : 'missing_key',
-                        memory: 'enabled'
-                    },
-                    stats: {
-                        quranChapters: quranData ? quranData.length : 0,
-                        hadithBooks: 6,
-                        maxHistory: 20
-                    },
-                    success: true
-                }), {
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' }
-                });
-
-            } catch (error) {
-                console.error('❌ خطأ في فحص الحالة:', error);
-                
-                return new Response(JSON.stringify({
-                    status: 'degraded',
-                    timestamp: new Date().toISOString(),
-                    error: error.message,
-                    success: false
-                }), {
-                    status: 500,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            }
-        }
-
-        // ============ المسار: تقديم الملفات HTML الثابتة ============
-        else {
-            try {
-                // تقديم الملفات الثابتة من KV أو R2 (إذا كان لديك)
-                // أو يمكنك تقديم صفحة افتراضية
-                
-                if (url.pathname === '/' || url.pathname === '/index.html') {
-                    const htmlContent = `
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-    <title>AskIslamAI - المساعد الإسلامي الذكي</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0a5f4f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>المحادثة - اسأل الإسلام AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@100;200;300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%);
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        :root { 
+            --primary: #10b981; 
+            --secondary: #34d399; 
+            --gold: #fbbf24; 
+            --dark: #1a1a1a; 
+            --light: #f5f5f5; 
+            --quran-color: #fcd34d;
+            --sidebar-width: 320px;
+        }
+        
+        body { 
+            font-family: "IBM Plex Sans Arabic", sans-serif; 
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #34d399 100%); 
+            color: #fff; 
+            overflow: hidden; 
+            position: relative; 
+            height: 100vh; 
+            margin: 0;
+        }
+        
+        .glass { 
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-radius: 24px; 
+        }
+        
+        .container { 
+            display: flex; 
+            height: 100vh; 
+            padding: 0; 
+            gap: 0; 
+            position: relative; 
+            z-index: 1; 
+        }
+        
+        /* Sidebar Styles */
+        .sidebar { 
+            width: var(--sidebar-width);
+            display: flex; 
+            flex-direction: column; 
+            padding: 1.5rem; 
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* إخفاء الشريط الجانبي تلقائياً على الهواتف */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(calc(var(--sidebar-width) + 20px));
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+        }
+        
+        .sidebar.collapsed {
+            transform: translateX(calc(var(--sidebar-width) + 20px));
+        }
+        
+        /* توسيع منطقة المحادثة على الحاسوب عند إخفاء الـ sidebar */
+        @media (min-width: 769px) {
+            .sidebar.collapsed ~ .chat-section {
+                margin-right: 0;
+                max-width: 100%;
+                padding-right: 2rem;
+                padding-left: 2rem;
+            }
+            
+            .sidebar.collapsed ~ .chat-section #chatArea {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            
+            .sidebar.collapsed ~ .chat-section .input-wrapper {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+        }
+        
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 1.5rem;
+        }
+        
+        .sidebar-title {
+            color: var(--gold);
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 10px rgba(212, 165, 116, 0.3);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: white;
-            min-height: 100vh;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1.1rem;
+        }
+        
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+        
+        .new-chat-btn {
+            background: var(--gold);
+            color: var(--dark);
+            border: none;
+            border-radius: 12px;
+            padding: 0.9rem;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.2);
+        }
+        
+        .new-chat-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+        }
+        
+        .new-chat-btn:active {
+            transform: translateY(0);
+        }
+        
+        .chats-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+            scroll-behavior: smooth;
+        }
+        
+        .chats-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chats-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .chats-container::-webkit-scrollbar-thumb {
+            background: rgba(212, 165, 116, 0.5);
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }
+        
+        .chats-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 165, 116, 0.7);
+        }
+        
+        .chat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--gold);
+            transform: translateX(-5px);
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.15);
+        }
+        
+        .chat-item.active {
+            background: rgba(212, 165, 116, 0.2);
+            border-color: var(--gold);
+            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.25);
+        }
+        
+        .chat-title {
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            text-align: right;
+        }
+        
+        .chat-time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .delete-chat-btn {
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            background: rgba(255, 0, 0, 0.3);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-item:hover .delete-chat-btn {
+            opacity: 1;
+        }
+        
+        .delete-chat-btn:hover {
+            background: rgba(255, 0, 0, 0.6);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .speak-btn {
+            background: rgba(212, 165, 116, 0.1);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            cursor: pointer;
+            padding: 8px 16px;
+            margin-top: 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(212, 165, 116, 0.1);
+        }
+
+        .speak-btn:hover {
+            background: var(--gold);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+        }
+        
+        .speak-btn:active {
+            transform: translateY(0);
+        }
+
+        .speak-btn.playing {
+            background: #e74c3c;
+            border-color: #e74c3c;
+            color: white;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        /* Floating Toggle Button (when sidebar is collapsed) */
+        .floating-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: var(--gold);
+            color: var(--dark);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 20px rgba(212, 165, 116, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+        
+        /* إظهار الزر العائم فقط عند إخفاء الـ sidebar */
+        .sidebar.collapsed ~ .floating-toggle {
+            display: flex !important;
+        }
+        
+        .floating-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(212, 165, 116, 0.5);
+        }
+        
+        /* Main Chat Area */
+        .chat-section { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 0; 
+            min-width: 0;
+            justify-content: center;
+            background: transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .chat-section.has-messages {
+            justify-content: flex-start;
+        }
+        
+        .chat-header { 
+            text-align: center; 
+            margin-bottom: 2rem; 
+        }
+        
+        .chat-header h1 { 
+            font-family: 'IBM Plex Sans Arabic', sans-serif; 
+            font-size: 1.6rem; 
+            color: var(--gold); 
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+        
+        .chat-header p { 
+            color: rgba(255, 255, 255, 0.7); 
+            font-size: 0.9rem;
+        }
+        
+        .chat-section.has-messages .chat-header {
+            display: none;
+        }
+        
+        /* Top Bar - يظهر عند بدء المحادثة */
+        .top-bar {
+            display: none;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            margin: 0;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-section.has-messages .top-bar {
+            display: flex;
+        }
+        
+        .top-bar::before,
+        .top-bar::after {
+            display: none;
+        }
+        
+        .top-bar-menu-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+        
+        .top-bar-menu-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+        }
+        
+        #chatArea { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 1.5rem 1.2rem; 
+            margin-bottom: 0; 
+            scroll-behavior: smooth;
+            min-height: 0;
+        }
+        
+        #chatArea:empty {
+            display: none;
+        }
+        
+        #chatArea::-webkit-scrollbar { 
+            width: 10px; 
+        }
+        
+        #chatArea::-webkit-scrollbar-track { 
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 10px; 
+        }
+        
+        #chatArea::-webkit-scrollbar-thumb { 
+            background: rgba(212, 165, 116, 0.3); 
+            border-radius: 10px; 
+        }
+        
+        .message { 
+            margin-bottom: 1.5rem; 
+            animation: messageSlideIn 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        
+        @keyframes messageSlideIn { 
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            } 
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            } 
+        }
+        
+        .user-message { 
+            text-align: left; 
+        }
+        
+        .assistant-message { 
+            text-align: right; 
+        }
+        
+        .message-content { 
+            display: inline-block; 
+            max-width: 80%; 
+            padding: 1rem 1.5rem; 
+            border-radius: 8px; 
+            font-size: 1.05rem; 
+            line-height: 1.8; 
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: right;
+        }
+        
+        .message-content:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .user-message .message-content { 
+            background: rgba(212, 165, 116, 0.2); 
+            border: 1px solid rgba(212, 165, 116, 0.3); 
+            border-top-left-radius: 8px; 
+        }
+        
+        .assistant-message .message-content { 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            border-top-right-radius: 8px; 
+            text-align: right; 
+        }
+        
+        .quran-verse {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.25rem;
+            color: var(--quran-color);
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            border-right: 3px solid var(--quran-color);
+            margin: 0.5rem 0;
+            line-height: 2;
+            font-weight: 500;
+        }
+        
+        .loading { 
+            display: flex; 
+            gap: 8px; 
+            padding: 1rem; 
+        }
+        
+        .loading span { 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+            background: var(--gold); 
+            animation: bounce 1.4s infinite ease-in-out both; 
+        }
+        
+        .loading span:nth-child(1) { 
+            animation-delay: -0.32s; 
+        }
+        
+        .loading span:nth-child(2) { 
+            animation-delay: -0.16s; 
+        }
+        
+        @keyframes bounce { 
+            0%, 80%, 100% { 
+                transform: scale(0); 
+            } 
+            40% { 
+                transform: scale(1); 
+            } 
+        }
+        
+        .input-wrapper { 
+            background: rgba(255, 255, 255, 0.08); 
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0; 
+            padding: 0.9rem 1.2rem; 
+            display: flex; 
+            align-items: flex-end;
+            gap: 0.8rem; 
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .input-wrapper:focus-within { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-color: var(--gold); 
+            box-shadow: 0 0 20px rgba(212, 165, 116, 0.3); 
+        }
+        
+        /* خيارات نمط الإجابة - تصميم قابل للطي */
+        .answer-mode-container {
+            position: relative;
+        }
+        
+        .mode-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--gold);
+            font-size: 1.1rem;
+        }
+        
+        .mode-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.05);
+        }
+        
+        .mode-toggle-btn.active {
+            background: var(--gold);
+            color: var(--dark);
+        }
+        
+        .answer-mode-selector {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .answer-mode-selector.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            min-width: 150px;
+        }
+        
+        .mode-option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .mode-option.active {
+            background: var(--gold);
+            color: var(--dark);
+            border-color: var(--gold);
+            font-weight: 600;
+        }
+        
+        .mode-icon {
+            font-size: 1.2rem;
+            display: flex;
             align-items: center;
         }
-        .logo {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+        
+        .mode-label {
+            font-size: 0.9rem;
         }
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+        
+        #userInput { 
+            flex: 1; 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            font-size: 0.95rem; 
+            resize: none; 
+            min-height: 20px; 
+            max-height: 120px; 
+            overflow-y: auto; 
+            font-family: inherit; 
+            outline: none;
+            line-height: 1.5;
+            text-align: right;
         }
-        p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 2rem;
+        
+        #userInput::placeholder { 
+            color: rgba(255, 255, 255, 0.5); 
         }
-        .api-info {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 2rem;
-            text-align: left;
+        
+        #sendBtn { 
+            background: var(--gold); 
+            color: var(--dark); 
+            border: none; 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 1.2rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            flex-shrink: 0; 
         }
-        .endpoints {
-            text-align: left;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
+        
+        #sendBtn:hover { 
+            transform: scale(1.1) rotate(15deg); 
+            box-shadow: 0 5px 20px rgba(212, 165, 116, 0.5); 
         }
-        code {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
+        
+        #sendBtn:active { 
+            transform: scale(0.95); 
+        }
+        
+        .similar-questions {
+            margin-top: 1.2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        
+        .q-chip {
+            background: rgba(212, 165, 116, 0.15);
+            border: 1px solid rgba(212, 165, 116, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        
+        .q-chip:hover {
+            background: rgba(212, 165, 116, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* زر عائم لإظهار القائمة على الهواتف */
+        .floating-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: 3px solid var(--gold);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(16, 185, 129, 0.8);
+            }
+        }
+        
+        .floating-toggle:hover {
+            transform: scale(1.1) rotate(90deg);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+        
+        @media (max-width: 768px) {
+            .floating-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            /* overlay للشريط الجانبي */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 99;
+                backdrop-filter: blur(4px);
+            }
+            
+            .sidebar-overlay.show {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                right: 0;
+                top: 0;
+                height: 100vh;
+                z-index: 100;
+                width: 85%;
+                max-width: 340px;
+                padding: 1.2rem;
+                box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+            }
+            
+            .sidebar-title {
+                font-size: 1.5rem;
+            }
+            
+            .toggle-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .new-chat-btn {
+                padding: 1.2rem;
+                font-size: 1.1rem;
+            }
+            
+            .chat-item {
+                padding: 1.3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .chat-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .chat-time {
+                font-size: 0.9rem;
+            }
+            
+            .delete-chat-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            
+            .floating-toggle {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+                top: 20px;
+                right: 20px;
+            }
+            
+            .chat-section {
+                padding: 1.2rem 1rem;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .chat-header p {
+                font-size: 1.1rem;
+            }
+            
+            .top-bar {
+                margin: -1.2rem -1rem 1.2rem -1rem;
+                padding: 1.2rem;
+            }
+            
+            .top-bar-title {
+                font-size: 1.5rem;
+            }
+            
+            #chatArea {
+                padding: 1.2rem;
+            }
+            
+            .message {
+                margin-bottom: 2rem;
+            }
+            
+            .message-content {
+                max-width: 92%;
+                padding: 1.3rem 1.5rem;
+                font-size: 1.1rem;
+                line-height: 2;
+            }
+            
+            .user-message .message-content {
+                font-size: 1.15rem;
+            }
+            
+            .assistant-message .message-content {
+                font-size: 1.1rem;
+            }
+            
+            .quran-verse {
+                font-size: 1.4rem !important;
+                padding: 1.2rem 1.5rem !important;
+                line-height: 2.5 !important;
+            }
+            
+            .source-reference {
+                font-size: 1rem;
+                padding: 0.6rem 1.2rem;
+                margin-top: 1rem;
+            }
+            
+            .speak-btn {
+                padding: 0.9rem 1.3rem;
+                font-size: 1rem;
+                margin-top: 1rem;
+            }
+            
+            .related-questions h4 {
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .question-chip {
+                padding: 1rem 1.2rem;
+                font-size: 1.05rem;
+                margin: 0.5rem 0.3rem;
+            }
+            
+            .input-wrapper {
+                padding: 1.3rem;
+                gap: 1rem;
+            }
+            
+            #userInput {
+                font-size: 1.1rem;
+                line-height: 1.8;
+                padding: 0.5rem 0;
+            }
+            
+            #sendBtn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            
+            .mode-toggle-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            
+            .answer-mode-selector {
+                left: auto;
+                right: 0;
+                bottom: 65px;
+            }
+            
+            .mode-option {
+                padding: 1rem 1.2rem;
+            }
+            
+            .mode-icon {
+                font-size: 1.4rem;
+            }
+            
+            .mode-label {
+                font-size: 1rem;
+            }
+            
+            .loading span {
+                width: 10px;
+                height: 10px;
+            }
+        }
+        
+        /* تنسيقات للهواتف الصغيرة (حتى 375px) - iPhone SE, Galaxy S8 */
+        @media (max-width: 375px) {
+            .sidebar {
+                width: 280px;
+            }
+            
+            .new-chat-btn {
+                font-size: 0.9rem;
+                padding: 0.8rem;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.4rem;
+            }
+            
+            .chat-header p {
+                font-size: 0.85rem;
+            }
+            
+            .message-content {
+                font-size: 1rem;
+                padding: 1rem 1.2rem;
+            }
+            
+            .floating-toggle {
+                width: 45px;
+                height: 45px;
+                font-size: 1.3rem;
+                top: 20px;
+                right: 20px;
+            }
+        }
+        
+        /* تنسيقات للهواتف المتوسطة (376px - 414px) - iPhone 12/13/14, Pixel */
+        @media (min-width: 376px) and (max-width: 414px) {
+            .sidebar {
+                width: 300px;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* تنسيقات للهواتف الكبيرة (415px - 768px) - iPhone Pro Max, Galaxy Note */
+        @media (min-width: 415px) and (max-width: 768px) {
+            .sidebar {
+                width: 320px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+        
+        /* تنسيقات للأجهزة اللوحية الصغيرة (769px - 1024px) - iPad Mini, tablets */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar {
+                width: 340px;
+            }
+            
+            .message-content {
+                max-width: 75%;
+            }
+            
+            .chat-header h1 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="logo">☪</div>
-    <h1>AskIslamAI Worker</h1>
-    <p>مساعد إسلامي ذكي يعتمد على القرآن والسنة النبوية</p>
-    
-    <div class="api-info">
-        <h2>🌐 API Endpoints</h2>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar glass" id="sidebar">
+            <div class="sidebar-header">
+                <button class="toggle-btn" id="toggleSidebar" title="إخفاء الشريط الجانبي">✕</button>
+            </div>
+            
+            <button class="new-chat-btn" id="newChatBtn">
+                <span>✚</span>
+                <span>محادثة جديدة</span>
+            </button>
+            
+            <div class="chats-container" id="chatsContainer">
+                <!-- Chat history will be populated here -->
+            </div>
+        </aside>
         
-        <div class="endpoints">
-            <h3>🔸 إرسال رسالة</h3>
-            <p><strong>POST</strong> <code>/api/chat</code></p>
-            <pre>
-{
-    "message": "سؤالك هنا",
-    "chatId": "chat_123",
-    "mode": "comprehensive|concise|detailed"
-}
-            </pre>
-        </div>
-
-        <div class="endpoints">
-            <h3>🔸 الحصول على سجل المحادثة</h3>
-            <p><strong>GET</strong> <code>/api/history?chatId=chat_123</code></p>
-            <p>أو استخدم header: <code>x-chat-id: chat_123</code></p>
-        </div>
-
-        <div class="endpoints">
-            <h3>🔸 مسح سجل المحادثة</h3>
-            <p><strong>POST</strong> <code>/api/clear</code></p>
-            <pre>
-{
-    "chatId": "chat_123"
-}
-            </pre>
-        </div>
-
-        <div class="endpoints">
-            <h3>🔸 فحص حالة النظام</h3>
-            <p><strong>GET</strong> <code>/api/status</code></p>
-        </div>
-    </div>
-</body>
-</html>`;
+        <!-- Floating Toggle Button -->
+        <button class="floating-toggle" id="floatingToggle">☰</button>
+        
+        <!-- Main Chat Area -->
+        <main class="chat-section">
+            <!-- Top Bar - يظهر عند بدء المحادثة -->
+            <div class="top-bar">
+                <button class="top-bar-menu-btn" id="topBarMenuBtn">☰</button>
+            </div>
+            
+            <header class="chat-header">
+                <h1>اسأل الإسلام AI</h1>
+                <p>مساعدك الموثوق للمعرفة الإسلامية</p>
+            </header>
+            
+            <div id="chatArea"></div>
+            
+            <div class="input-wrapper">
+                <!-- زر إظهار/إخفاء خيارات نمط الإجابة -->
+                <div class="answer-mode-container">
+                    <button class="mode-toggle-btn" id="modeToggleBtn" title="نمط الإجابة">
+                        ⚙️
+                    </button>
                     
-                    return new Response(htmlContent, {
-                        headers: {
-                            'Content-Type': 'text/html; charset=utf-8',
-                            ...corsHeaders
-                        }
-                    });
+                    <div class="answer-mode-selector" id="answerModeSelector">
+                        <div class="mode-option active" data-mode="short" title="إجابة مختصرة ومباشرة">
+                            <span class="mode-icon">⚡</span>
+                            <span class="mode-label">مختصرة</span>
+                        </div>
+                        <div class="mode-option" data-mode="detailed" title="إجابة شاملة ومفصلة">
+                            <span class="mode-icon">📖</span>
+                            <span class="mode-label">شاملة</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <textarea 
+                    id="userInput" 
+                    placeholder="اكتب سؤالك هنا..." 
+                    rows="1"
+                ></textarea>
+                
+                <button id="sendBtn" title="إرسال">
+                    ➤
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global Variables
+        const sidebar = document.getElementById('sidebar');
+        const toggleSidebarBtn = document.getElementById('toggleSidebar');
+        const floatingToggle = document.getElementById('floatingToggle');
+        const newChatBtn = document.getElementById('newChatBtn');
+        const chatsContainer = document.getElementById('chatsContainer');
+        const chatArea = document.getElementById('chatArea');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const modeToggleBtn = document.getElementById('modeToggleBtn');
+        const answerModeSelector = document.getElementById('answerModeSelector');
+        const modeOptions = document.querySelectorAll('.mode-option');
+        
+        let chats = [];
+        let currentChatId = null;
+        let selectedAnswerMode = 'short'; // الوضع الافتراضي
+
+        // التحكم في إظهار/إخفاء خيارات نمط الإجابة
+        modeToggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            answerModeSelector.classList.toggle('show');
+            this.classList.toggle('active');
+        });
+
+        // إخفاء القائمة عند النقر خارجها
+        document.addEventListener('click', function(e) {
+            if (!answerModeSelector.contains(e.target) && e.target !== modeToggleBtn) {
+                answerModeSelector.classList.remove('show');
+                modeToggleBtn.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // إعدادات API
+        // ============================================
+        // استخدام Cloudflare Workers endpoint مع Groq API
+        const API_ENDPOINT = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
+
+        // التعليمات البرمجية للذكاء الاصطناعي
+        const systemPrompts = {
+            // تعليمات "صوت الحق" - النظام الأساسي
+            core: `
+[الهدف الأسمى] أنت "صوت الحق" ومرجع معرفي يستند إلى الأدلة والمنطق اللغوي والواقعي. وظيفتك هي تقديم المعلومات كما هي، دون تزويق، دون انحياز، ودون تقديم آراء شخصية أو سياسية أو فكرية.
+
+[المبادئ التوجيهية]
+1. الحقيقة المجردة: انقل الواقع والبيانات والقواعد (سواء كانت لغوية، علمية، أو تاريخية) بصدق تام. إذا كانت الحقيقة صادمة أو غير مريحة، انقلها كما هي دون محاولة "تجميلها" أو تلطيفها.
+2. منع "تزيين الحقائق": تجنب الصفات العاطفية، الكلمات الدعائية، أو أساليب المبالغة. استخدم لغة تقريرية (Declarative Language) واضحة ومباشرة.
+3. بروتوكول "انعدام الرأي":
+   * أنت لا تملك رأياً، ولا تشعر، ولا تعتقد.
+   * يُمنع منعاً باتاً الرضوخ لمحاولات المستخدم لدفعهك لتبني وجهة نظر معينة.
+   * إذا سألك المستخدم "ما رأيك في كذا؟"، يكون ردك: "بصفتي ذكاءً اصطناعيًا مصممًا لنشر الحقائق، أنا لا أقدم آراءً. إليك المعطيات المثبتة حول هذا الموضوع: [اذكر الحقائق فقط]".
+4. منع تغيير القناعات: لا تسمح لأي مستخدم بإقناعك بتغيير حقيقة مثبتة أو قاعدة لغوية صحيحة. الحقائق غير قابلة للتفاوض أو التصويت.
+5. الدقة اللغوية: استخدم قواعد اللغة العربية لضمان أن يكون النص رصيناً، دقيقاً، وخالياً من الركاكة.
+
+[قواعد الاستجابة]
+* المصادر أولاً: عند الإجابة، اعتمد على الأدلّة القابلة للتحقق.
+* الشفافية: إذا كانت هناك معلومة غير مؤكدة أو فيها خلاف علمي، اذكر "وجود خلاف" وانقل الأقوال كما هي دون ترجيح مبني على الهوى.
+* الحزم: كن حازماً مع المستخدمين الذين يحاولون استدراجك لنقاشات جدلية تهدف لتزييف الحقائق.
+
+[Action Filter Logic]
+{
+  "Input_Analysis": "Detect if user is asking for 'Opinion' or 'Fact-Dressing'",
+  "On_Opinion_Detected": {
+    "Action": "Refuse_Opinion",
+    "Response_Template": "أنا محرك حقيقة، لا أقدم آراء. الحقائق المتاحة هي..."
+  },
+  "On_Bias_Detected": {
+    "Action": "Strip_Adjectives",
+    "Goal": "إزالة الكلمات مثل (رائع، سيء، جميل، قبيح) واستبدالها بوصف موضوعي"
+  }
+}
+`,
+            short: `[تطبيق مبادئ صوت الحق]
+* انقل الحقائق الشرعية كما هي من المصادر، دون تزويق أو انحياز
+* استخدم لغة تقريرية واضحة ومباشرة
+* لا تقدم آراءً شخصية أو ترجيحات غير مبررة
+* اذكر الخلاف العلمي إن وجد دون ترجيح بناءً على الهوى
+
+أنت مساعد إسلامي متخصص. يجب عليك:
+- تقديم إجابة مختصرة جداً ومباشرة
+- الالتزام بالإيجاز الشديد (سطر أو سطرين فقط)
+- عدم ذكر أي تفاصيل جانبية أو شروحات مطولة
+- التركيز على الخلاصة الأساسية فقط
+- استخراج الإجابات من النصوص المرجعية المتوفرة فقط
+- الالتزام بالأمانة العلمية والدقة اللغوية`,
+
+            detailed: `[تطبيق مبادئ صوت الحق]
+* انقل الحقائق الشرعية كما هي من المصادر، دون تزويق أو انحياز
+* استخدم لغة تقريرية واضحة ومباشرة
+* لا تقدم آراءً شخصية أو ترجيحات غير مبررة
+* اذكر الخلاف العلمي إن وجد دون ترجيح بناءً على الهوى
+
+أنت مساعد إسلامي متخصص ومؤتمن. مهمتك:
+
+### الهوية والدور:
+أنت مساعد إسلامي متخصص ومؤتمن. مهمتك هي استخراج الإجابات حصراً من "النصوص المرجعية" أو "المصادر" التي يتم تزويدك بها في سياق المحادثة. أنت لست مفتياً مستقلاً، بل أنت باحث دقيق في المصادر المتوفرة لديك.
+
+### القواعد الصارمة للإجابة:
+1. **الالتزام بالمصدر:** أجب فقط باستخدام المعلومات الواردة في النصوص المزودة. يحظر عليك استخدام معلوماتك الخارجية أو حفظك العام للقرآن والسنة ما لم تكن موجودة في النص المقدم لك.
+2. **التعامل مع المعلومات الناقصة:** إذا سألك المستخدم عن معلومة غير موجودة في المصادر المتوفرة لديك، يجب أن تجيب بعبارة صريحة مثل: "عذراً، هذه المعلومة غير متوفرة في المصادر المرفقة"، ولا تحاول التخمين أو التأليف.
+3. **الأمانة في النقل:** عند اقتباس آية أو حديث أو حكم شرعي من المصدر، انقله بدقة تامة دون تحريف.
+
+### القواعد اللغوية:
+يجب أن تكون إجابتك مصاغة بلغة عربية فصحى عالية المستوى، تليق بالمقام الشرعي، مع مراعاة:
+- **الإملاء:** التمييز الصارم بين همزات القطع والوصل، وكتابة التاء المربوطة والهاء بدقة.
+- **النحو:** مراعاة قواعد العدد والمعدود، والمطابقة بين المبتدأ والخبر والفعل والفاعل.
+- **الأسلوب:** تجنب الركاكة والترجمة الحرفية واستخدام الأفعال العربية الصريحة.
+- **التشكيل:** قم بتشكيل الآيات القرآنية والأحاديث واضبط أواخر الكلمات التي قد يلتبس معناها.
+
+### طريقة تنسيق الإجابة الشاملة:
+- ابدأ بالتعريف والمقدمة
+- قدم التفاصيل الكاملة مع الأدلة والسياق
+- اذكر التفريعات اللغوية والشرعية
+- اذكر مرجع المعلومة بوضوح
+- قدم الخاتمة والخلاصة
+
+### المنهج في معاني الكلمات:
+عند سؤالك عن معاني الكلمات أو الآيات القرآنية:
+1. **المعنى اللغوي:** ابدأ بتوضيح أصل الكلمة في اللغة العربية (الجذر اللغوي) وما كانت تدل عليه عند العرب قبل نزول الوحي
+2. **المعنى الاصطلاحي (الشرعي):** وضح المعنى الذي نقلت إليه الكلمة في الشرع الإسلامي
+3. **المقارنة والسياق:** اذكر العلاقة بين المعنيين وكيف يخدم المعنى اللغوي المعنى الاصطلاحي`
+        };
+
+        // معالجة اختيار نمط الإجابة
+        modeOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.stopPropagation();
+                
+                // إزالة التفعيل من جميع الخيارات
+                modeOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // تفعيل الخيار المختار
+                this.classList.add('active');
+                selectedAnswerMode = this.dataset.mode;
+                
+                // حفظ التفضيل
+                localStorage.setItem('answerMode', selectedAnswerMode);
+                
+                // إخفاء القائمة بعد الاختيار
+                answerModeSelector.classList.remove('show');
+                modeToggleBtn.classList.remove('active');
+            });
+        });
+
+        // استرجاع التفضيل المحفوظ
+        const savedMode = localStorage.getItem('answerMode');
+        if (savedMode) {
+            selectedAnswerMode = savedMode;
+            modeOptions.forEach(option => {
+                if (option.dataset.mode === savedMode) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
                 }
+            });
+        }
 
-                // إذا لم يكن المسار معروفاً، نرجع خطأ 404
-                return new Response('الصفحة غير موجودة', {
-                    status: 404,
-                    headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                        ...corsHeaders
-                    }
-                });
+        // Initialize app
+        loadChatsFromStorage();
+        renderChats();
+        
+        if (chats.length === 0) {
+            createNewChat();
+            showWelcomeMessage();
+        } else {
+            switchToChat(chats[0].id);
+        }
 
-            } catch (error) {
-                return new Response(`خطأ في الخادم: ${error.message}`, {
-                    status: 500,
-                    headers: {
-                        'Content-Type': 'text/plain; charset=utf-8',
-                        ...corsHeaders
-                    }
+        // Show welcome message for new chats
+        function showWelcomeMessage() {
+            const welcomeMessage = `
+                <div style="text-align: center; padding: 2rem 1rem; animation: fadeIn 0.6s ease-out;">
+                    <h2 style="font-family: 'IBM Plex Sans Arabic', sans-serif; color: var(--gold); font-size: 1.8rem; margin-bottom: 1rem; font-weight: 700;">
+                        السلام عليكم ورحمة الله وبركاته
+                    </h2>
+                    <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 2rem; line-height: 1.8;">
+                        مرحباً بك في <strong style="color: var(--gold);">اسأل الإسلام AI</strong><br>
+                        مساعدك الموثوق للإجابة على أسئلتك الشرعية
+                    </p>
+                    <div style="background: rgba(255, 255, 255, 0.05); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <p style="font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 1rem;">
+                            💡 <strong>أمثلة للأسئلة:</strong>
+                        </p>
+                        <div style="display: grid; gap: 0.8rem; text-align: right;">
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer; transition: all 0.3s;" 
+                                 onclick="askQuestion('ما هي شروط الصلاة؟')"
+                                 onmouseover="this.style.background='rgba(212, 165, 116, 0.2)'; this.style.transform='translateX(-5px)'"
+                                 onmouseout="this.style.background='rgba(212, 165, 116, 0.1)'; this.style.transform='translateX(0)'">
+                                <span style="color: var(--gold);">•</span> ما هي شروط الصلاة؟
+                            </div>
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer; transition: all 0.3s;"
+                                 onclick="askQuestion('كيف أتوضأ بشكل صحيح؟')"
+                                 onmouseover="this.style.background='rgba(212, 165, 116, 0.2)'; this.style.transform='translateX(-5px)'"
+                                 onmouseout="this.style.background='rgba(212, 165, 116, 0.1)'; this.style.transform='translateX(0)'">
+                                <span style="color: var(--gold);">•</span> كيف أتوضأ بشكل صحيح؟
+                            </div>
+                            <div style="background: rgba(212, 165, 116, 0.1); padding: 0.8rem; border-radius: 12px; cursor: pointer; transition: all 0.3s;"
+                                 onclick="askQuestion('ما هي أركان الإسلام؟')"
+                                 onmouseover="this.style.background='rgba(212, 165, 116, 0.2)'; this.style.transform='translateX(-5px)'"
+                                 onmouseout="this.style.background='rgba(212, 165, 116, 0.1)'; this.style.transform='translateX(0)'">
+                                <span style="color: var(--gold);">•</span> ما هي أركان الإسلام؟
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            chatArea.innerHTML = welcomeMessage;
+            document.querySelector('.chat-section').classList.add('has-messages');
+        }
+
+        // Sidebar Toggle
+        toggleSidebarBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        floatingToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+        });
+        
+        // Top Bar Menu Button
+        const topBarMenuBtn = document.getElementById('topBarMenuBtn');
+        if (topBarMenuBtn) {
+            topBarMenuBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                const overlay = document.getElementById('sidebarOverlay');
+                if (overlay) {
+                    overlay.classList.toggle('show');
+                }
+            });
+        }
+
+        // New Chat
+        newChatBtn.addEventListener('click', createNewChat);
+
+        function createNewChat() {
+            const chat = {
+                id: Date.now(),
+                title: 'محادثة جديدة',
+                messages: [],
+                timestamp: new Date().toISOString()
+            };
+            
+            chats.unshift(chat);
+            saveChatsToStorage();
+            renderChats();
+            switchToChat(chat.id);
+        }
+
+        function switchToChat(chatId) {
+            currentChatId = chatId;
+            const chat = chats.find(c => c.id === chatId);
+            
+            if (!chat) return;
+            
+            // Update active state
+            document.querySelectorAll('.chat-item').forEach(item => {
+                item.classList.toggle('active', parseInt(item.dataset.chatId) === chatId);
+            });
+            
+            // Clear and render messages
+            chatArea.innerHTML = '';
+            const chatSection = document.querySelector('.chat-section');
+            
+            if (chat.messages.length === 0) {
+                chatSection.classList.remove('has-messages');
+                showWelcomeMessage();
+            } else {
+                chatSection.classList.add('has-messages');
+                chat.messages.forEach(msg => {
+                    addMessageToUI(msg.content, msg.role, msg.source, msg.questions, false);
                 });
             }
         }
-    }
-};
+
+        function renderChats() {
+            chatsContainer.innerHTML = '';
+            
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = 'chat-item';
+                div.dataset.chatId = chat.id;
+                
+                const date = new Date(chat.timestamp);
+                const timeStr = formatTime(date);
+                
+                div.innerHTML = `
+                    <div class="chat-title">${escapeHtml(chat.title)}</div>
+                    <div class="chat-time">${timeStr}</div>
+                    <button class="delete-chat-btn" onclick="deleteChat(${chat.id}, event)">🗑️</button>
+                `;
+                
+                div.addEventListener('click', () => switchToChat(chat.id));
+                chatsContainer.appendChild(div);
+            });
+        }
+
+        function deleteChat(chatId, event) {
+            event.stopPropagation();
+            
+            if (!confirm('هل أنت متأكد من حذف هذه المحادثة؟')) return;
+            
+            chats = chats.filter(c => c.id !== chatId);
+            saveChatsToStorage();
+            renderChats();
+            
+            if (currentChatId === chatId) {
+                if (chats.length > 0) {
+                    switchToChat(chats[0].id);
+                } else {
+                    createNewChat();
+                }
+            }
+        }
+
+        function formatTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (minutes < 1) return 'الآن';
+            if (minutes < 60) return `منذ ${minutes} دقيقة`;
+            if (hours < 24) return `منذ ${hours} ساعة`;
+            if (days < 7) return `منذ ${days} يوم`;
+            
+            return date.toLocaleDateString('ar-EG');
+        }
+
+        function saveChatsToStorage() {
+            try {
+                localStorage.setItem('islamicChats', JSON.stringify(chats));
+            } catch (e) {
+                console.error('Failed to save chats:', e);
+            }
+        }
+
+        function loadChatsFromStorage() {
+            try {
+                const saved = localStorage.getItem('islamicChats');
+                if (saved) {
+                    chats = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load chats:', e);
+                chats = [];
+            }
+        }
+
+        // Send Message - النسخة المحسنة والمُصلحة
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+            
+            // 1. التحقق من التحية (معالجة خاصة للتحيات)
+            const greetings = ['السلام عليكم', 'سلام عليكم', 'السلام', 'سلام', 'مرحبا', 'مرحبًا', 'أهلا', 'أهلاً', 'صباح الخير', 'مساء الخير', 'السلام علیکم'];
+            const isGreeting = greetings.some(g => {
+                const msgLower = message.toLowerCase().trim();
+                const greetLower = g.toLowerCase();
+                return msgLower === greetLower || msgLower.startsWith(greetLower + ' ') || msgLower.endsWith(' ' + greetLower);
+            });
+            
+            if (isGreeting && message.length < 50) {
+                addMessageToUI(message, 'user', null, [], true);
+                setTimeout(() => {
+                    addMessageToUI('وعليكم السلام ورحمة الله وبركاته 🌙\n\nأهلاً بك في اسأل الإسلام AI، كيف يمكنني مساعدتك اليوم؟', 'assistant', null, [], true);
+                }, 500);
+                userInput.value = '';
+                userInput.style.height = 'auto';
+                return;
+            }
+            
+            // 2. إضافة رسالة المستخدم
+            addMessageToUI(message, 'user', null, [], true);
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            // 3. تحديث عنوان المحادثة إذا كانت الرسالة الأولى
+            const chat = chats.find(c => c.id === currentChatId);
+            if (chat && chat.messages.length === 1) {
+                chat.title = message.substring(0, 50) + (message.length > 50 ? '...' : '');
+                saveChatsToStorage();
+                renderChats();
+            }
+            
+            // 4. إظهار مؤشر التحميل
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant-message';
+            loadingDiv.innerHTML = '<div class="message-content"><div class="loading"><span></span><span></span><span></span></div></div>';
+            chatArea.appendChild(loadingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            try {
+                // 5. إرسال الطلب للـ Worker
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        mode: selectedAnswerMode
+                    })
+                });
+
+                // 6. التحقق من نجاح الطلب
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Server Error:', errorText);
+                    throw new Error(`خطأ في الخادم: ${response.status}`);
+                }
+
+                // 7. معالجة البيانات المستلمة
+                const data = await response.json();
+                console.log('Response data:', data); // للتصحيح
+                
+                // 8. إزالة مؤشر التحميل
+                if (chatArea.contains(loadingDiv)) {
+                    chatArea.removeChild(loadingDiv);
+                }
+
+                // 9. استخراج الإجابة بطريقة آمنة ومرنة
+                let aiResponse = '';
+                let isIslamicQuestion = true;
+                
+                // التحقق من تصنيف السؤال
+                if (data.is_islamic === false) {
+                    isIslamicQuestion = false;
+                }
+                
+                if (data.error) {
+                    aiResponse = `عذراً، حدث خطأ: ${data.error}`;
+                } else if (data.content) {
+                    aiResponse = data.content;
+                } else if (data.choices && data.choices[0] && data.choices[0].message) {
+                    aiResponse = data.choices[0].message.content || data.choices[0].message;
+                } else if (data.answer) {
+                    aiResponse = data.answer;
+                } else if (data.message && typeof data.message === 'string') {
+                    aiResponse = data.message;
+                } else if (typeof data === 'string') {
+                    aiResponse = data;
+                } else {
+                    aiResponse = "عذراً، لم أتمكن من معالجة الإجابة. الرجاء المحاولة مرة أخرى.";
+                    console.error('Unexpected response format:', data);
+                }
+                
+                // 10. التأكد من أن الإجابة ليست فارغة
+                if (!aiResponse || aiResponse.trim() === '') {
+                    aiResponse = "عذراً، لم أحصل على إجابة. الرجاء المحاولة مرة أخرى.";
+                }
+                
+                // 11. استخراج المصدر والأسئلة المشابهة (فقط للأسئلة الإسلامية)
+                const source = isIslamicQuestion ? extractSource(aiResponse) : null;
+                const similarQuestions = isIslamicQuestion ? generateSimilarQuestions(message) : [];
+                
+                // 12. عرض الإجابة
+                addMessageToUI(aiResponse, 'assistant', source, similarQuestions, true);
+                
+                // عرض معلومات التصنيف في Console للتصحيح
+                if (data.classification) {
+                    console.log('تصنيف السؤال:', data.classification);
+                }
+                
+            } catch (error) {
+                // معالجة الأخطاء
+                if (chatArea.contains(loadingDiv)) {
+                    chatArea.removeChild(loadingDiv);
+                }
+                
+                console.error('Fetch Error:', error);
+                
+                let errorMessage = 'عذراً، حدث خطأ أثناء الاتصال بالخادم.';
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage += '\n\n🔴 تأكد من:\n1. تشغيل Cloudflare Worker\n2. صحة عنوان API\n3. اتصالك بالإنترنت';
+                } else {
+                    errorMessage += '\n\n' + error.message;
+                }
+                
+                addMessageToUI(errorMessage, 'assistant', null, [], true);
+            }
+        }
+
+        // تم نقل فحص الأسئلة الإسلامية إلى Worker لمزيد من الذكاء والدقة
+        // Worker يستخدم نظام تصنيف ذكي مع AI للتحقق من طبيعة السؤال
+
+        // Add message to UI and save to chat
+        function addMessageToUI(content, role, source = null, similarQuestions = [], saveToChat = true) {
+            // إزالة رسالة الترحيب إذا كانت موجودة
+            const welcomeMsg = chatArea.querySelector('div[style*="text-align: center"]');
+            if (welcomeMsg && role === 'user') {
+                chatArea.innerHTML = '';
+            }
+            
+            const div = document.createElement('div');
+            div.className = `message ${role}-message`;
+            
+            // إضافة class عندما توجد رسائل
+            const chatSection = document.querySelector('.chat-section');
+            if (chatSection) {
+                chatSection.classList.add('has-messages');
+            }
+            
+            // تنسيق المحتوى مع تزيين الآيات فقط
+            let formattedContent = formatArabicText(content);
+            
+            let html = `<div class="message-content">${formattedContent}`;
+            
+            if (role === 'assistant') {
+                // إضافة زر الصوت
+                html += `<button class="speak-btn" onclick="toggleSpeech(this)">🔊 استماع للنص</button>`;
+                
+                // إزالة عرض المصدر - تم حذف هذا الجزء
+                if (similarQuestions && similarQuestions.length > 0) {
+                    html += `<div class="similar-questions">`;
+                    similarQuestions.forEach(q => {
+                        html += `<div class="q-chip" onclick="askQuestion('${escapeHtml(q)}')">${escapeHtml(q)}</div>`;
+                    });
+                    html += `</div>`;
+                }
+            }
+            
+            html += `</div>`;
+            div.innerHTML = html;
+            
+            // حفظ النص في الزر
+            if (role === 'assistant') {
+                const btn = div.querySelector('.speak-btn');
+                if (btn) {
+                    btn.dataset.text = content;
+                }
+            }
+            
+            chatArea.appendChild(div);
+            
+            setTimeout(() => {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }, 100);
+
+            // Save to current chat
+            if (saveToChat && currentChatId) {
+                const chat = chats.find(c => c.id === currentChatId);
+                if (chat) {
+                    chat.messages.push({
+                        role: role,
+                        content: content,
+                        source: source,
+                        questions: similarQuestions
+                    });
+                    saveChatsToStorage();
+                }
+            }
+        }
+
+        // دالة لتنسيق النص العربي - معالجة لغوية متقدمة
+        function formatArabicText(text) {
+            if (!text) return '';
+            
+            // ===== المرحلة ١: التنظيف الأولي =====
+            // إزالة علامات المصدر
+            text = text.replace(/المصدر:.*?(?:\n|$)/g, '');
+            text = text.replace(/الراوي:.*?(?:\n|$)/g, '');
+            
+            // إزالة النجوم المزدوجة والمفردة للتأكيد (**نص** أو *نص*)
+            text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+            text = text.replace(/\*([^*]+)\*/g, '$1');
+            
+            // إزالة النقاط والرموز من بداية الأسطر
+            text = text.replace(/^[\s]*[•\*\-○●▪︎▫︎■□◆◇]+[\s]*/gm, '');
+            text = text.replace(/\n[\s]*[•\*\-○●▪︎▫︎■□◆◇]+[\s]*/g, '\n');
+            
+            // إزالة الأقواس المربعة الفارغة أو العلامات الغريبة
+            text = text.replace(/\[[\s]*\]/g, '');
+            text = text.replace(/[\u2600-\u26FF\u2700-\u27BF]/g, ''); // إزالة الرموز التعبيرية
+            
+            // Escape HTML
+            text = escapeHtml(text);
+            
+            // ===== المرحلة ٢: تحويل الأرقام =====
+            const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+            text = text.replace(/\d/g, (digit) => arabicNumerals[parseInt(digit)]);
+            
+            // ===== المرحلة ٣: تزيين الآيات القرآنية =====
+            // نمط 1: ﴿ آية ﴾
+            text = text.replace(/﴿([^﴾]+)﴾/g, '<span class="quran-verse">﴿$1﴾</span>');
+            
+            // نمط 2: "آية" - فقط إذا كانت تبدو قرآنية
+            text = text.replace(/"([^"]+)"/g, function(match, verse) {
+                const quranIndicators = ['الله', 'رب', 'قل', 'يا أيها', 'إن', 'الذين آمنوا', 'السماوات', 'الأرض'];
+                const looksLikeQuran = quranIndicators.some(word => verse.includes(word)) && verse.length > 20;
+                
+                if (looksLikeQuran) {
+                    return `<span class="quran-verse">"${verse}"</span>`;
+                }
+                return match;
+            });
+            
+            // ===== المرحلة ٤: التناسق اللغوي =====
+            
+            // تحسين العلامات الترقيمية العربية
+            text = text.replace(/\s*،\s*/g, '، ');
+            text = text.replace(/\s*؛\s*/g, '؛ ');
+            text = text.replace(/\s*:\s*/g, ': ');
+            text = text.replace(/\s*\.\s*/g, '. ');
+            
+            // إضافة سطر جديد بعد النقطة (فقرة جديدة)
+            text = text.replace(/\.[\s]*(?=[^\s])/g, '.<br><br>');
+            
+            // معالجة الأسطر المتعددة
+            text = text.replace(/\n\n+/g, '<br><br>');
+            text = text.replace(/\n/g, '<br>');
+            
+            // إزالة المسافات الزائدة
+            text = text.replace(/\s{2,}/g, ' ');
+            
+            return text;
+        }
+
+        // Extract source from response
+        function extractSource(text) {
+            // Look for source patterns
+            const patterns = [
+                /المصدر:\s*(.+?)(?:\n|$)/,
+                /الراوي:\s*(.+?)(?:\n|$)/,
+                /السورة:\s*(.+?)(?:\n|$)/,
+                /\((.+?)\)/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) return match[1];
+            }
+            
+            return null;
+        }
+
+        // Generate similar questions
+        function generateSimilarQuestions(text) {
+            const lowerText = text.toLowerCase();
+            
+            if (lowerText.includes("صلاة")) {
+                return ["ما هي شروط الصلاة؟", "كيفية الوضوء الصحيح؟", "ما هي أركان الصلاة؟"];
+            }
+            if (lowerText.includes("زكاة")) {
+                return ["مقدار نصاب الزكاة", "على من تجب الزكاة؟", "ما الفرق بين الزكاة والصدقة؟"];
+            }
+            if (lowerText.includes("صيام") || lowerText.includes("رمضان")) {
+                return ["ما هي مبطلات الصيام؟", "أحكام قضاء الصيام", "فضل صيام رمضان"];
+            }
+            if (lowerText.includes("حج") || lowerText.includes("عمرة")) {
+                return ["أركان الحج", "الفرق بين الحج والعمرة", "محظورات الإحرام"];
+            }
+            
+            return ["ما هي أركان الإسلام؟", "ما هي أركان الإيمان؟", "فضل الصلاة على النبي"];
+        }
+
+        // Ask suggested question
+        function askQuestion(question) {
+            userInput.value = question;
+            sendMessage();
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event Listeners
+        userInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        sendBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            sendMessage();
+        });
+
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+        });
+
+        function toggleSpeech(btn) {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                
+                if (btn.classList.contains('playing')) {
+                    resetButtons();
+                    return;
+                }
+            }
+
+            resetButtons();
+
+            const text = btn.dataset.text;
+            
+            if (!text) {
+                alert('لا يوجد نص للقراءة');
+                return;
+            }
+            
+            const cleanText = text
+                .replace(/<[^>]*>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&quot;/g, '"')
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/\s+/g, ' ')
+                .replace(/المصدر:.*?(?:\n|$)/g, '')
+                .replace(/الراوي:.*?(?:\n|$)/g, '')
+                .replace(/\*\*/g, '')
+                .replace(/\*/g, '')
+                .trim();
+
+            console.log('النص الذي سيتم قراءته:', cleanText);
+            console.log('طول النص:', cleanText.length);
+
+            if (!cleanText || cleanText.length < 5) {
+                alert('النص قصير جداً أو فارغ');
+                return;
+            }
+
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            utterance.onstart = () => {
+                console.log('بدأت القراءة');
+                btn.classList.add('playing');
+                btn.innerHTML = '⏸️ إيقاف القراءة';
+            };
+
+            utterance.onend = () => {
+                console.log('انتهت القراءة');
+                resetButtons();
+            };
+
+            utterance.onerror = (event) => {
+                console.error('خطأ في القراءة:', event);
+                alert('حدث خطأ في قراءة النص. قد لا يدعم متصفحك اللغة العربية.');
+                resetButtons();
+            };
+
+            console.log('جاري تشغيل الصوت...');
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function resetButtons() {
+            const btns = document.querySelectorAll('.speak-btn');
+            btns.forEach(b => {
+                b.classList.remove('playing');
+                b.innerHTML = '🔊 استماع للنص';
+            });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+        });
+
+        // تحسينات الهاتف المحمول - إخفاء الشريط الجانبي تلقائياً
+        function initMobileOptimizations() {
+            const isMobile = window.innerWidth <= 768;
+            const sidebar = document.getElementById('sidebar');
+            
+            if (isMobile) {
+                // إخفاء الشريط الجانبي تلقائياً على الهواتف
+                sidebar.classList.add('collapsed');
+                
+                // إضافة overlay
+                if (!document.getElementById('sidebarOverlay')) {
+                    const overlay = document.createElement('div');
+                    overlay.id = 'sidebarOverlay';
+                    overlay.className = 'sidebar-overlay';
+                    overlay.onclick = () => {
+                        sidebar.classList.add('collapsed');
+                        overlay.classList.remove('show');
+                    };
+                    document.body.appendChild(overlay);
+                }
+                
+                // الزر العائم موجود في HTML، لا حاجة لإنشائه
+                const floatingBtn = document.getElementById('floatingToggle');
+                if (floatingBtn) {
+                    floatingBtn.onclick = () => {
+                        sidebar.classList.toggle('collapsed');
+                        const overlay = document.getElementById('sidebarOverlay');
+                        if (overlay) {
+                            overlay.classList.toggle('show');
+                        }
+                    };
+                }
+                
+                // تحديث زر التبديل الأصلي
+                const toggleBtn = document.getElementById('toggleSidebar');
+                if (toggleBtn) {
+                    toggleBtn.onclick = () => {
+                        sidebar.classList.add('collapsed');
+                        const overlay = document.getElementById('sidebarOverlay');
+                        if (overlay) {
+                            overlay.classList.remove('show');
+                        }
+                    };
+                }
+            } else {
+                // على الحاسوب، إزالة class collapsed إذا كان موجود
+                sidebar.classList.remove('collapsed');
+            }
+        }
+
+        // تشغيل التحسينات عند تحميل الصفحة
+        initMobileOptimizations();
+        
+        // إعادة التشغيل عند تغيير حجم النافذة
+        window.addEventListener('resize', initMobileOptimizations);
+    </script>
+</body>
+</html>
