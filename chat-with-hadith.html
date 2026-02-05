@@ -659,6 +659,233 @@
                 margin: 12px 0;
             }
         }
+
+        /* تحسينات للأجهزة اللوحية والأجهزة متوسطة الحجم */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                padding: 15px;
+                gap: 15px;
+            }
+            
+            .sidebar {
+                width: 280px;
+                padding: 1.2rem;
+            }
+            
+            .sidebar.collapsed {
+                transform: translateX(calc(280px + 15px));
+            }
+            
+            .main-content.expanded {
+                margin-right: calc(-1 * 280px - 15px);
+            }
+            
+            .chat-area {
+                padding: 1.5rem;
+            }
+            
+            .message-content {
+                max-width: 90%;
+                padding: 1.2rem;
+                font-size: 1rem;
+            }
+            
+            .input-area {
+                padding: 1.2rem 1.5rem;
+            }
+            
+            .quran-text-style {
+                font-size: 1.5rem;
+                line-height: 2.5;
+            }
+            
+            .hadith-text-style {
+                font-size: 1rem;
+                line-height: 1.8;
+            }
+            
+            .quran-content-box {
+                padding: 20px;
+            }
+            
+            .hadith-content-box {
+                padding: 18px;
+            }
+        }
+
+        /* تحسينات للأجهزة الصغيرة جداً */
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+            
+            .chat-area {
+                padding: 0.8rem;
+            }
+            
+            .message-content {
+                max-width: 100%;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .input-area {
+                padding: 1rem;
+            }
+            
+            .input-wrapper {
+                padding: 0.8rem;
+            }
+            
+            textarea {
+                font-size: 0.95rem;
+            }
+            
+            .send-btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            
+            .quran-text-style {
+                font-size: 1.2rem;
+                line-height: 2;
+            }
+            
+            .hadith-text-style {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+            
+            .quran-content-box {
+                padding: 12px;
+                margin: 10px 0;
+            }
+            
+            .hadith-content-box {
+                padding: 12px;
+                margin: 10px 0;
+            }
+            
+            .hadith-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            
+            .hadith-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
+            }
+            
+            .hadith-label {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* تحسينات للأجهزة العالية الدقة (شاشات كبيرة) */
+        @media (min-width: 1440px) {
+            .container {
+                max-width: 1400px;
+                margin: 0 auto;
+            }
+            
+            .sidebar {
+                width: 350px;
+            }
+            
+            .sidebar.collapsed {
+                transform: translateX(calc(350px + 20px));
+            }
+            
+            .main-content.expanded {
+                margin-right: calc(-1 * 350px - 20px);
+            }
+            
+            .message-content {
+                max-width: 80%;
+                font-size: 1.1rem;
+                line-height: 1.9;
+            }
+            
+            .quran-text-style {
+                font-size: 1.8rem;
+                line-height: 3;
+            }
+            
+            .hadith-text-style {
+                font-size: 1.2rem;
+                line-height: 2;
+            }
+            
+            .quran-content-box {
+                padding: 30px;
+            }
+            
+            .hadith-content-box {
+                padding: 25px;
+            }
+        }
+
+        /* تحسينات للتوجيه الأفقي على الأجهزة المحمولة */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                height: auto;
+                min-height: 100vh;
+            }
+            
+            .chat-area {
+                max-height: 60vh;
+            }
+            
+            .input-area {
+                padding: 1rem;
+            }
+            
+            .input-wrapper {
+                padding: 0.8rem;
+            }
+            
+            textarea {
+                max-height: 80px;
+            }
+        }
+
+        /* دعم خاص لمتصفحات WebKit على iOS */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                height: -webkit-fill-available;
+            }
+            
+            .container {
+                height: -webkit-fill-available;
+            }
+            
+            .chat-area {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .chats-container {
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* تحسينات للوضع الداكن التلقائي */
+        @media (prefers-color-scheme: dark) {
+            .quran-content-box {
+                background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+                border-color: var(--secondary);
+            }
+            
+            .hadith-content-box {
+                background: linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%);
+                border-right-color: var(--secondary);
+            }
+            
+            .hadith-text-style {
+                color: #e0e0e0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1174,10 +1401,13 @@
             // تنسيق المحتوى مع تزيين الآيات
             let formattedContent;
             if (role === 'assistant') {
-                // معالجة النص العربي أولاً ثم تزيين المحتوى الإسلامي
+                // معالجة النص العربي أولاً
                 formattedContent = formatArabicText(content);
+                // تحويل الوسوم [Q] و [H] إلى صناديق مزخرفة
                 formattedContent = formatIslamicContent(formattedContent);
-                formattedContent = enhanceReligiousText(formattedContent);
+                
+                // تم إيقاف هذا السطر لمنع التداخل مع الصناديق الجديدة
+                // formattedContent = enhanceReligiousText(formattedContent); 
             } else {
                 // رسائل المستخدم: فقط تنظيف HTML
                 formattedContent = escapeHtml(content);
