@@ -992,8 +992,8 @@
 
 هذه التعليمات إلزامية ولا استثناءات عليها.`;
 
-        // --- إعدادات الاتصال بالـ Worker الجديد ---
-        const WORKER_URL = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
+        // --- إعدادات الاتصال بالـ Worker ---
+        const WORKER_URL = window.location.origin + '/api/chat';
         const USE_AI_WORKER = true;
 
         let currentChatId = null;
@@ -1101,20 +1101,22 @@
             chatArea.innerHTML = `
                 <div class="message assistant-message">
                     <div class="message-content">
-                        السلام عليكم ورحمة الله وبركاته، أنا مساعدك الإسلامي الذكي المتخصص. 
+                        السلام عليكم ورحمة الله وبركاته، أنا "اسأل الإسلام AI". 
                         <br><br>
-                        <strong>⚠️ تنبيه هام:</strong> أنا مُبرمج للإجابة على الأسئلة الإسلامية فقط من القرآن الكريم والسنة النبوية الصحيحة والملفات المرفقة.
+                        <strong>📚 مصادر الإجابة:</strong>
+                        <br>• القرآن الكريم وتفسيره
+                        <br>• الأحاديث الصحيحة من الكتب التسعة
+                        <br>• فتاوى إسلام ويب الموثوقة
                         <br><br>
-                        <strong>سأجيب فقط على:</strong>
-                        <br>• أسئلة العقيدة والفقه والعبادات
-                        <br>• تفسير القرآن الكريم
-                        <br>• شرح الأحاديث النبوية
-                        <br>• الأحكام الشرعية
-                        <br>• السيرة النبوية
+                        <strong>⚠️ تنبيه هام:</strong> إجاباتي مبنية حصراً على النصوص الواردة في المصادر أعلاه، ولن أختلق أي نص ديني.
                         <br><br>
-                        <strong>لن أجيب على:</strong> أي أسئلة خارج المجال الإسلامي
+                        <strong>سأجيب فقط على الأسئلة الإسلامية المتعلقة بـ:</strong>
+                        <br>• القرآن الكريم والتفسير
+                        <br>• السنة النبوية الصحيحة
+                        <br>• الفقه والعقيدة
+                        <br>• العبادات والأحكام الشرعية
                         <br><br>
-                        كيف يمكنني مساعدتك في الأمور الدينية اليوم؟
+                        كيف يمكنني مساعدتك اليوم؟
                     </div>
                 </div>
             `;
@@ -1212,13 +1214,12 @@
                     },
                     body: JSON.stringify({
                         message: text,
-                        chatHistory: chatHistory.slice(-6), // إرسال آخر 6 رسائل فقط لتوفير التوكنز
-                        mode: 'comprehensive'     // الوضع الصارم الشامل
+                        chatHistory: chatHistory.slice(-6)
                     })
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`خطأ في الخادم: ${response.status}`);
                 }
 
                 const data = await response.json();
@@ -1247,13 +1248,13 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                addMessageToUI(
-                    "حدث خطأ في الاتصال. تأكد من أن الـ Worker مفعل في Cloudflare.", 
-                    'assistant',
-                    null,
-                    [],
-                    true
-                );
+                let errorMsg = "حدث خطأ في الاتصال. ";
+                if (error.message.includes('Failed to fetch')) {
+                    errorMsg += "تأكد من تشغيل الـ Worker باستخدام 'wrangler dev' أو نشره على Cloudflare.";
+                } else {
+                    errorMsg += error.message;
+                }
+                addMessageToUI(errorMsg, 'assistant', null, [], true);
             } finally {
                 typingIndicator.classList.remove('active');
                 isProcessing = false;
@@ -1405,9 +1406,6 @@
                 formattedContent = formatArabicText(content);
                 // تحويل الوسوم [Q] و [H] إلى صناديق مزخرفة
                 formattedContent = formatIslamicContent(formattedContent);
-                
-                // تم إيقاف هذا السطر لمنع التداخل مع الصناديق الجديدة
-                // formattedContent = enhanceReligiousText(formattedContent); 
             } else {
                 // رسائل المستخدم: فقط تنظيف HTML
                 formattedContent = escapeHtml(content);
@@ -1416,7 +1414,6 @@
             let html = `<div class="message-content">${formattedContent}`;
             
             if (role === 'assistant') {
-                // إزالة عرض المصدر - تم حذف هذا الجزء
                 if (similarQuestions && similarQuestions.length > 0) {
                     html += `<div class="similar-questions">`;
                     similarQuestions.forEach(q => {
