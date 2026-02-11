@@ -785,13 +785,14 @@
         // تهيئة الوضع عند تحميل الصفحة
         initTheme();
 
+        // ========== 🔧 التعديلات الأساسية لحل مشكلة الاتصال ==========
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
 
-        // إعدادات الاتصال بالـ Worker
-        const WORKER_URL = 'https://askislam-ai.YOUR_SUBDOMAIN.workers.dev/api/chat';
+        // ✅ الرابط الصحيح للـ Worker - POST /api/chat
+        const WORKER_URL = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
         let chatHistory = [];
         let isProcessing = false;
 
@@ -832,14 +833,13 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
 
             try {
+                // ✅ التغيير الجوهري: POST مع JSON Body
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: text,
-                        chatHistory: chatHistory.slice(-6)
+                        chatHistory: chatHistory.slice(-4) // آخر 4 رسائل للسياق
                     })
                 });
 
@@ -849,19 +849,21 @@
 
                 const data = await response.json();
 
+                // ✅ معالجة الرد من الـ Worker (يحتوي على content, sources)
                 if (data.content) {
-                    addMessage(data.content, 'assistant', data.sources, data.usage);
+                    addMessage(data.content, 'assistant', data.sources);
                     chatHistory.push({ role: 'assistant', content: data.content });
                 } else {
                     addMessage('عذراً، لم أتمكن من العثور على إجابة.', 'assistant');
                 }
+
             } catch (error) {
                 console.error('❌ خطأ:', error);
                 
                 let errorMessage = "⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
                 
                 if (error.message.includes('Failed to fetch')) {
-                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من:\n• اتصال الإنترنت\n• تفعيل Worker في Cloudflare";
+                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من:\n• اتصال الإنترنت\n• تفعيل Worker في Cloudflare\n• أن عنوان الـ Worker صحيح";
                 } else if (error.message.includes('timeout')) {
                     errorMessage = "⏱️ انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى.";
                 }
@@ -876,7 +878,7 @@
         }
 
         // دالة إضافة رسالة
-        function addMessage(content, role, sources = null, usage = null) {
+        function addMessage(content, role, sources = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
 
@@ -887,7 +889,6 @@
                 <div class="message-content">
                     ${formatContent(content)}
                     ${sources ? formatSources(sources) : ''}
-                    ${usage ? formatUsage(usage) : ''}
                 </div>
             `;
 
@@ -931,25 +932,6 @@
             return `
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #d4a574;">
                     ${sourcesText.join(' • ')}
-                </div>
-            `;
-        }
-
-        // تنسيق الإحصائيات
-        function formatUsage(usage) {
-            const modelName = usage.model === 'deepseek-chat' ? 'DeepSeek V3' : 
-                            usage.model === 'deepseek-reasoner' ? 'DeepSeek R1' : usage.model;
-            
-            let statsText = `🧠 ${modelName} • ${usage.total_tokens.toLocaleString()} توكن`;
-            
-            if (usage.cost_estimate) {
-                const costInCents = (parseFloat(usage.cost_estimate) * 100).toFixed(2);
-                statsText += ` • ~$${usage.cost_estimate} (${costInCents}¢)`;
-            }
-            
-            return `
-                <div style="margin-top: 0.5rem; font-size: 0.75rem; color: #6b7280;">
-                    ${statsText}
                 </div>
             `;
         }
