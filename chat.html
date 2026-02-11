@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <!--
-    AskIslamAI - النسخة المبسطة (DeepSeek فقط)
+    🕌 AskIslamAI - واجهة المحادثة المحسّنة
     
-    التحديثات الجديدة:
-    ✅ دعم عرض المصادر (القرآن، الأحاديث، الفتاوى)
-    ✅ عرض إحصائيات الاستخدام (DeepSeek + عدد التوكنز)
-    ✅ عرض نوع النموذج (DeepSeek V3 أو DeepSeek R1)
-    ✅ عرض مصدر الأحاديث (الكتب التسعة أو الدرر السنية)
-    ✅ تحسين UI لعرض المعلومات الإضافية
+    ✨ المميزات:
+    ✅ عرض ذكي للمصادر (القرآن، الأحاديث، الفتاوى)
+    ✅ إحصائيات مباشرة (المحرك + التوكنز + التكلفة)
+    ✅ دعم DeepSeek V3 (الأسرع) و R1 (الأذكى)
+    ✅ مصادر متعددة (الكتب التسعة + الدرر السنية + إسلام ويب)
+    ✅ تصميم احترافي مع تجربة مستخدم سلسة
+    ✅ Timeout محسّن ورسائل خطأ واضحة
     
-    المحرك: DeepSeek فقط (بدون Groq)
-    متوافق مع: worker-enhanced.js
+    📦 متوافق مع: worker-deepseek-fixed.js
+    🔗 GitHub: https://github.com/aminelabzioui123-hash/AskIslamAI
 -->
 <html lang="ar" dir="rtl">
 <head>
@@ -392,13 +393,19 @@
             align-items: center;
             gap: 0.4rem;
             font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.5);
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 0.4rem 0.9rem;
-            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             width: fit-content;
             font-family: 'IBM Plex Sans Arabic', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .usage-stats:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
         }
         
         .q-chip { 
@@ -1298,9 +1305,23 @@
                     addMessageToUI('عذراً، لم أجد إجابة في المصادر المتاحة حالياً.', 'assistant');
                 }
             } catch (error) {
-                console.error('Error:', error);
+                console.error('❌ خطأ في الاتصال:', error);
+                
+                // رسائل خطأ واضحة ومفيدة
+                let errorMessage = "⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
+                
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من:\n• اتصال الإنترنت\n• تفعيل Worker في Cloudflare\n• صحة رابط WORKER_URL";
+                } else if (error.message.includes('timeout')) {
+                    errorMessage = "⏱️ انتهت مهلة الاتصال. الخادم قد يكون مشغولاً. حاول مرة أخرى.";
+                } else if (error.message.includes('401')) {
+                    errorMessage = "🔑 خطأ في المصادقة. تحقق من إعدادات DEEPSEEK_API_KEY في Cloudflare.";
+                } else if (error.message.includes('429')) {
+                    errorMessage = "⏸️ تم تجاوز الحد المسموح. يرجى الانتظار قليلاً قبل المحاولة مرة أخرى.";
+                }
+                
                 addMessageToUI(
-                    "حدث خطأ في الاتصال. تأكد من أن الـ Worker مفعل في Cloudflare.", 
+                    errorMessage, 
                     'assistant',
                     null,
                     [],
@@ -1489,12 +1510,21 @@
                     
                     // عرض الإحصائيات
                     if (usage) {
+                        const providerIcon = usage.provider === 'deepseek' ? '🧠' : '⚡';
                         const modelName = usage.model === 'deepseek-chat' ? 'DeepSeek V3' : 
-                                        usage.model === 'deepseek-reasoner' ? 'DeepSeek R1' : 
-                                        usage.model;
+                                        usage.model === 'deepseek-reasoner' ? 'DeepSeek R1' :
+                                        usage.model === 'llama-3.3-70b-versatile' ? 'Llama 3.3' : usage.model;
+                        
+                        let statsText = `${providerIcon} ${modelName} • ${usage.total_tokens.toLocaleString()} توكن`;
+                        
+                        // إضافة التكلفة إذا كانت متوفرة
+                        if (usage.cost_estimate) {
+                            const costInCents = (parseFloat(usage.cost_estimate) * 100).toFixed(2);
+                            statsText += ` • ~$${usage.cost_estimate} (${costInCents}¢)`;
+                        }
                         
                         html += `<div class="usage-stats">
-                            🧠 ${modelName} • ${usage.total_tokens.toLocaleString()} توكن
+                            ${statsText}
                         </div>`;
                     }
                     
