@@ -1,30 +1,17 @@
-name = 'askislam-ai'
-main = "worker.js"
+name = "ask-islam-ai"
+main = "worker-rag-deepseek.js"
 compatibility_date = "2024-01-01"
 
-# Worker Configuration
-[observability]
-enabled = true
+# لا تضع الأسرار هنا!
+# استخدم: wrangler secret put DEEPSEEK_API_KEY
 
-# Compatibility flags
-compatibility_flags = ["nodejs_compat"]
+[env.production]
+name = "ask-islam-ai"
+route = "askislam.ai/*"  # غيّر إلى نطاقك
 
-# إعدادات اختيارية - يمكن تفعيلها لاحقاً
+[env.staging]
+name = "ask-islam-ai-staging"
 
-# Environment variables (استخدم wrangler secret put للمتغيرات الحساسة)
-# [vars]
-# DEBUG = "false"
-
-# Custom domains (بعد إضافة domain مخصص)
-# routes = [
-#   { pattern = "askislamai.com/*", zone_name = "askislamai.com" }
-# ]
-
-# KV Namespaces لحفظ البيانات (اختياري)
-# kv_namespaces = [
-#   { binding = "CHAT_HISTORY", id = "your-kv-namespace-id" }
-# ]
-
-# Rate limiting (اختياري - للحماية من الإفراط في الاستخدام)
-# [limits]
-# cpu_ms = 50
+# Cron Jobs (اختياري - لتنظيف الكاش)
+# [triggers]
+# crons = ["0 0 * * *"]  # كل يوم عند منتصف الليل
