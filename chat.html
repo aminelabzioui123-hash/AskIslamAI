@@ -12,6 +12,10 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         :root {
@@ -27,6 +31,19 @@
             --glow-soft: rgba(212, 165, 116, 0.15);
         }
 
+        /* الوضع النهاري 🌞 */
+        [data-theme="light"] {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-chat: #fafbfc;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --accent-gold: #c4956a;
+            --accent-green: #0a5f4f;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --glow-soft: rgba(212, 165, 116, 0.2);
+        }
+
         body {
             font-family: 'IBM Plex Sans Arabic', sans-serif;
             background: var(--bg-primary);
@@ -36,12 +53,64 @@
             flex-direction: column;
         }
 
+        /* تأكيد تغيير لون النصوص في الوضع النهاري */
+        [data-theme="light"] body {
+            color: #1a1a1a;
+        }
+
+        /* قاعدة شاملة لتحويل كل النصوص للأسود */
+        [data-theme="light"] *:not(.theme-icon) {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3,
+        [data-theme="light"] h4,
+        [data-theme="light"] p,
+        [data-theme="light"] span:not(.theme-icon),
+        [data-theme="light"] div:not(.theme-toggle),
+        [data-theme="light"] a,
+        [data-theme="light"] li,
+        [data-theme="light"] label,
+        [data-theme="light"] button:not(.theme-toggle),
+        [data-theme="light"] textarea,
+        [data-theme="light"] input {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] .text-secondary,
+        [data-theme="light"] .tagline,
+        [data-theme="light"] .help-points li {
+            color: #4a4a4a !important;
+        }
+
+        [data-theme="light"] .site-title,
+        [data-theme="light"] .welcome-greeting {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] .message-content,
+        [data-theme="light"] .message-content * {
+            color: #1a1a1a !important;
+        }
+
+        /* الحفاظ على لون الأيقونات */
+        [data-theme="light"] .theme-icon {
+            filter: none !important;
+        }
+
         /* الشعار الإسلامي في الأعلى */
         .header {
             text-align: center;
             padding: 2rem 1rem 1rem;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-subtle);
+        }
+
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
         }
 
         .islamic-logo {
@@ -67,6 +136,11 @@
             text-shadow: 0 2px 8px var(--glow-soft);
         }
 
+        [data-theme="light"] .basmala {
+            color: #c4956a;
+            text-shadow: 0 2px 8px rgba(196, 149, 106, 0.3);
+        }
+
         .site-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -74,9 +148,17 @@
             margin-bottom: 0.3rem;
         }
 
+        [data-theme="light"] .site-title {
+            color: #1a1a1a;
+        }
+
         .tagline {
             font-size: 0.9rem;
             color: var(--text-secondary);
+        }
+
+        [data-theme="light"] .tagline {
+            color: #4a4a4a;
         }
 
         /* منطقة المحادثة */
@@ -172,9 +254,21 @@
             border-color: rgba(255, 255, 255, 0.15);
         }
 
+        [data-theme="light"] .message.user .message-content {
+            background: #ffffff;
+            border-color: rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
         .message.assistant .message-content {
             background: linear-gradient(135deg, var(--bg-chat) 0%, rgba(10, 95, 79, 0.1) 100%);
             border-color: rgba(212, 165, 116, 0.2);
+        }
+
+        [data-theme="light"] .message.assistant .message-content {
+            background: linear-gradient(135deg, #ffffff 0%, rgba(10, 95, 79, 0.03) 100%);
+            border-color: rgba(212, 165, 116, 0.3);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         }
 
         /* رسالة الترحيب الأولى */
@@ -187,6 +281,12 @@
             text-align: center;
         }
 
+        [data-theme="light"] .welcome-message {
+            background: linear-gradient(135deg, rgba(10, 95, 79, 0.05) 0%, rgba(212, 165, 116, 0.08) 100%);
+            border-color: var(--accent-gold);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
         .welcome-greeting {
             font-family: 'Amiri Quran';
             font-size: 1.8rem;
@@ -194,11 +294,20 @@
             margin-bottom: 1rem;
         }
 
+        [data-theme="light"] .welcome-greeting {
+            color: #c4956a;
+            text-shadow: 0 2px 8px rgba(196, 149, 106, 0.2);
+        }
+
         .welcome-text {
             color: var(--text-primary);
             font-size: 1rem;
             margin-bottom: 1rem;
             line-height: 1.8;
+        }
+
+        [data-theme="light"] .welcome-text {
+            color: #1a1a1a;
         }
 
         .help-points {
@@ -225,6 +334,10 @@
             color: var(--accent-gold);
             font-weight: 500;
             margin-top: 1rem;
+        }
+
+        [data-theme="light"] .welcome-prompt {
+            color: #c4956a;
         }
 
         /* الأزرار السريعة */
@@ -254,11 +367,26 @@
             transform: translateY(-2px);
         }
 
+        [data-theme="light"] .quick-btn {
+            background: rgba(212, 165, 116, 0.08);
+            border-color: rgba(212, 165, 116, 0.3);
+        }
+
+        [data-theme="light"] .quick-btn:hover {
+            background: rgba(212, 165, 116, 0.15);
+            box-shadow: 0 4px 12px rgba(212, 165, 116, 0.2);
+        }
+
         /* منطقة الإدخال */
         .input-area {
             padding: 1.5rem;
             background: var(--bg-secondary);
             border-top: 1px solid var(--border-subtle);
+        }
+
+        [data-theme="light"] .input-area {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.05);
         }
 
         .input-wrapper {
@@ -413,6 +541,98 @@
             }
         }
 
+        /* زر تبديل الوضع الأسطوري 🌙☀️ */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), #c99a6b);
+            border: 2px solid var(--border-subtle);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 10000;
+            box-shadow: 
+                0 4px 16px var(--glow-soft),
+                0 0 0 0 rgba(212, 165, 116, 0.4);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.15) rotate(20deg);
+            box-shadow: 
+                0 6px 24px var(--glow-soft),
+                0 0 0 6px rgba(212, 165, 116, 0.2);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.9) rotate(0deg);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .theme-toggle:hover::before {
+            opacity: 1;
+        }
+
+        .theme-icon {
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .theme-icon.sun {
+            opacity: 0;
+            transform: rotate(-180deg) scale(0);
+        }
+
+        .theme-icon.moon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        [data-theme="light"] .theme-icon.sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        [data-theme="light"] .theme-icon.moon {
+            opacity: 0;
+            transform: rotate(180deg) scale(0);
+        }
+
+        /* تأثير موجة عند التبديل */
+        @keyframes ripple {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.6),
+                            0 0 0 0 rgba(212, 165, 116, 0.4),
+                            0 0 0 0 rgba(212, 165, 116, 0.2);
+            }
+            100% {
+                box-shadow: 0 0 0 20px rgba(212, 165, 116, 0),
+                            0 0 0 40px rgba(212, 165, 116, 0),
+                            0 0 0 60px rgba(212, 165, 116, 0);
+            }
+        }
+
+        .theme-toggle.ripple-effect {
+            animation: ripple 0.8s ease-out;
+        }
+
         /* التجاوب مع الشاشات */
         @media (max-width: 768px) {
             .basmala {
@@ -448,6 +668,12 @@
     </style>
 </head>
 <body>
+    <!-- زر تبديل الوضع الأسطوري -->
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="تبديل بين الوضع الليلي والنهاري" title="تبديل الوضع">
+        <span class="theme-icon moon">🌙</span>
+        <span class="theme-icon sun">☀️</span>
+    </button>
+
     <!-- الرأس -->
     <header class="header">
         <div class="islamic-logo">☪</div>
@@ -536,13 +762,36 @@
     </div>
 
     <script>
+        // 🌙☀️ نظام تبديل الوضع الأسطوري
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // تأثير الموجة
+            const toggleBtn = document.getElementById('themeToggle');
+            toggleBtn.classList.add('ripple-effect');
+            setTimeout(() => toggleBtn.classList.remove('ripple-effect'), 800);
+            
+            // تطبيق الوضع الجديد
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // تهيئة الوضع عند تحميل الصفحة
+        initTheme();
+
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
 
         // إعدادات الاتصال بالـ Worker
-        const WORKER_URL = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
+        const WORKER_URL = 'https://askislam-ai.YOUR_SUBDOMAIN.workers.dev/api/chat';
         let chatHistory = [];
         let isProcessing = false;
 
