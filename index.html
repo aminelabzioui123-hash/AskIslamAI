@@ -20,9 +20,25 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         :root {
+            /* الألوان الإسلامية الداكنة - الوضع الليلي */
+            --bg-primary: #0a0e14;
+            --bg-secondary: #151b23;
+            --bg-chat: #1a1f28;
+            --text-primary: #e6e8eb;
+            --text-secondary: #9ca3af;
+            --accent-gold: #d4a574;
+            --accent-green: #0a5f4f;
+            --border-subtle: rgba(255, 255, 255, 0.1);
+            --glow-soft: rgba(212, 165, 116, 0.15);
+            
+            /* الألوان القديمة للتوافق */
             --primary: #0a5f4f;
             --secondary: #2d8b74;
             --gold: #d4a574;
@@ -33,13 +49,74 @@
             --shadow: rgba(0, 0, 0, 0.1);
         }
 
+        /* الوضع النهاري 🌞 */
+        [data-theme="light"] {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-chat: #fafbfc;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --accent-gold: #c4956a;
+            --accent-green: #0a5f4f;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --glow-soft: rgba(212, 165, 116, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+            --shadow: rgba(0, 0, 0, 0.05);
+        }
+
         body {
             font-family: "IBM Plex Sans Arabic", sans-serif;
-            background: linear-gradient(135deg, #0a5f4f 0%, #1a4a3d 50%, #2d8b74 100%);
-            color: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             overflow-x: hidden;
             position: relative;
             min-height: 100vh;
+        }
+
+        /* تأكيد تغيير لون النصوص في الوضع النهاري */
+        [data-theme="light"] body {
+            background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 50%, #cbd5e0 100%);
+            color: #1a1a1a;
+        }
+
+        /* قاعدة شاملة لتحويل كل النصوص للأسود */
+        [data-theme="light"] *:not(.theme-icon) {
+            color: #1a1a1a !important;
+        }
+
+        /* استثناءات للعناصر التي يجب أن تبقى بلونها */
+        [data-theme="light"] .action-btn::before,
+        [data-theme="light"] .theme-toggle::after {
+            color: white !important;
+        }
+
+        [data-theme="light"] h1,
+        [data-theme="light"] h2,
+        [data-theme="light"] h3,
+        [data-theme="light"] h4,
+        [data-theme="light"] h5,
+        [data-theme="light"] h6 {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] p,
+        [data-theme="light"] span:not(.theme-icon),
+        [data-theme="light"] div:not(.theme-toggle),
+        [data-theme="light"] a,
+        [data-theme="light"] li,
+        [data-theme="light"] label,
+        [data-theme="light"] button:not(.theme-toggle) {
+            color: #1a1a1a !important;
+        }
+
+        [data-theme="light"] .text-secondary {
+            color: #4a4a4a !important;
+        }
+
+        /* الحفاظ على لون الأيقونات والإيموجي */
+        [data-theme="light"] .theme-icon {
+            filter: none !important;
         }
 
         /* Animated Background Pattern */
@@ -51,12 +128,21 @@
             width: 100%;
             height: 100%;
             background: 
-                radial-gradient(circle at 20% 50%, rgba(212, 165, 116, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(45, 139, 116, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 20%, rgba(10, 95, 79, 0.1) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, var(--glow-soft) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(10, 95, 79, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(21, 27, 35, 0.2) 0%, transparent 50%);
             animation: backgroundMove 20s ease infinite;
             pointer-events: none;
             z-index: 0;
+            opacity: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        [data-theme="light"] body::before {
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(212, 165, 116, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(10, 95, 79, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(45, 139, 116, 0.05) 0%, transparent 50%);
         }
 
         @keyframes backgroundMove {
@@ -66,18 +152,29 @@
 
         /* Glassmorphism Container */
         .glass {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(21, 27, 35, 0.6);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="light"] .glass {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
         }
 
         .glass-strong {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(26, 31, 40, 0.8);
             backdrop-filter: blur(30px) saturate(200%);
             -webkit-backdrop-filter: blur(30px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(212, 165, 116, 0.2);
+        }
+
+        [data-theme="light"] .glass-strong {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(212, 165, 116, 0.3);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
         }
 
         /* Non-Profit Banner */
@@ -95,26 +192,27 @@
             display: flex;
             align-items: center;
             gap: 1rem;
-            background: linear-gradient(135deg, rgba(45, 139, 116, 0.15), rgba(10, 95, 79, 0.15));
-            border: 1px solid rgba(212, 165, 116, 0.3);
+            background: linear-gradient(135deg, rgba(10, 95, 79, 0.2) 0%, rgba(21, 27, 35, 0.3) 100%);
+            border: 1px solid var(--accent-gold);
+            box-shadow: 0 8px 24px var(--glow-soft);
         }
 
         .nonprofit-icon {
             font-size: 2rem;
-            filter: drop-shadow(0 2px 8px rgba(212, 165, 116, 0.3));
+            filter: drop-shadow(0 2px 8px var(--glow-soft));
         }
 
         .nonprofit-text {
             flex: 1;
             font-size: 1rem;
             line-height: 1.6;
-            color: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
         }
 
         .nonprofit-close {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
+            background: rgba(21, 27, 35, 0.5);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
             width: 30px;
             height: 30px;
             border-radius: 50%;
@@ -124,12 +222,130 @@
         }
 
         .nonprofit-close:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(26, 31, 40, 0.8);
+            border-color: var(--accent-gold);
             transform: rotate(90deg);
         }
 
         .nonprofit-banner.hidden {
             display: none;
+        }
+
+        /* زر تبديل الوضع الأسطوري 🌙☀️ */
+        .theme-toggle {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-gold), #c99a6b);
+            border: 3px solid var(--border-subtle);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            z-index: 10000;
+            box-shadow: 
+                0 8px 32px var(--glow-soft),
+                0 0 0 0 rgba(212, 165, 116, 0.4);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            overflow: hidden;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(20deg);
+            box-shadow: 
+                0 12px 48px var(--glow-soft),
+                0 0 0 8px rgba(212, 165, 116, 0.2);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95) rotate(0deg);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .theme-toggle:hover::before {
+            opacity: 1;
+        }
+
+        .theme-icon {
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .theme-icon.sun {
+            opacity: 0;
+            transform: rotate(-180deg) scale(0);
+        }
+
+        .theme-icon.moon {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        [data-theme="light"] .theme-icon.sun {
+            opacity: 1;
+            transform: rotate(0deg) scale(1);
+        }
+
+        [data-theme="light"] .theme-icon.moon {
+            opacity: 0;
+            transform: rotate(180deg) scale(0);
+        }
+
+        /* تأثير موجة عند التبديل */
+        @keyframes ripple {
+            0% {
+                box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.6),
+                            0 0 0 0 rgba(212, 165, 116, 0.4),
+                            0 0 0 0 rgba(212, 165, 116, 0.2);
+            }
+            100% {
+                box-shadow: 0 0 0 20px rgba(212, 165, 116, 0),
+                            0 0 0 40px rgba(212, 165, 116, 0),
+                            0 0 0 60px rgba(212, 165, 116, 0);
+            }
+        }
+
+        .theme-toggle.ripple-effect {
+            animation: ripple 0.8s ease-out;
+        }
+
+        /* Tooltip للزر */
+        .theme-toggle::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: 80px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-family: "IBM Plex Sans Arabic", sans-serif;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .theme-toggle:hover::after {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* Navigation */
@@ -165,6 +381,11 @@
             text-shadow: 0 2px 10px rgba(212, 165, 116, 0.3);
         }
 
+        [data-theme="light"] .logo {
+            color: #c4956a;
+            text-shadow: 0 2px 10px rgba(196, 149, 106, 0.4);
+        }
+
         .nav-links {
             display: flex;
             gap: 2rem;
@@ -173,7 +394,7 @@
         }
 
         .nav-links a {
-            color: white;
+            color: var(--text-primary);
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
@@ -188,8 +409,13 @@
             right: 0;
             width: 0;
             height: 2px;
-            background: var(--gold);
+            background: var(--accent-gold);
             transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--glow-soft);
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
         }
 
         .nav-links a:hover::after {
@@ -197,8 +423,8 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--gold), #c4956a);
-            color: var(--dark);
+            background: linear-gradient(135deg, var(--accent-gold), #c99a6b);
+            color: var(--bg-primary);
             padding: 0.8rem 2rem;
             border-radius: 12px;
             border: none;
@@ -206,7 +432,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: inherit;
-            box-shadow: 0 4px 15px rgba(212, 165, 116, 0.3);
+            box-shadow: 0 4px 15px var(--glow-soft);
             position: relative;
             z-index: 1001;
             touch-action: manipulation;
@@ -214,7 +440,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(212, 165, 116, 0.4);
+            box-shadow: 0 8px 24px var(--glow-soft);
         }
 
         /* Hero Section */
@@ -284,6 +510,11 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
             color: white;
             backdrop-filter: blur(10px);
+        }
+
+        [data-theme="light"] .btn-outline {
+            color: #1a1a1a !important;
+            border-color: rgba(0, 0, 0, 0.2);
         }
 
         .btn-outline:hover {
@@ -460,8 +691,18 @@
             min-height: 100px;
         }
 
+        [data-theme="light"] .testimonial-input {
+            color: #1a1a1a !important;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
         .testimonial-input::placeholder {
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        [data-theme="light"] .testimonial-input::placeholder {
+            color: rgba(0, 0, 0, 0.4) !important;
         }
 
         .testimonial-input:focus {
@@ -607,6 +848,11 @@
             font-family: "IBM Plex Sans Arabic", sans-serif;
         }
 
+        [data-theme="light"] .action-btn::before {
+            background: rgba(26, 26, 26, 0.95);
+            color: white !important;
+        }
+
         .action-btn:hover::before {
             opacity: 1;
             bottom: 75px;
@@ -697,6 +943,10 @@
         .contact-value {
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="light"] .contact-value {
+            color: #1a1a1a !important;
         }
 
         .modal-close {
@@ -802,6 +1052,10 @@
             font-size: 0.7rem;
         }
 
+        [data-theme="light"] .support-method-desc {
+            color: #4a4a4a !important;
+        }
+
         .support-note {
             background: rgba(76, 175, 80, 0.1);
             border: 1px solid rgba(76, 175, 80, 0.3);
@@ -811,6 +1065,12 @@
             color: rgba(255, 255, 255, 0.85);
             line-height: 1.4;
             font-size: 0.8rem;
+        }
+
+        [data-theme="light"] .support-note {
+            color: #1a1a1a !important;
+            background: rgba(76, 175, 80, 0.1);
+            border-color: rgba(76, 175, 80, 0.4);
         }
 
         .support-note strong {
@@ -1044,6 +1304,12 @@
         </div>
     </section>
 
+    <!-- زر تبديل الوضع الأسطوري -->
+    <button class="theme-toggle" id="themeToggle" data-tooltip="تبديل الوضع" onclick="toggleTheme()" aria-label="تبديل بين الوضع الليلي والنهاري">
+        <span class="theme-icon moon">🌙</span>
+        <span class="theme-icon sun">☀️</span>
+    </button>
+
     <!-- Floating Action Buttons -->
     <div class="floating-actions">
         <button class="action-btn" data-tooltip="تواصل معنا" onclick="openContactModal()">
@@ -1120,6 +1386,48 @@
     </footer>
 
    <script>
+    // 🌙☀️ نظام تبديل الوضع الأسطوري
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateThemeTooltip(savedTheme);
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // تأثير الموجة
+        const toggleBtn = document.getElementById('themeToggle');
+        toggleBtn.classList.add('ripple-effect');
+        setTimeout(() => toggleBtn.classList.remove('ripple-effect'), 800);
+        
+        // تطبيق الوضع الجديد
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeTooltip(newTheme);
+        
+        // صوت تأكيد (اختياري)
+        playToggleSound();
+    }
+
+    function updateThemeTooltip(theme) {
+        const tooltip = theme === 'dark' ? 'الوضع النهاري ☀️' : 'الوضع الليلي 🌙';
+        document.getElementById('themeToggle').setAttribute('data-tooltip', tooltip);
+    }
+
+    function playToggleSound() {
+        // يمكن إضافة صوت بسيط هنا
+        if (typeof Audio !== 'undefined') {
+            // const audio = new Audio('click.mp3');
+            // audio.volume = 0.3;
+            // audio.play().catch(() => {});
+        }
+    }
+
+    // تهيئة الوضع عند تحميل الصفحة
+    initTheme();
+
     // 1. وظائف شريط "غير ربحي"
     function closeBanner() {
         document.getElementById('nonprofitBanner').classList.add('hidden');
