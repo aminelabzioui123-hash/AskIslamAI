@@ -19,6 +19,7 @@
         }
 
         :root {
+            /* الألوان الإسلامية الداكنة */
             --bg-primary: #0a0e14;
             --bg-secondary: #151b23;
             --bg-chat: #1a1f28;
@@ -30,6 +31,7 @@
             --glow-soft: rgba(212, 165, 116, 0.15);
         }
 
+        /* الوضع النهاري 🌞 */
         [data-theme="light"] {
             --bg-primary: #f0f4f8;
             --bg-secondary: #ffffff;
@@ -51,10 +53,12 @@
             flex-direction: column;
         }
 
+        /* تأكيد تغيير لون النصوص في الوضع النهاري */
         [data-theme="light"] body {
             color: #1a1a1a;
         }
 
+        /* قاعدة شاملة لتحويل كل النصوص للأسود */
         [data-theme="light"] *:not(.theme-icon) {
             color: #1a1a1a !important;
         }
@@ -91,10 +95,12 @@
             color: #1a1a1a !important;
         }
 
+        /* الحفاظ على لون الأيقونات */
         [data-theme="light"] .theme-icon {
             filter: none !important;
         }
 
+        /* الشعار الإسلامي في الأعلى */
         .header {
             text-align: center;
             padding: 2rem 1rem 1rem;
@@ -118,6 +124,7 @@
             color: #1a1a1a;
         }
 
+        /* منطقة المحادثة */
         .chat-container {
             flex: 1;
             display: flex;
@@ -151,6 +158,7 @@
             border-radius: 10px;
         }
 
+        /* رسالة المستخدم */
         .message {
             display: flex;
             gap: 1rem;
@@ -226,6 +234,7 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
         }
 
+        /* رسالة الترحيب الأولى */
         .welcome-message {
             background: linear-gradient(135deg, rgba(10, 95, 79, 0.2) 0%, rgba(212, 165, 116, 0.1) 100%);
             border: 1px solid var(--accent-gold);
@@ -294,6 +303,7 @@
             color: #c4956a;
         }
 
+        /* الأزرار السريعة */
         .quick-actions {
             display: flex;
             gap: 0.8rem;
@@ -330,6 +340,7 @@
             box-shadow: 0 4px 12px rgba(212, 165, 116, 0.2);
         }
 
+        /* منطقة الإدخال */
         .input-area {
             padding: 1.5rem;
             background: var(--bg-secondary);
@@ -407,6 +418,7 @@
             cursor: not-allowed;
         }
 
+        /* الأدوات السفلية */
         .bottom-tools {
             display: flex;
             gap: 0.8rem;
@@ -436,6 +448,7 @@
             color: var(--text-primary);
         }
 
+        /* مؤشر الكتابة */
         .typing-indicator {
             display: none;
             gap: 0.3rem;
@@ -473,6 +486,7 @@
             }
         }
 
+        /* زر تبديل الوضع الأسطوري 🌙☀️ */
         .theme-toggle {
             position: fixed;
             top: 20px;
@@ -546,6 +560,7 @@
             transform: rotate(180deg) scale(0);
         }
 
+        /* تأثير موجة عند التبديل */
         @keyframes ripple {
             0% {
                 box-shadow: 0 0 0 0 rgba(212, 165, 116, 0.6),
@@ -563,6 +578,7 @@
             animation: ripple 0.8s ease-out;
         }
 
+        /* التجاوب مع الشاشات */
         @media (max-width: 768px) {
             .basmala {
                 font-size: 1.2rem;
@@ -597,17 +613,21 @@
     </style>
 </head>
 <body>
+    <!-- زر تبديل الوضع الأسطوري -->
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="تبديل بين الوضع الليلي والنهاري" title="تبديل الوضع">
         <span class="theme-icon moon">🌙</span>
         <span class="theme-icon sun">☀️</span>
     </button>
 
+    <!-- الرأس - تم حذف أيقونة الهلال والبسملة والشعار، وإبقاء اسم المنصة فقط -->
     <header class="header">
         <h1 class="site-title">اسأل الإسلام AI</h1>
     </header>
 
+    <!-- المحادثة -->
     <div class="chat-container">
         <div class="messages-area" id="messagesArea">
+            <!-- رسالة الترحيب -->
             <div class="welcome-message">
                 <div class="welcome-greeting">السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ</div>
                 <div class="welcome-text">
@@ -639,6 +659,7 @@
             </div>
         </div>
 
+        <!-- مؤشر الكتابة -->
         <div class="typing-indicator" id="typingIndicator">
             <div class="typing-dot"></div>
             <div class="typing-dot"></div>
@@ -646,6 +667,7 @@
         </div>
     </div>
 
+    <!-- الإدخال -->
     <div class="input-area">
         <div class="input-wrapper">
             <textarea 
@@ -655,12 +677,14 @@
                 rows="1"
             ></textarea>
             <div class="input-icons">
+                <!-- تم حذف أيقونة الميكروفون -->
                 <button class="send-btn" id="sendBtn" aria-label="إرسال">
                     ➤
                 </button>
             </div>
         </div>
 
+        <!-- الأدوات - تم حذف الأزرار: بحث في القرآن، بحث في الأحاديث، فتاوى شرعية -->
         <div class="bottom-tools">
             <button class="tool-btn" title="تحليل المصادر">
                 🔍 تحليل المصادر
@@ -669,6 +693,7 @@
     </div>
 
     <script>
+        // 🌙☀️ نظام تبديل الوضع الأسطوري
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -677,29 +702,39 @@
         function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            // تأثير الموجة
             const toggleBtn = document.getElementById('themeToggle');
             toggleBtn.classList.add('ripple-effect');
             setTimeout(() => toggleBtn.classList.remove('ripple-effect'), 800);
+            
+            // تطبيق الوضع الجديد
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         }
 
+        // تهيئة الوضع عند تحميل الصفحة
         initTheme();
 
+        // ========== 🔧 التعديلات الأساسية لحل مشكلة الاتصال ==========
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
 
-        const WORKER_URL = 'https://askislam-ai.aminelabzioui123.workers.dev/api/chat';
+        // ✅ الرابط الصحيح للـ Worker - POST /api/chat
+        // يجب أن يطابق اسم Worker في wrangler.toml (السطر 1: name = 'askislam-ai')
+        const WORKER_URL = window.location.origin + '/api/chat';
         let chatHistory = [];
         let isProcessing = false;
 
+        // تعديل حجم textarea تلقائياً
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
+        // إرسال بالضغط على Enter (Shift+Enter للسطر الجديد)
         messageInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -707,8 +742,10 @@
             }
         });
 
+        // زر الإرسال
         sendBtn.addEventListener('click', sendMessage);
 
+        // دالة إرسال الرسالة
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || isProcessing) return;
@@ -716,22 +753,25 @@
             isProcessing = true;
             sendBtn.disabled = true;
 
+            // إضافة رسالة المستخدم
             addMessage(text, 'user');
             chatHistory.push({ role: 'user', content: text });
 
             messageInput.value = '';
             messageInput.style.height = 'auto';
 
+            // إظهار مؤشر الكتابة
             typingIndicator.classList.add('active');
             messagesArea.scrollTop = messagesArea.scrollHeight;
 
             try {
+                // ✅ التغيير الجوهري: POST مع JSON Body
                 const response = await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: text,
-                        chatHistory: chatHistory.slice(-4)
+                        chatHistory: chatHistory.slice(-4) // آخر 4 رسائل للسياق
                     })
                 });
 
@@ -741,6 +781,7 @@
 
                 const data = await response.json();
 
+                // ✅ معالجة الرد من الـ Worker (يحتوي على content, sources)
                 if (data.content) {
                     addMessage(data.content, 'assistant', data.sources);
                     chatHistory.push({ role: 'assistant', content: data.content });
@@ -768,6 +809,7 @@
             }
         }
 
+        // دالة إضافة رسالة
         function addMessage(content, role, sources = null) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}`;
@@ -787,15 +829,27 @@
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
+        // تنسيق المحتوى
         function formatContent(text) {
+            // تحويل النص إلى HTML آمن
             text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // تنسيق الآيات القرآنية
             text = text.replace(/﴿(.*?)﴾/g, '<span style="font-family: \'Amiri Quran\'; font-size: 1.2em; color: #d4a574;">﴿$1﴾</span>');
+            
+            // تنسيق الأحاديث
             text = text.replace(/«(.*?)»/g, '<span style="color: #9ca3af; font-style: italic;">«$1»</span>');
+            
+            // إضافة رمز ﷺ
             text = text.replace(/(النبي محمد|رسول الله|النبي ﷺ)/g, '$1 ﷺ');
+            
+            // تحويل الأسطر الجديدة
             text = text.replace(/\n/g, '<br>');
+            
             return text;
         }
 
+        // تنسيق المصادر
         function formatSources(sources) {
             let sourcesText = [];
             if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
@@ -814,6 +868,7 @@
             `;
         }
 
+        // دالة للأزرار السريعة
         function askQuestion(question) {
             messageInput.value = question;
             sendMessage();
