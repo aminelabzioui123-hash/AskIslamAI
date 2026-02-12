@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
     <style>
-        /* كامل التصميم كما هو في ملفك – لم يتم تغيير أي حرف */
         * {
             margin: 0;
             padding: 0;
@@ -108,34 +107,6 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
         }
 
-        .islamic-logo {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 1rem;
-            background: linear-gradient(135deg, var(--accent-gold) 0%, #c99a6b 100%);
-            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Amiri Quran';
-            font-size: 1.5rem;
-            color: var(--bg-primary);
-            box-shadow: 0 8px 24px var(--glow-soft);
-        }
-
-        .basmala {
-            font-family: 'Amiri Quran';
-            font-size: 1.5rem;
-            color: var(--accent-gold);
-            margin-bottom: 0.5rem;
-            text-shadow: 0 2px 8px var(--glow-soft);
-        }
-
-        [data-theme="light"] .basmala {
-            color: #c4956a;
-            text-shadow: 0 2px 8px rgba(196, 149, 106, 0.3);
-        }
-
         .site-title {
             font-size: 1.2rem;
             font-weight: 600;
@@ -145,15 +116,6 @@
 
         [data-theme="light"] .site-title {
             color: #1a1a1a;
-        }
-
-        .tagline {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        [data-theme="light"] .tagline {
-            color: #4a4a4a;
         }
 
         .chat-container {
@@ -420,24 +382,6 @@
             align-items: center;
         }
 
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-primary);
-        }
-
         .send-btn {
             background: linear-gradient(135deg, var(--accent-gold) 0%, #c99a6b 100%);
             color: var(--bg-primary);
@@ -659,10 +603,7 @@
     </button>
 
     <header class="header">
-        <div class="islamic-logo">☪</div>
-        <div class="basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
         <h1 class="site-title">اسأل الإسلام AI</h1>
-        <p class="tagline">مساعدك الذكي في علوم القرآن والسنة</p>
     </header>
 
     <div class="chat-container">
@@ -714,9 +655,6 @@
                 rows="1"
             ></textarea>
             <div class="input-icons">
-                <button class="icon-btn" title="ميكروفون" aria-label="تسجيل صوتي">
-                    🎤
-                </button>
                 <button class="send-btn" id="sendBtn" aria-label="إرسال">
                     ➤
                 </button>
@@ -724,15 +662,6 @@
         </div>
 
         <div class="bottom-tools">
-            <button class="tool-btn" title="بحث في القرآن">
-                📖 بحث في القرآن
-            </button>
-            <button class="tool-btn" title="بحث في الأحاديث">
-                📿 بحث في الأحاديث
-            </button>
-            <button class="tool-btn" title="فتاوى شرعية">
-                📚 فتاوى شرعية
-            </button>
             <button class="tool-btn" title="تحليل المصادر">
                 🔍 تحليل المصادر
             </button>
