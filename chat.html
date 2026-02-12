@@ -722,9 +722,8 @@
         const sendBtn = document.getElementById('sendBtn');
         const typingIndicator = document.getElementById('typingIndicator');
 
-        // ✅ الرابط الصحيح للـ Worker - POST /api/chat
-        // يجب أن يطابق اسم Worker في wrangler.toml (السطر 1: name = 'askislam-ai')
-        const WORKER_URL = window.location.origin + '/api/chat';
+        // ✅ الرابط الصحيح - نسبي (يعمل مع `wrangler dev` ومع النطاق النهائي)
+        const WORKER_URL = '/api/chat';
         let chatHistory = [];
         let isProcessing = false;
 
@@ -795,7 +794,7 @@
                 let errorMessage = "⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
                 
                 if (error.message.includes('Failed to fetch')) {
-                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من:\n• اتصال الإنترنت\n• تفعيل Worker في Cloudflare\n• أن عنوان الـ Worker صحيح";
+                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من:\n• أن الـ Worker منشور على Cloudflare\n• أن عنوان الـ API صحيح (/api/chat)";
                 } else if (error.message.includes('timeout')) {
                     errorMessage = "⏱️ انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى.";
                 }
