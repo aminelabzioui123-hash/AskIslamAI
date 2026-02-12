@@ -1,4 +1,3 @@
-<!-- ملف chat.html (بدون أي تغيير - كما أرفقته تماماً) -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -853,11 +852,12 @@
         function formatSources(sources) {
             let sourcesText = [];
             if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
+            if (sources.tafsir > 0) sourcesText.push(`📚 ${sources.tafsir} تفسير`);
             if (sources.hadith > 0) {
                 const hadithSource = sources.hadithSource || 'أحاديث';
                 sourcesText.push(`📿 ${sources.hadith} حديث (${hadithSource})`);
             }
-            if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
+            if (sources.islamweb > 0) sourcesText.push(`📋 ${sources.islamweb} فتوى`);
             
             if (sourcesText.length === 0) return '';
             
