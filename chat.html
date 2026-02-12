@@ -1140,6 +1140,9 @@
         const analytics = getAnalytics(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+        
+        // ✅ الحل: إضافة سطر واحد فقط لإجبار اختيار الحساب وتحسين نجاح تسجيل الدخول
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         // 4. المتغيرات العامة
         window.currentUser = null; // سيتم تحديثه عند تغيير حالة المصادقة
