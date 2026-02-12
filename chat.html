@@ -578,6 +578,63 @@
             animation: ripple 0.8s ease-out;
         }
 
+        /* ===== تنسيق صندوق القرآن المحسن ===== */
+        .quran-content-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(212, 165, 116, 0.05) 100%);
+            border: 2px solid var(--accent-gold);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 16px var(--glow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+        .quran-text-style {
+            font-family: 'Amiri Quran', serif;
+            font-size: 1.5rem;
+            color: var(--accent-gold);
+            line-height: 2;
+            text-align: justify;
+        }
+        .quran-ornament {
+            font-family: 'Amiri Quran', serif;
+            color: var(--accent-gold);
+            opacity: 0.5;
+            font-size: 1rem;
+        }
+        /* ===== تنسيق صندوق الحديث المحسن ===== */
+        .hadith-content-box {
+            background: rgba(10, 95, 79, 0.08);
+            border-right: 5px solid var(--accent-green);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 12px 12px 0;
+        }
+        .hadith-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .hadith-icon {
+            font-size: 1.2rem;
+        }
+        .hadith-label {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+        .hadith-text-style {
+            font-style: italic;
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+        .hadith-footer {
+            text-align: left;
+            margin-top: 10px;
+            color: var(--accent-green);
+        }
+
         /* التجاوب مع الشاشات */
         @media (max-width: 768px) {
             .basmala {
@@ -716,7 +773,7 @@
         // تهيئة الوضع عند تحميل الصفحة
         initTheme();
 
-        // ========== 🔧 التعديلات الأساسية لحل مشكلة الاتصال ==========
+        // ========== 🔧 التعديلات الأساسية لحل مشكلة الاتصال وعرض النصوص ==========
         const messagesArea = document.getElementById('messagesArea');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
@@ -743,6 +800,72 @@
 
         // زر الإرسال
         sendBtn.addEventListener('click', sendMessage);
+
+        // دالة تنسيق المحتوى المتكاملة (تدعم وسوم [Q] و [H])
+        function formatContent(text) {
+            if (!text) return '';
+            
+            // 1. تحويل وسوم [Q]...[/Q] إلى صندوق القرآن
+            text = text.replace(/\[Q\]([\s\S]*?)\[\/Q\]/g, function(match, content) {
+                return `<div class="quran-content-box">
+                    <div class="quran-ornament">﷽</div>
+                    <div class="quran-text-style">﴿ ${content.trim()} ﴾</div>
+                    <div class="quran-ornament">﴿ ﴾</div>
+                </div>`;
+            });
+            
+            // 2. تحويل وسوم [H]...[/H] إلى صندوق الحديث
+            text = text.replace(/\[H\]([\s\S]*?)\[\/H\]/g, function(match, content) {
+                return `<div class="hadith-content-box">
+                    <div class="hadith-header">
+                        <span class="hadith-icon">📜</span>
+                        <span class="hadith-label">حديث شريف</span>
+                    </div>
+                    <div class="hadith-text-style">« ${content.trim()} »</div>
+                    <div class="hadith-footer">ﷺ</div>
+                </div>`;
+            });
+            
+            // 3. معالجة بقية النص (تنظيف وإضافة تنسيقات إضافية)
+            // نأخذ النص المتبقي (الأجزاء خارج الوسوم) - لكن بما أن replace أجرى التبديل،
+            // نحتاج لحماية HTML المُولد من escape.
+            // سنقسم النص إلى أجزاء HTML آمنة وأجزاء نصية عادية.
+            // لكن لتبسيط: نطبق التحسينات على النص كامل دون escape عام.
+            
+            // تنسيق الآيات القرآنية المكتوبة بشكل عادي
+            text = text.replace(/﴿([^﴾]+)﴾/g, '<span style="font-family: \'Amiri Quran\'; font-size: 1.2em; color: var(--accent-gold);">﴿$1﴾</span>');
+            
+            // تنسيق الأحاديث
+            text = text.replace(/«([^»]+)»/g, '<span style="color: var(--text-secondary); font-style: italic;">«$1»</span>');
+            
+            // إضافة رمز ﷺ بعد ذكر النبي
+            text = text.replace(/(النبي محمد|رسول الله|النبي ﷺ)/g, '$1 ﷺ');
+            
+            // تحويل الأسطر الجديدة
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+
+        // تنسيق المصادر
+        function formatSources(sources) {
+            if (!sources) return '';
+            let sourcesText = [];
+            if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
+            if (sources.hadith > 0) {
+                const hadithSource = sources.hadithSource || 'أحاديث';
+                sourcesText.push(`📿 ${sources.hadith} حديث (${hadithSource})`);
+            }
+            if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
+            
+            if (sourcesText.length === 0) return '';
+            
+            return `
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: var(--accent-gold);">
+                    ${sourcesText.join(' • ')}
+                </div>
+            `;
+        }
 
         // دالة إرسال الرسالة
         async function sendMessage() {
@@ -826,45 +949,6 @@
             messageDiv.innerHTML = messageHTML;
             messagesArea.appendChild(messageDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
-        }
-
-        // تنسيق المحتوى
-        function formatContent(text) {
-            // تحويل النص إلى HTML آمن
-            text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
-            // تنسيق الآيات القرآنية
-            text = text.replace(/﴿(.*?)﴾/g, '<span style="font-family: \'Amiri Quran\'; font-size: 1.2em; color: #d4a574;">﴿$1﴾</span>');
-            
-            // تنسيق الأحاديث
-            text = text.replace(/«(.*?)»/g, '<span style="color: #9ca3af; font-style: italic;">«$1»</span>');
-            
-            // إضافة رمز ﷺ
-            text = text.replace(/(النبي محمد|رسول الله|النبي ﷺ)/g, '$1 ﷺ');
-            
-            // تحويل الأسطر الجديدة
-            text = text.replace(/\n/g, '<br>');
-            
-            return text;
-        }
-
-        // تنسيق المصادر
-        function formatSources(sources) {
-            let sourcesText = [];
-            if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
-            if (sources.hadith > 0) {
-                const hadithSource = sources.hadithSource || 'أحاديث';
-                sourcesText.push(`📿 ${sources.hadith} حديث (${hadithSource})`);
-            }
-            if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
-            
-            if (sourcesText.length === 0) return '';
-            
-            return `
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #d4a574;">
-                    ${sourcesText.join(' • ')}
-                </div>
-            `;
         }
 
         // دالة للأزرار السريعة
