@@ -990,14 +990,6 @@
         </div>
 
         <!-- ✅ قسم المستخدم (يتملأ بواسطة Firebase) -->
-        <!-- 
-            📌 كيفية تسجيل الدخول:
-            1. افتح السلايدبار (زر ⚡ في الهيدر)
-            2. ستجد زر "تسجيل الدخول عبر Google" في الأعلى
-            3. اضغط على الزر لتسجيل الدخول
-            4. بعد تسجيل الدخول، ستظهر صورتك واسمك
-            5. محفوظاتك ستكون خاصة بك فقط
-        -->
         <div class="sidebar-user" id="userSection">
             <!-- سيتم ملؤه ديناميكياً عبر JavaScript -->
         </div>
@@ -1071,10 +1063,7 @@
         </div>
     </div>
 
-    <!-- ========== 🔥 Firebase Authentication + حفظ المحادثات لكل مستخدم ========== -->
-    <!-- يُضاف قبل إغلاق </body> مباشرة -->
-    
-    <!-- ========== 🎯 دوال فتح/إغلاق السلايدبار ========== -->
+    <!-- ========== 🎯 دوال فتح/إغلاق السلايدبار والثيم ========== -->
     <script>
         // فتح السلايدبار
         document.getElementById('sidebarToggle').addEventListener('click', function() {
@@ -1110,14 +1099,138 @@
             document.documentElement.setAttribute('data-theme', savedTheme);
         })();
 
-        // دالة طرح سؤال سريع
+        // ========== 💬 نظام إرسال الرسائل (تمت إضافته لإصلاح مشكلة زر الإرسال) ==========
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const messagesArea = document.getElementById('messagesArea');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const WORKER_URL = '/api/chat'; // سيتم استبداله تلقائياً بالرابط الصحيح
+        let chatHistory = [];
+        let isProcessing = false;
+
+        // تعديل حجم textarea تلقائياً
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // إرسال بالضغط على Enter
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // زر الإرسال
+        sendBtn.addEventListener('click', sendMessage);
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || isProcessing) return;
+
+            isProcessing = true;
+            sendBtn.disabled = true;
+
+            addMessage(text, 'user');
+            chatHistory.push({ role: 'user', content: text });
+
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            typingIndicator.classList.add('active');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        chatHistory: chatHistory.slice(-4)
+                    })
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                const data = await response.json();
+
+                if (data.content) {
+                    addMessage(data.content, 'assistant', data.sources);
+                    chatHistory.push({ role: 'assistant', content: data.content });
+                    if (window.saveConversation) {
+                        window.saveConversation(text, data.content);
+                    }
+                } else {
+                    addMessage('عذراً، لم أتمكن من العثور على إجابة.', 'assistant');
+                }
+
+            } catch (error) {
+                console.error('❌ خطأ:', error);
+                let errorMessage = "⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من أن الـ Worker منشور.";
+                }
+                addMessage(errorMessage, 'assistant');
+            } finally {
+                typingIndicator.classList.remove('active');
+                isProcessing = false;
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        function addMessage(content, role, sources = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            let avatarContent = role === 'user' ? '👤' : '☪';
+            let messageHTML = `
+                <div class="message-avatar">${avatarContent}</div>
+                <div class="message-content">
+                    ${formatContent(content)}
+                    ${sources ? formatSources(sources) : ''}
+                </div>
+            `;
+            messageDiv.innerHTML = messageHTML;
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        function formatContent(text) {
+            text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            text = text.replace(/﴿(.*?)﴾/g, '<span style="font-family: \'Amiri Quran\'; font-size: 1.2em; color: #d4a574;">﴿$1﴾</span>');
+            text = text.replace(/«(.*?)»/g, '<span style="color: #9ca3af; font-style: italic;">«$1»</span>');
+            text = text.replace(/(النبي محمد|رسول الله|النبي ﷺ)/g, '$1 ﷺ');
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
+        function formatSources(sources) {
+            if (!sources) return '';
+            let sourcesText = [];
+            if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
+            if (sources.hadith > 0) {
+                const hadithSource = sources.hadithSource || 'أحاديث';
+                sourcesText.push(`📿 ${sources.hadith} حديث (${hadithSource})`);
+            }
+            if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
+            if (sourcesText.length === 0) return '';
+            return `
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; color: #d4a574;">
+                    ${sourcesText.join(' • ')}
+                </div>
+            `;
+        }
+
+        // دالة طرح سؤال سريع (تم تعديلها لإرسال السؤال تلقائياً)
         function askQuestion(question) {
             document.getElementById('messageInput').value = question;
             document.getElementById('messageInput').focus();
-            // يمكنك إضافة كود إرسال السؤال تلقائياً هنا
+            sendMessage(); // ✅ الآن الأزرار السريعة تعمل
         }
     </script>
 
+    <!-- ========== 🔥 Firebase Authentication + حفظ المحادثات لكل مستخدم ========== -->
     <script type="module">
         // 1. استيراد Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -1141,11 +1254,11 @@
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
         
-        // ✅ الحل: إضافة سطر واحد فقط لإجبار اختيار الحساب وتحسين نجاح تسجيل الدخول
+        // ✅ إجبار اختيار الحساب لتحسين نجاح تسجيل الدخول
         provider.setCustomParameters({ prompt: 'select_account' });
 
         // 4. المتغيرات العامة
-        window.currentUser = null; // سيتم تحديثه عند تغيير حالة المصادقة
+        window.currentUser = null;
 
         // 5. دالة تسجيل الدخول
         window.loginGoogle = async () => {
@@ -1174,7 +1287,6 @@
             if (!userSection) return;
 
             if (user) {
-                // مستخدم مسجل الدخول
                 const photoURL = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
                 const displayName = user.displayName || 'مستخدم';
                 const email = user.email || '';
@@ -1190,7 +1302,6 @@
                     </button>
                 `;
             } else {
-                // زائر
                 userSection.innerHTML = `
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 24px; height: 24px; flex-shrink: 0;">
                     <button class="login-btn" onclick="loginGoogle()">
@@ -1204,42 +1315,44 @@
         onAuthStateChanged(auth, (user) => {
             window.currentUser = user;
             updateUserUI(user);
-            
-            // تغيير مفتاح التخزين في localStorage حسب المستخدم
-            // وإعادة تحميل المحفوظات
             loadHistory();
         });
 
-        // ========== تعديل دوال حفظ المحادثات لتصبح لكل مستخدم ==========
-        // الحصول على مفتاح التخزين الخاص بالمستخدم الحالي
+        // ========== دوال حفظ المحادثات لكل مستخدم ==========
         function getHistoryKey() {
             const uid = window.currentUser ? window.currentUser.uid : 'guest';
             return `askislam_history_${uid}`;
         }
 
-        // حفظ المحادثة (تعديل الدالة الأصلية)
-        const originalSaveConversation = window.saveConversation;
         window.saveConversation = function(question, answer) {
             const key = getHistoryKey();
             let history = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            // استخراج tags تلقائية
+            const tags = [];
+            if (question.includes('قرآن') || answer.includes('﴿')) tags.push('قرآن');
+            if (question.includes('حديث') || answer.includes('روى')) tags.push('حديث');
+            if (question.includes('فقه') || question.includes('حكم')) tags.push('فقه');
+            if (question.includes('دعاء') || question.includes('أدعية')) tags.push('دعاء');
+            if (question.includes('صلاة')) tags.push('عبادة');
+            if (question.includes('زكاة') || question.includes('صيام') || question.includes('حج')) tags.push('أركان');
             
             const entry = {
                 question: question.substring(0, 100) + (question.length > 100 ? '...' : ''),
                 answer: answer.replace(/<[^>]*>/g, '').substring(0, 120) + (answer.length > 120 ? '...' : ''),
                 timestamp: new Date().toISOString(),
                 fullQuestion: question,
-                fullAnswer: answer
+                fullAnswer: answer,
+                tags: tags,
+                id: Date.now() + Math.random()
             };
             
             history.unshift(entry);
-            if (history.length > 50) history.pop();
+            if (history.length > 100) history.pop();
             localStorage.setItem(key, JSON.stringify(history));
-            
-            // تحديث عرض السلايدبار
             renderHistorySidebar();
         };
 
-        // تحميل المحفوظات (تعديل الدالة الأصلية)
         window.loadHistory = function() {
             const key = getHistoryKey();
             const stored = localStorage.getItem(key);
@@ -1255,7 +1368,6 @@
             renderHistorySidebar();
         };
 
-        // مسح المحفوظات (تعديل الدالة الأصلية)
         window.clearHistory = function() {
             if (confirm('هل أنت متأكد من حذف جميع المحفوظات؟')) {
                 const key = getHistoryKey();
@@ -1265,7 +1377,6 @@
             }
         };
 
-        // عرض المحفوظات في السلايدبار (نفس الدالة ولكن نضمن أنها تستخدم conversationHistory المحدث)
         window.renderHistorySidebar = function() {
             const historyList = document.getElementById('historyList');
             if (!historyList) return;
@@ -1294,7 +1405,6 @@
             });
             historyList.innerHTML = html;
 
-            // إضافة حدث النقر لاستعادة السؤال
             document.querySelectorAll('.history-item-content').forEach(el => {
                 el.addEventListener('click', function(e) {
                     const index = this.parentElement.dataset.index;
@@ -1306,17 +1416,15 @@
                 });
             });
 
-            // إضافة حدث الحذف لكل محادثة
             document.querySelectorAll('.history-delete-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
-                    e.stopPropagation(); // منع تفعيل حدث النقر على المحادثة
+                    e.stopPropagation();
                     const index = parseInt(this.dataset.deleteIndex);
                     deleteHistoryItem(index);
                 });
             });
         };
 
-        // دالة حذف محادثة واحدة
         function deleteHistoryItem(index) {
             if (confirm('هل تريد حذف هذه المحادثة؟')) {
                 const key = getHistoryKey();
@@ -1330,11 +1438,9 @@
 
         // تهيئة أولية
         window.loadHistory();
-
-        // ربط زر مسح المحفوظات بالدالة المعدلة
         document.getElementById('clearHistoryBtn').addEventListener('click', window.clearHistory);
 
-        // ========== 🔍 دالة البحث في المحفوظات ==========
+        // البحث في المحفوظات
         document.getElementById('searchHistory').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
             const historyItems = document.querySelectorAll('.history-item');
@@ -1347,7 +1453,6 @@
             historyItems.forEach(item => {
                 const question = item.querySelector('.history-question').textContent.toLowerCase();
                 const answer = item.querySelector('.history-answer').textContent.toLowerCase();
-                
                 if (question.includes(searchTerm) || answer.includes(searchTerm)) {
                     item.style.display = 'block';
                 } else {
@@ -1355,39 +1460,6 @@
                 }
             });
         });
-
-        // ========== ✨ تحسين حفظ المحادثات بإضافة tags تلقائية ==========
-        const originalSaveConversationEnhanced = window.saveConversation;
-        window.saveConversation = function(question, answer) {
-            const key = getHistoryKey();
-            let history = JSON.parse(localStorage.getItem(key) || '[]');
-            
-            // استخراج tags تلقائية
-            const tags = [];
-            if (question.includes('قرآن') || answer.includes('﴿')) tags.push('قرآن');
-            if (question.includes('حديث') || answer.includes('روى')) tags.push('حديث');
-            if (question.includes('فقه') || question.includes('حكم')) tags.push('فقه');
-            if (question.includes('دعاء') || question.includes('أدعية')) tags.push('دعاء');
-            if (question.includes('صلاة')) tags.push('عبادة');
-            if (question.includes('زكاة') || question.includes('صيام') || question.includes('حج')) tags.push('أركان');
-            
-            const entry = {
-                question: question.substring(0, 100) + (question.length > 100 ? '...' : ''),
-                answer: answer.replace(/<[^>]*>/g, '').substring(0, 120) + (answer.length > 120 ? '...' : ''),
-                timestamp: new Date().toISOString(),
-                fullQuestion: question,
-                fullAnswer: answer,
-                tags: tags,
-                id: Date.now() + Math.random() // معرف فريد
-            };
-            
-            history.unshift(entry);
-            if (history.length > 100) history.pop(); // زيادة الحد إلى 100
-            localStorage.setItem(key, JSON.stringify(history));
-            
-            // تحديث عرض السلايدبار
-            renderHistorySidebar();
-        };
 
         console.log('✅ Firebase Authentication جاهز، المحفوظات لكل مستخدم + البحث + حذف فردي');
     </script>
