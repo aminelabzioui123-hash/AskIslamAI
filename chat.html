@@ -976,6 +976,13 @@
     <div class="sidebar" id="historySidebar">
         <div class="sidebar-header">
             <h3>📁 المحفوظات</h3>
+            <!-- ✅ زر تسجيل الدخول في المنتصف -->
+            <div id="userSection" style="display: flex; align-items: center; gap: 0.5rem;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; height: 20px; flex-shrink: 0;">
+                <button class="login-btn" onclick="loginGoogle()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
+                    تسجيل الدخول
+                </button>
+            </div>
             <button class="close-sidebar" id="closeSidebar">×</button>
         </div>
 
@@ -987,11 +994,6 @@
                 placeholder="🔍 ابحث في المحفوظات..." 
                 style="width: 100%; padding: 0.6rem; background: var(--bg-chat); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem;"
             >
-        </div>
-
-        <!-- ✅ قسم المستخدم (يتملأ بواسطة Firebase) -->
-        <div class="sidebar-user" id="userSection">
-            <!-- سيتم ملؤه ديناميكياً عبر JavaScript -->
         </div>
 
         <div class="sidebar-content" id="historyList">
@@ -1235,7 +1237,7 @@
         // 1. استيراد Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         // 2. إعدادات Firebase (خاصة بك)
         const firebaseConfig = {
@@ -1257,14 +1259,25 @@
         // ✅ إجبار اختيار الحساب لتحسين نجاح تسجيل الدخول
         provider.setCustomParameters({ prompt: 'select_account' });
 
+        // ✅ معالجة نتيجة التوجيه عند العودة من Google
+        getRedirectResult(auth)
+            .then((result) => {
+                if (result && result.user) {
+                    console.log("✅ تم تسجيل الدخول بنجاح:", result.user.displayName);
+                }
+            })
+            .catch((error) => {
+                console.error("❌ خطأ في معالجة تسجيل الدخول:", error);
+                alert("حدث خطأ أثناء تسجيل الدخول: " + error.message);
+            });
+
         // 4. المتغيرات العامة
         window.currentUser = null;
 
         // 5. دالة تسجيل الدخول
         window.loginGoogle = async () => {
             try {
-                const result = await signInWithPopup(auth, provider);
-                console.log("تم تسجيل الدخول:", result.user.displayName);
+                await signInWithRedirect(auth, provider);
             } catch (error) {
                 console.error("خطأ في تسجيل الدخول:", error);
                 alert("فشل تسجيل الدخول. حاول مرة أخرى.");
@@ -1284,7 +1297,12 @@
         // 7. تحديث واجهة المستخدم بناءً على حالة المصادقة
         function updateUserUI(user) {
             const userSection = document.getElementById('userSection');
-            if (!userSection) return;
+            if (!userSection) {
+                console.error('❌ userSection غير موجود في الصفحة!');
+                return;
+            }
+
+            console.log('✅ تحديث واجهة المستخدم:', user ? user.displayName : 'غير مسجل');
 
             if (user) {
                 const photoURL = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
@@ -1292,19 +1310,20 @@
                 const email = user.email || '';
 
                 userSection.innerHTML = `
-                    <img src="${photoURL}" alt="صورة المستخدم" class="user-avatar" onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
-                    <div class="user-info">
-                        <span class="user-name">${displayName}</span>
-                        <span class="user-email">${email}</span>
+                    <img src="${photoURL}" alt="صورة المستخدم" 
+                         style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent-gold);"
+                         onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
+                    <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
+                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
                     </div>
-                    <button class="logout-btn" onclick="logout()">
+                    <button class="logout-btn" onclick="logout()" style="padding: 0.3rem 0.7rem; font-size: 0.7rem;">
                         خروج
                     </button>
                 `;
             } else {
                 userSection.innerHTML = `
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 24px; height: 24px; flex-shrink: 0;">
-                    <button class="login-btn" onclick="loginGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; height: 20px; flex-shrink: 0;">
+                    <button class="login-btn" onclick="loginGoogle()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
                         تسجيل الدخول
                     </button>
                 `;
@@ -1317,6 +1336,13 @@
             updateUserUI(user);
             loadHistory();
         });
+
+        // ✅ استدعاء فوري لضمان ظهور واجهة تسجيل الدخول
+        setTimeout(() => {
+            if (!window.currentUser) {
+                updateUserUI(null);
+            }
+        }, 500);
 
         // ========== دوال حفظ المحادثات لكل مستخدم ==========
         function getHistoryKey() {
