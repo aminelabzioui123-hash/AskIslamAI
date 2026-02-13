@@ -718,6 +718,53 @@
             z-index: 1;
         }
 
+        /* FAQ Section */
+        .faq-section {
+            padding: 6rem 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .faq-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .faq-item {
+            padding: 1.5rem 2rem;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--glow-soft);
+        }
+
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-gold);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faq-answer {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        [data-theme="light"] .faq-answer {
+            color: #4a4a4a !important;
+        }
+
         .founder-card {
             max-width: 900px;
             margin: 0 auto;
@@ -1117,16 +1164,50 @@
                 right: -100%;
                 width: 80%;
                 height: 100vh;
-                background: rgba(10, 95, 79, 0.98);
+                background: var(--bg-secondary);
                 flex-direction: column;
                 padding: 5rem 2rem;
                 transition: right 0.3s ease;
                 backdrop-filter: blur(20px);
                 z-index: 1001;
+                border-left: 1px solid var(--border-subtle);
+            }
+
+            [data-theme="light"] .nav-links {
+                background: rgba(255, 255, 255, 0.98);
+                border-left: 1px solid rgba(0, 0, 0, 0.1);
             }
 
             .nav-links.active {
                 right: 0;
+            }
+
+            .menu-close {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: var(--accent-gold);
+                color: var(--dark);
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 1.5rem;
+                cursor: pointer;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            }
+
+            .nav-links.active .menu-close {
+                display: flex;
+            }
+
+            .menu-close:hover {
+                transform: scale(1.1) rotate(90deg);
+                box-shadow: 0 6px 20px rgba(212, 165, 116, 0.5);
             }
 
             .hero {
@@ -1185,12 +1266,13 @@
             <div class="logo">AskIslamAI</div>
             <button class="menu-toggle" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
-                <li><a href="#home">الرئيسية</a></li>
-                <li><a href="#features">المميزات</a></li>
-                <li><a href="#books">المصادر</a></li>
-                <li><a href="#testimonials">آراء المستخدمين</a></li>
-                <li><a href="#founder">المؤسس</a></li>
-                <li><a href="#about">عن الموقع</a></li>
+                <button class="menu-close" onclick="toggleMenu()">✕</button>
+                <li><a href="#home" onclick="toggleMenu()">الرئيسية</a></li>
+                <li><a href="#features" onclick="toggleMenu()">المميزات</a></li>
+                <li><a href="#books" onclick="toggleMenu()">المصادر</a></li>
+                <li><a href="#testimonials" onclick="toggleMenu()">آراء المستخدمين</a></li>
+                <li><a href="#founder" onclick="toggleMenu()">المؤسس</a></li>
+                <li><a href="#about" onclick="toggleMenu()">عن الموقع</a></li>
                 <li><button class="btn-primary" onclick="goToChat()">ابدأ الآن</button></li>
             </ul>
         </div>
@@ -1232,6 +1314,11 @@
                 <h3>ذكاء اصطناعي متطور</h3>
                 <p>تقنية ذكاء اصطناعي متقدمة لفهم أسئلتك والبحث في آلاف الكتب الإسلامية بلحظات.</p>
             </div>
+            <div class="feature-card glass">
+                <span class="feature-icon">📚</span>
+                <h3>مكتبة ضخمة</h3>
+                <p>الوصول لـ <span id="hadithCounter" style="color: var(--accent-gold); font-weight: 700; font-size: 1.3em;">0</span>+ حديث والتفاسير من المصادر الموثوقة</p>
+            </div>
         </div>
     </section>
 
@@ -1244,6 +1331,37 @@
             <div class="book-item glass"><h4>📖 رياض الصالحين</h4></div>
             <div class="book-item glass"><h4>📖 الموطأ</h4></div>
             <div class="book-item glass"><h4>📖 سنن أبي داود</h4></div>
+        </div>
+    </section>
+
+    <!-- Suggested Questions Section -->
+    <section class="faq-section" id="faq">
+        <h2 class="section-title">أسئلة مقترحة</h2>
+        <div class="faq-container">
+            <div class="faq-item glass">
+                <div class="faq-question">✔ هل يمكن الاعتماد على الإجابات؟</div>
+                <div class="faq-answer">نعم، جميع الإجابات مستندة على مصادر موثوقة من كتب السنة والتفاسير المعتمدة. ننصح دائماً بمراجعة المصادر الأصلية للتأكد.</div>
+            </div>
+            <div class="faq-item glass">
+                <div class="faq-question">✔ هل المنصة مجانية؟</div>
+                <div class="faq-answer">نعم، المنصة مجانية بالكامل وهي مشروع وقفي غير ربحي. نهدف لنشر العلم الشرعي لوجه الله تعالى.</div>
+            </div>
+            <div class="faq-item glass">
+                <div class="faq-question">✔ هل المنصة غير ربحية؟</div>
+                <div class="faq-answer">نعم، AskIslamAI منصة وقفية تعليمية 100% غير ربحية. لا نسعى للربح المادي، بل نهدف لنشر المعرفة الإسلامية الصحيحة مجاناً لجميع المسلمين حول العالم.</div>
+            </div>
+            <div class="faq-item glass">
+                <div class="faq-question">✔ ما هي مصادر المعلومات؟</div>
+                <div class="faq-answer">نعتمد على أمهات الكتب الإسلامية مثل: صحيح البخاري، صحيح مسلم، سنن أبي داود، رياض الصالحين، الموطأ، وتفاسير القرآن المعتمدة.</div>
+            </div>
+            <div class="faq-item glass">
+                <div class="faq-question">✔ هل يتم حفظ بيانات المستخدم؟</div>
+                <div class="faq-answer">لا، نحن نحترم خصوصيتك. لا يتم حفظ أي بيانات شخصية أو محادثات. جميع الاستفسارات تتم بشكل مؤقت فقط.</div>
+            </div>
+            <div class="faq-item glass">
+                <div class="faq-question">✔ هل يمكن استخدام الموقع بدون تسجيل؟</div>
+                <div class="faq-answer">نعم، يمكنك استخدام جميع ميزات الموقع مباشرة بدون الحاجة للتسجيل أو إنشاء حساب.</div>
+            </div>
         </div>
     </section>
 
@@ -1291,16 +1409,6 @@
                 <p class="founder-title">مؤسس ومطور AskIslamAI</p>
                 <p class="founder-description">مهتم بخدمة الإسلام من خلال التقنية الحديثة. أسس AskIslamAI لتسهيل الوصول إلى المعرفة الإسلامية الموثوقة للجميع.</p>
             </div>
-        </div>
-    </section>
-
-    <section class="cta" id="about">
-        <div class="cta-box glass-strong">
-            <h2>ابدأ رحلتك الآن</h2>
-            <p>اطرح أسئلتك واحصل على إجابات موثوقة من التراث الإسلامي العظيم.</p>
-            <button class="btn-primary btn-large chat-trigger" onclick="goToChat()">
-                🚀 ابدأ المحادثة الآن
-            </button>
         </div>
     </section>
 
@@ -1380,6 +1488,7 @@
             </div>
         </div>
     </div>
+
 
     <footer>
         <p>© 2026 AskIslamAI - جميع الحقوق محفوظة | صُنع بـ ❤️ لخدمة الإسلام</p>
@@ -1545,7 +1654,44 @@
     document.addEventListener('DOMContentLoaded', function() {
         displayTestimonials();
         checkSystemStatus();
+        animateHadithCounter();
     });
+
+    // وظيفة عداد الأحاديث المتزايد
+    function animateHadithCounter() {
+        const counter = document.getElementById('hadithCounter');
+        if (!counter) return;
+        
+        const targetNumber = 50000; // العدد المستهدف
+        const duration = 3000; // المدة بالميلي ثانية
+        const steps = 100; // عدد الخطوات
+        const increment = targetNumber / steps;
+        const stepDuration = duration / steps;
+        
+        let currentNumber = 0;
+        
+        const updateCounter = () => {
+            currentNumber += increment;
+            if (currentNumber >= targetNumber) {
+                counter.textContent = targetNumber.toLocaleString('ar-SA');
+            } else {
+                counter.textContent = Math.floor(currentNumber).toLocaleString('ar-SA');
+                setTimeout(updateCounter, stepDuration);
+            }
+        };
+        
+        // بدء العد عند ظهور العنصر في الشاشة
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    updateCounter();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        observer.observe(counter);
+    }
 </script>
 -e 
 </body>
