@@ -29,7 +29,7 @@
             --accent-green: #0a5f4f;
             --border-subtle: rgba(255, 255, 255, 0.1);
             --glow-soft: rgba(212, 165, 116, 0.15);
-            --sidebar-width: 280px;
+            --sidebar-width: 250px;
         }
 
         [data-theme="light"] {
@@ -40,8 +40,42 @@
             --text-secondary: #4a4a4a;
             --accent-gold: #c4956a;
             --accent-green: #0a5f4f;
-            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-subtle: rgba(0, 0, 0, 0.15);
             --glow-soft: rgba(212, 165, 116, 0.2);
+        }
+
+        /* تحسين وضوح الحدود في الوضع النهاري */
+        [data-theme="light"] .sidebar {
+            border-left: 1px solid rgba(0, 0, 0, 0.2);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="light"] .sidebar-header,
+        [data-theme="light"] .sidebar-footer {
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .history-item {
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            background: #ffffff;
+        }
+
+        [data-theme="light"] .login-btn,
+        [data-theme="light"] .logout-btn {
+            border: 1.5px solid var(--accent-gold);
+            background: rgba(196, 149, 106, 0.1);
+        }
+
+        [data-theme="light"] .clear-history-btn {
+            border: 1.5px solid var(--accent-gold);
+        }
+
+        [data-theme="light"] input {
+            border: 1px solid rgba(0, 0, 0, 0.2) !important;
+        }
+
+        [data-theme="light"] .close-sidebar {
+            color: #1a1a1a;
         }
 
         body {
@@ -115,17 +149,27 @@
         }
 
         .sidebar-header {
-            padding: 1.2rem;
+            padding: 1rem;
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1rem;
         }
 
         .sidebar-header h3 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--accent-gold);
+            flex-shrink: 0;
+        }
+        
+        .sidebar-header #userSection {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex: 1;
+            justify-content: center;
         }
 
         .close-sidebar {
@@ -189,13 +233,14 @@
         }
 
         .login-btn, .logout-btn {
-            background: rgba(212, 165, 116, 0.1);
+            background: rgba(212, 165, 116, 0.15);
             border: 1px solid var(--accent-gold);
             color: var(--accent-gold);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
             font-weight: 600;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -215,23 +260,23 @@
         .sidebar-content {
             flex: 1;
             overflow-y: auto;
-            padding: 1rem;
+            padding: 0.8rem;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
         .history-item {
             background: var(--bg-chat);
             border: 1px solid var(--border-subtle);
-            border-radius: 12px;
-            padding: 0.8rem;
+            border-radius: 10px;
+            padding: 0.7rem;
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
             display: flex;
-            gap: 0.8rem;
+            gap: 0.6rem;
             align-items: flex-start;
         }
 
@@ -244,14 +289,14 @@
             background: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
             color: #ef4444;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 1rem;
             transition: all 0.2s;
             flex-shrink: 0;
             opacity: 0;
@@ -294,38 +339,41 @@
             font-weight: 600;
             color: var(--accent-gold);
             margin-bottom: 0.3rem;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .history-answer {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.4;
         }
 
         .history-empty {
             text-align: center;
             color: var(--text-secondary);
             padding: 2rem 0;
+            font-size: 0.85rem;
         }
 
         .sidebar-footer {
-            padding: 1rem;
+            padding: 0.8rem;
             border-top: 1px solid var(--border-subtle);
         }
 
         .clear-history-btn {
             width: 100%;
-            padding: 0.8rem;
+            padding: 0.7rem;
             background: rgba(212, 165, 116, 0.1);
             border: 1px solid var(--accent-gold);
             color: var(--accent-gold);
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 600;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -549,7 +597,48 @@
 
         [data-theme="light"] .message.user .message-content {
             background: #ffffff;
-            border-color: rgba(0, 0, 0, 0.1);
+            border-color: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] .message.assistant .message-content {
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="light"] .welcome-message {
+            background: #ffffff;
+            border: 1.5px solid var(--accent-gold);
+            box-shadow: 0 2px 12px rgba(196, 149, 106, 0.15);
+        }
+
+        [data-theme="light"] .quick-btn {
+            background: rgba(196, 149, 106, 0.08);
+            border: 1px solid rgba(196, 149, 106, 0.4);
+        }
+
+        [data-theme="light"] .quick-btn:hover {
+            background: rgba(196, 149, 106, 0.15);
+            border-color: var(--accent-gold);
+        }
+
+        [data-theme="light"] .input-area {
+            background: #ffffff;
+            border-top: 1px solid rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="light"] .input-wrapper {
+            border: 1.5px solid rgba(0, 0, 0, 0.15);
+            background: #fafbfc;
+        }
+
+        [data-theme="light"] .send-btn {
+            box-shadow: 0 2px 8px rgba(196, 149, 106, 0.4);
+        }
+
+        [data-theme="light"] .header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
@@ -977,22 +1066,21 @@
         <div class="sidebar-header">
             <h3>📁 المحفوظات</h3>
             <!-- ✅ زر تسجيل الدخول في المنتصف -->
-            <div id="userSection" style="display: flex; align-items: center; gap: 0.5rem;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; height: 20px; flex-shrink: 0;">
-                <button class="login-btn" onclick="loginGoogle()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
-                    تسجيل الدخول
+            <div id="userSection">
+                <button class="login-btn" onclick="loginGoogle()">
+                    🔐 تسجيل الدخول
                 </button>
             </div>
             <button class="close-sidebar" id="closeSidebar">×</button>
         </div>
 
         <!-- شريط البحث -->
-        <div style="padding: 1rem; border-bottom: 1px solid var(--border-subtle);">
+        <div style="padding: 0.8rem; border-bottom: 1px solid var(--border-subtle);">
             <input 
                 type="text" 
                 id="searchHistory" 
                 placeholder="🔍 ابحث في المحفوظات..." 
-                style="width: 100%; padding: 0.6rem; background: var(--bg-chat); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem;"
+                style="width: 100%; padding: 0.6rem; background: var(--bg-chat); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 0.85rem;"
             >
         </div>
 
@@ -1002,7 +1090,7 @@
         </div>
         <div class="sidebar-footer">
             <button class="clear-history-btn" id="clearHistoryBtn">
-                🗑️ مسح جميع المحفوظات
+                🗑️ مسح الكل
             </button>
         </div>
     </div>
@@ -1307,24 +1395,23 @@
             if (user) {
                 const photoURL = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
                 const displayName = user.displayName || 'مستخدم';
-                const email = user.email || '';
+                
+                // تقصير الاسم إذا كان طويلاً
+                const shortName = displayName.length > 10 ? displayName.substring(0, 10) + '...' : displayName;
 
                 userSection.innerHTML = `
-                    <img src="${photoURL}" alt="صورة المستخدم" 
-                         style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent-gold);"
-                         onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
-                    <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
-                        <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <img src="${photoURL}" alt="${displayName}" 
+                             style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent-gold); object-fit: cover;"
+                             onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">${shortName}</span>
                     </div>
-                    <button class="logout-btn" onclick="logout()" style="padding: 0.3rem 0.7rem; font-size: 0.7rem;">
-                        خروج
-                    </button>
+                    <button class="logout-btn" onclick="logout()">خروج</button>
                 `;
             } else {
                 userSection.innerHTML = `
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; height: 20px; flex-shrink: 0;">
-                    <button class="login-btn" onclick="loginGoogle()" style="padding: 0.4rem 0.8rem; font-size: 0.75rem;">
-                        تسجيل الدخول
+                    <button class="login-btn" onclick="loginGoogle()">
+                        🔐 تسجيل الدخول
                     </button>
                 `;
             }
