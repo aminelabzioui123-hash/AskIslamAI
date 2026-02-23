@@ -133,7 +133,7 @@
                 radial-gradient(circle at 40% 20%, rgba(21, 27, 35, 0.2) 0%, transparent 50%);
             animation: backgroundMove 20s ease infinite;
             pointer-events: none;
-            z-index: 0;
+            z-index: -2;
             opacity: 1;
             transition: opacity 0.4s ease;
         }
@@ -1328,6 +1328,113 @@
         [data-theme="light"] .footer-btn { border-color:#c4956a; color:#c4956a; }
         [data-theme="light"] .footer-btn:hover { background:#c4956a; color:#fff; }
         .founder-image { object-fit:cover; object-position:center top; }
+
+        /* ===== تأثير النجوم والشهب ===== */
+        #starsCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 1;
+            transition: opacity 0.6s ease;
+        }
+        [data-theme="light"] #starsCanvas {
+            opacity: 0.45;
+        }
+
+        /* كل محتوى الصفحة يجب أن يكون فوق الكانفاس */
+        nav, section, footer, .floating-actions,
+        .theme-toggle, .theme-toggle-nav,
+        .nonprofit-banner, .contact-modal, .support-modal {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* ===== شبكة ثابتة للوضع الليلي ===== */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(212,165,116,0.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212,165,116,0.06) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: -1;
+            transition: opacity 0.4s ease;
+        }
+        [data-theme="light"] body::after {
+            opacity: 0;
+        }
+
+        /* ===== كانفاس المربعات المتحركة (الوضع النهاري) ===== */
+        #gridCanvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+        [data-theme="light"] #gridCanvas {
+            opacity: 1;
+        }
+
+        /* ===== السلايدبار (الكمبيوتر): طويل وضيق ===== */
+        @media (min-width: 769px) {
+            .nav-links {
+                position: fixed !important;
+                top: 0;
+                right: -260px;
+                width: 200px !important;
+                height: 100vh !important;
+                background: var(--bg-secondary) !important;
+                flex-direction: column !important;
+                padding: 5rem 1rem 2rem !important;
+                gap: 0.4rem !important;
+                transition: right 0.35s cubic-bezier(0.4,0,0.2,1) !important;
+                backdrop-filter: blur(20px);
+                z-index: 1001;
+                border-left: 1px solid var(--border-subtle);
+                box-shadow: -4px 0 24px rgba(0,0,0,0.25);
+                display: flex !important;
+                visibility: hidden;
+                opacity: 0;
+            }
+            .nav-links.active {
+                right: 0 !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+            [data-theme="light"] .nav-links {
+                background: rgba(255,255,255,0.98) !important;
+            }
+            .nav-links li a,
+            .nav-links li button {
+                font-size: 0.92rem !important;
+                padding: 0.55rem 0.9rem !important;
+                display: block;
+                width: 100%;
+                text-align: right;
+            }
+            .nav-links .btn-primary {
+                font-size: 0.88rem !important;
+                padding: 0.55rem 1rem !important;
+                width: 100%;
+            }
+            .menu-toggle {
+                display: block !important;
+            }
+            .menu-close {
+                display: none;
+            }
+            .nav-links.active .menu-close {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1571,7 +1678,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
                 لينكداين
             </a>
-            <a class="footer-btn" href="mailto:contact@askislamai.com">
+            <a class="footer-btn" href="/cdn-cgi/l/email-protection#84e7ebeaf0e5e7f0c4e5f7efedf7e8e5e9e5edaae7ebe9">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                 تواصل معنا
             </a>
@@ -1582,7 +1689,12 @@
         <p class="footer-copy">© 2026 AskIslamAI - جميع الحقوق محفوظة | صُنع بـ ❤️ لخدمة الإسلام</p>
     </footer>
 
-   <script>
+    <!-- Canvas النجوم والشهب -->
+    <canvas id="starsCanvas"></canvas>
+    <!-- Canvas المربعات المتحركة النهارية -->
+    <canvas id="gridCanvas"></canvas>
+
+   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // 🌙☀️ نظام تبديل الوضع الأسطوري
     function initTheme() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -1773,13 +1885,294 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     updateCounter();
-                    observer.unobserve(entry.target);
+                    observer.unobserve(entry);
                 }
             });
         }, { threshold: 0.5 });
         
         observer.observe(counter);
     }
-</script>
+
+    // ===== نظام النجوم والشهب =====
+    (function initStars() {
+        const canvas = document.getElementById('starsCanvas');
+        const ctx = canvas.getContext('2d');
+        let W, H, stars = [], meteors = [];
+        
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+        
+        function createStar() {
+            return {
+                x: Math.random() * W,
+                y: Math.random() * H,
+                r: Math.random() * 2.5 + 0.5,
+                alpha: Math.random() * 0.5 + 0.5,
+                delta: (Math.random() * 0.012 + 0.004) * (Math.random() < 0.5 ? 1 : -1),
+                color: Math.random() < 0.2 ? '#d4a574' : (Math.random() < 0.1 ? '#a8d8ea' : '#ffffff')
+            };
+        }
+        
+        function createMeteor() {
+            return {
+                x: Math.random() * W,
+                y: Math.random() * H * 0.3,
+                len: Math.random() * 180 + 80,
+                speed: Math.random() * 8 + 5,
+                alpha: 1,
+                angle: Math.PI / 4 + (Math.random() - 0.5) * 0.25,
+                width: Math.random() * 2 + 1,
+                active: true
+            };
+        }
+        
+        function initStarsArr() {
+            stars = [];
+            const count = Math.max(150, Math.min(300, Math.floor(W * H / 4000)));
+            for (let i = 0; i < count; i++) stars.push(createStar());
+        }
+        
+        function drawFrame() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            ctx.clearRect(0, 0, W, H);
+            
+            // رسم النجوم
+            stars.forEach(s => {
+                s.alpha += s.delta;
+                if (s.alpha <= 0.1) { s.delta = Math.abs(s.delta); }
+                if (s.alpha >= 1)   { s.delta = -Math.abs(s.delta); }
+                
+                ctx.save();
+                ctx.globalAlpha = isLight ? s.alpha * 0.6 : s.alpha;
+                ctx.fillStyle = isLight ? '#0a5f4f' : s.color;
+                // بريق النجمة
+                if (s.r > 1.5) {
+                    const grd = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r * 2.5);
+                    grd.addColorStop(0, isLight ? 'rgba(10,95,79,0.8)' : 'rgba(255,255,255,0.9)');
+                    grd.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = grd;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r * 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = isLight ? '#0a5f4f' : s.color;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+            
+            // رسم الشهب
+            meteors.forEach(m => {
+                if (!m.active) return;
+                m.x += Math.cos(m.angle) * m.speed;
+                m.y += Math.sin(m.angle) * m.speed;
+                m.alpha -= 0.012;
+                
+                if (m.alpha <= 0 || m.x > W + 200 || m.y > H + 200) {
+                    m.active = false;
+                    return;
+                }
+                
+                const tailX = m.x - Math.cos(m.angle) * m.len;
+                const tailY = m.y - Math.sin(m.angle) * m.len;
+                
+                const grad = ctx.createLinearGradient(tailX, tailY, m.x, m.y);
+                if (isLight) {
+                    grad.addColorStop(0, `rgba(10,95,79,0)`);
+                    grad.addColorStop(0.6, `rgba(10,95,79,${m.alpha * 0.5})`);
+                    grad.addColorStop(1, `rgba(10,95,79,${m.alpha * 0.8})`);
+                } else {
+                    grad.addColorStop(0, `rgba(255,255,255,0)`);
+                    grad.addColorStop(0.5, `rgba(212,165,116,${m.alpha * 0.6})`);
+                    grad.addColorStop(1, `rgba(255,255,255,${m.alpha})`);
+                }
+                
+                ctx.save();
+                ctx.globalAlpha = isLight ? m.alpha * 0.55 : m.alpha;
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = m.width;
+                ctx.lineCap = 'round';
+                ctx.shadowColor = isLight ? '#0a5f4f' : '#d4a574';
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.moveTo(tailX, tailY);
+                ctx.lineTo(m.x, m.y);
+                ctx.stroke();
+                ctx.restore();
+            });
+            
+            meteors = meteors.filter(m => m.active);
+            requestAnimationFrame(drawFrame);
+        }
+        
+        function launchMeteor() {
+            if (meteors.length < 4) meteors.push(createMeteor());
+            setTimeout(launchMeteor, Math.random() * 3000 + 1200);
+        }
+        
+        resize();
+        initStarsArr();
+        window.addEventListener('resize', () => { resize(); initStarsArr(); });
+        drawFrame();
+        setTimeout(launchMeteor, 800);
+    })();
+
+    // ===== مربعات متحركة بحواف متوهجة (الوضع النهاري) =====
+    (function initGrid() {
+        const canvas = document.getElementById('gridCanvas');
+        const ctx = canvas.getContext('2d');
+        const CELL = 60;
+        let W, H, cols, rows, t = 0;
+        let pulses = []; // نبضات متحركة على الحواف
+
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            cols = Math.ceil(W / CELL) + 1;
+            rows = Math.ceil(H / CELL) + 1;
+        }
+
+        // نبضة تسير على الخطوط
+        function createPulse() {
+            const isHoriz = Math.random() < 0.5;
+            return {
+                horiz: isHoriz,
+                // للأفقي: اختر سطراً عشوائياً، للرأسي: اختر عموداً
+                lineIdx: Math.floor(Math.random() * (isHoriz ? rows : cols)),
+                pos: isHoriz ? 0 : 0,
+                speed: Math.random() * 1.8 + 0.8,
+                len: Math.random() * 80 + 40,
+                alpha: 1,
+                color: Math.random() < 0.5 ? '#0a5f4f' : '#2d8b74'
+            };
+        }
+
+        function drawGrid() {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            if (!isLight) { requestAnimationFrame(drawGrid); return; }
+
+            ctx.clearRect(0, 0, W, H);
+
+            // ── رسم الشبكة الثابتة ──
+            ctx.save();
+            ctx.strokeStyle = 'rgba(10,95,79,0.13)';
+            ctx.lineWidth = 1;
+
+            // خطوط أفقية
+            for (let r = 0; r <= rows; r++) {
+                ctx.beginPath();
+                ctx.moveTo(0, r * CELL);
+                ctx.lineTo(W, r * CELL);
+                ctx.stroke();
+            }
+            // خطوط رأسية
+            for (let c = 0; c <= cols; c++) {
+                ctx.beginPath();
+                ctx.moveTo(c * CELL, 0);
+                ctx.lineTo(c * CELL, H);
+                ctx.stroke();
+            }
+            ctx.restore();
+
+            // ── رسم تلألؤ المربعات ──
+            t += 0.015;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    // قيمة موجية لكل خلية
+                    const wave = Math.sin(t + c * 0.4 + r * 0.5) * 0.5 + 0.5;
+                    const alpha = wave * 0.06;
+                    if (alpha < 0.01) continue;
+                    ctx.save();
+                    ctx.fillStyle = `rgba(10,95,79,${alpha})`;
+                    ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+                    ctx.restore();
+                }
+            }
+
+            // ── رسم النبضات المتحركة على الحواف ──
+            pulses.forEach(p => {
+                if (p.horiz) {
+                    p.pos += p.speed;
+                    const y = p.lineIdx * CELL;
+                    const x = p.pos;
+                    const grad = ctx.createLinearGradient(x - p.len, y, x, y);
+                    grad.addColorStop(0, `rgba(255,255,255,0)`);
+                    grad.addColorStop(0.5, `${p.color}88`);
+                    grad.addColorStop(1, p.color);
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(x - p.len, y);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.restore();
+                    if (p.pos > W + p.len) p.alpha = 0;
+                } else {
+                    p.pos += p.speed;
+                    const x = p.lineIdx * CELL;
+                    const y = p.pos;
+                    const grad = ctx.createLinearGradient(x, y - p.len, x, y);
+                    grad.addColorStop(0, `rgba(255,255,255,0)`);
+                    grad.addColorStop(0.5, `${p.color}88`);
+                    grad.addColorStop(1, p.color);
+                    ctx.save();
+                    ctx.globalAlpha = p.alpha;
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 2.5;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - p.len);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.restore();
+                    if (p.pos > H + p.len) p.alpha = 0;
+                }
+            });
+
+            // ── تقاطعات متوهجة ──
+            for (let r = 0; r <= rows; r++) {
+                for (let c = 0; c <= cols; c++) {
+                    const glow = Math.sin(t * 1.2 + c * 0.7 + r * 0.9) * 0.5 + 0.5;
+                    if (glow < 0.65) continue;
+                    const alpha = (glow - 0.65) * 0.9;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.fillStyle = '#0a5f4f';
+                    ctx.shadowColor = '#2d8b74';
+                    ctx.shadowBlur = 6;
+                    ctx.beginPath();
+                    ctx.arc(c * CELL, r * CELL, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            // إزالة النبضات المنتهية وإضافة جديدة
+            pulses = pulses.filter(p => p.alpha > 0);
+            if (pulses.length < 12) pulses.push(createPulse());
+
+            requestAnimationFrame(drawGrid);
+        }
+
+        resize();
+        window.addEventListener('resize', resize);
+        // أضف بعض النبضات الأولية
+        for (let i = 0; i < 6; i++) {
+            const p = createPulse();
+            p.pos = Math.random() * (p.horiz ? W : H);
+            pulses.push(p);
+        }
+        drawGrid();
+    })();
+
+    </script>
 </body>
 </html>
