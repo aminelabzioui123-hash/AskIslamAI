@@ -127,6 +127,10 @@
             color: #1a1a1a !important;
         }
 
+        [data-theme="light"] .site-title img {
+            filter: invert(1);
+        }
+
         /* ========== السلايدبار (مخفي افتراضياً) ========== */
         .sidebar {
             position: fixed;
@@ -471,7 +475,7 @@
         /* باقي الأنماط (بدون تغيير) */
         .header {
             text-align: center;
-            padding: 2rem 1rem 1rem;
+            padding: 32px 9px;
             background: var(--bg-secondary);
             border-bottom: 1px solid var(--border-subtle);
             position: relative;
@@ -1130,7 +1134,7 @@
 
         /* ===== لوغو ===== */
         .site-title img {
-            height: 70px; width: auto; display: block; margin: 0 auto;
+            height: 80px; width: auto; display: block; margin: 0 auto;
         }
 
         /* ===== Header - Glass Floating Fixed ===== */
@@ -1524,8 +1528,7 @@
             let sourcesText = [];
             if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
             if (sources.hadith > 0) {
-                const hadithSource = sources.hadithSource || 'أحاديث';
-                sourcesText.push(`📿 ${sources.hadith} حديث (${hadithSource})`);
+                sourcesText.push(`📿 ${sources.hadith} حديث`);
             }
             if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
             if (sourcesText.length === 0) return '';
