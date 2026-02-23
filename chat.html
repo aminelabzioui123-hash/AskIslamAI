@@ -1130,27 +1130,64 @@
 
         /* ===== لوغو ===== */
         .site-title img {
-            height: 90px; width: auto; display: block; margin: 0 auto;
-            mix-blend-mode: screen;
-            filter: drop-shadow(0 0 8px rgba(212,165,116,0.9)) drop-shadow(0 0 20px rgba(212,165,116,0.5));
-            animation: logo-glow 3s ease-in-out infinite;
-        }
-        @keyframes logo-glow {
-            0%,100% { filter: drop-shadow(0 0 8px rgba(212,165,116,0.9)) drop-shadow(0 0 20px rgba(212,165,116,0.5)); }
-            50%      { filter: drop-shadow(0 0 16px rgba(255,215,0,1))    drop-shadow(0 0 35px rgba(212,165,116,0.8)); }
-        }
-        [data-theme="light"] .site-title img {
-            filter: invert(1) drop-shadow(0 2px 6px rgba(0,0,0,0.25));
-            mix-blend-mode: multiply; animation: none;
+            height: 70px; width: auto; display: block; margin: 0 auto;
         }
 
-        /* ===== زر الثيم جانب اللوغو ===== */
+        /* ===== Header - Glass Floating Fixed ===== */
         .header {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: fixed !important;
+            top: 16px !important;
+            right: 50% !important;
+            left: auto !important;
+            transform: translateX(50%) !important;
+            width: 92% !important;
+            max-width: 1200px !important;
+            padding: 0.3rem 1.8rem !important;
+            border-radius: 20px !important;
+            z-index: 9999 !important;
+            min-height: 70px !important;
+
+            background: rgba(10, 14, 20, 0.38) !important;
+            backdrop-filter: blur(28px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+            border: 1px solid rgba(212, 165, 116, 0.22) !important;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
+
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.28) !important;
+            backdrop-filter: blur(28px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+            border: 1px solid rgba(212, 165, 116, 0.30) !important;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.10),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 12%;
+            right: 12%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(212, 165, 116, 0.55) 35%,
+                rgba(212, 165, 116, 0.85) 50%,
+                rgba(212, 165, 116, 0.55) 65%,
+                transparent
+            );
+            pointer-events: none;
+        }
+
+        body { padding-top: 105px; }
         .theme-toggle-header {
             position: absolute;
             left: 1.5rem;
