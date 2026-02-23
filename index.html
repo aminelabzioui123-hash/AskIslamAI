@@ -348,18 +348,73 @@
             transform: translateX(0);
         }
 
-        /* Navigation - Mobile: top bar */
+        /* Navigation - Glass Floating Fixed */
         nav {
-            position: fixed;
-            top: 20px;
-            right: 50%;
-            transform: translateX(50%);
-            width: 90%;
-            max-width: 1200px;
-            padding: 1rem 2rem;
-            border-radius: 20px;
-            z-index: 1000;
-            animation: slideDown 0.8s ease;
+            position: fixed !important;
+            top: 16px !important;
+            right: 50% !important;
+            left: auto !important;
+            transform: translateX(50%) !important;
+            width: 92% !important;
+            max-width: 1200px !important;
+            padding: 0.55rem 1.8rem !important;
+            border-radius: 20px !important;
+            z-index: 9999 !important;
+            animation: slideDown 0.8s ease !important;
+
+            /* تأثير الزجاج */
+            background: rgba(10, 14, 20, 0.38) !important;
+            backdrop-filter: blur(28px) saturate(200%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+            border: 1px solid rgba(212, 165, 116, 0.22) !important;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.38),
+                inset 0 1px 0 rgba(255, 255, 255, 0.07) !important;
+        }
+
+        [data-theme="light"] nav {
+            background: rgba(255, 255, 255, 0.28) !important;
+            backdrop-filter: blur(28px) saturate(180%) !important;
+            -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+            border: 1px solid rgba(212, 165, 116, 0.30) !important;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.10),
+                inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+        }
+
+        /* بريق ذهبي سفلي */
+        nav::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 12%;
+            right: 12%;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(212, 165, 116, 0.55) 35%,
+                rgba(212, 165, 116, 0.85) 50%,
+                rgba(212, 165, 116, 0.55) 65%,
+                transparent
+            );
+            pointer-events: none;
+        }
+
+        /* لوغو يملأ ارتفاع الشريط بالكامل */
+        nav .logo img.site-logo {
+            height: 70px !important;
+            width: auto !important;
+            display: block !important;
+            margin: -0.55rem 0 !important;
+        }
+
+        nav .nav-content {
+            min-height: 70px !important;
+            align-items: center !important;
+        }
+
+        .nonprofit-banner {
+            top: 90px !important;
         }
 
         @keyframes slideDown {
@@ -375,22 +430,6 @@
 
         /* ===== الحاسوب: navbar أفقي عادي مع العناوين ظاهرة دائماً ===== */
         @media (min-width: 769px) {
-            nav {
-                top: 20px !important;
-                right: 50% !important;
-                transform: translateX(50%) !important;
-                width: 90% !important;
-                max-width: 1200px !important;
-                height: auto !important;
-                border-radius: 20px !important;
-                padding: 1rem 2rem !important;
-                display: block !important;
-                flex-direction: unset !important;
-                animation: slideDown 0.8s ease !important;
-                border-left: none !important;
-                overflow: visible !important;
-            }
-
             nav .nav-content {
                 flex-direction: row !important;
                 align-items: center !important;
@@ -411,6 +450,7 @@
             .logo img.site-logo {
                 width: auto !important;
                 height: 70px !important;
+                margin: -0.55rem 0 !important;
             }
 
             /* العناوين أفقية وظاهرة دائماً */
@@ -2068,6 +2108,58 @@
         window.addEventListener('resize', () => { resize(); initStarsArr(); });
         drawFrame();
         setTimeout(launchMeteor, 800);
+    })();
+
+    // ===== تأثير الزجاج المتحرك للـ navbar =====
+    (function initGlassNav() {
+        const nav = document.querySelector('nav');
+        if (!nav) return;
+
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        function updateNav() {
+            const scrollY = window.scrollY;
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+            if (scrollY > 50) {
+                // عند التمرير: تعميق تأثير الزجاج
+                if (isLight) {
+                    nav.style.background = 'rgba(255, 255, 255, 0.35)';
+                    nav.style.boxShadow = '0 12px 48px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9)';
+                } else {
+                    nav.style.background = 'rgba(10, 14, 20, 0.55)';
+                    nav.style.boxShadow = '0 12px 48px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1)';
+                }
+            } else {
+                // في الأعلى: زجاج شفاف أكثر
+                if (isLight) {
+                    nav.style.background = 'rgba(255, 255, 255, 0.25)';
+                    nav.style.boxShadow = '0 8px 32px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)';
+                } else {
+                    nav.style.background = 'rgba(10, 14, 20, 0.35)';
+                    nav.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08)';
+                }
+            }
+
+            lastScrollY = scrollY;
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(updateNav);
+                ticking = true;
+            }
+        }, { passive: true });
+
+        // تحديث عند تغيير الوضع أيضاً
+        const themeBtn = document.getElementById('themeToggle') || document.querySelector('.theme-toggle');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => {
+                setTimeout(updateNav, 100);
+            });
+        }
     })();
 
     // ===== مربعات متحركة بحواف متوهجة (الوضع النهاري) =====
