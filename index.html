@@ -348,7 +348,7 @@
             transform: translateX(0);
         }
 
-        /* Navigation */
+        /* Navigation - Mobile: top bar */
         nav {
             position: fixed;
             top: 20px;
@@ -371,6 +371,92 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+        }
+
+        /* ===== الحاسوب: navbar أفقي عادي مع العناوين ظاهرة دائماً ===== */
+        @media (min-width: 769px) {
+            nav {
+                top: 20px !important;
+                right: 50% !important;
+                transform: translateX(50%) !important;
+                width: 90% !important;
+                max-width: 1200px !important;
+                height: auto !important;
+                border-radius: 20px !important;
+                padding: 1rem 2rem !important;
+                display: block !important;
+                flex-direction: unset !important;
+                animation: slideDown 0.8s ease !important;
+                border-left: none !important;
+                overflow: visible !important;
+            }
+
+            nav .nav-content {
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 0;
+                width: 100%;
+                height: auto;
+            }
+
+            .logo {
+                text-align: right;
+                font-size: 1.8rem !important;
+                padding-bottom: 0 !important;
+                border-bottom: none !important;
+                margin-bottom: 0 !important;
+            }
+
+            .logo img.site-logo {
+                width: auto !important;
+                height: 70px !important;
+            }
+
+            /* العناوين أفقية وظاهرة دائماً */
+            .nav-links {
+                flex-direction: row !important;
+                gap: 1.5rem !important;
+                align-items: center !important;
+                width: auto !important;
+                list-style: none;
+                padding: 0 !important;
+                margin: 0 !important;
+                position: static !important;
+                height: auto !important;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                display: flex !important;
+            }
+
+            .nav-links li { width: auto; }
+
+            .nav-links a {
+                display: inline-block !important;
+                padding: 0.5rem 0 !important;
+                font-size: 0.95rem !important;
+                border-radius: 0 !important;
+                text-align: center !important;
+                white-space: nowrap;
+            }
+
+            .nav-links .btn-primary {
+                width: auto !important;
+                font-size: 0.9rem !important;
+                padding: 0.6rem 1.5rem !important;
+                margin-top: 0 !important;
+                border-radius: 12px !important;
+            }
+
+            /* إخفاء الأزرار غير المطلوبة */
+            .menu-toggle { display: none !important; }
+            .menu-close  { display: none !important; }
+            .sidebar-logo { display: none !important; }
+
+            body { padding-right: 0; }
         }
 
         .logo {
@@ -1351,6 +1437,16 @@
             z-index: 10;
         }
 
+        /* ===== شعار الشريط الجانبي ===== */
+        .sidebar-logo {
+            display: none;
+            font-size: 2rem;
+            text-align: center;
+            padding: 0.5rem 0 1rem;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 0.5rem;
+            width: 100%;
+        }
         /* ===== شبكة ثابتة للوضع الليلي ===== */
         body::after {
             content: '';
@@ -1383,58 +1479,6 @@
             opacity: 1;
         }
 
-        /* ===== السلايدبار (الكمبيوتر): طويل وضيق ===== */
-        @media (min-width: 769px) {
-            .nav-links {
-                position: fixed !important;
-                top: 0;
-                right: -260px;
-                width: 200px !important;
-                height: 100vh !important;
-                background: var(--bg-secondary) !important;
-                flex-direction: column !important;
-                padding: 5rem 1rem 2rem !important;
-                gap: 0.4rem !important;
-                transition: right 0.35s cubic-bezier(0.4,0,0.2,1) !important;
-                backdrop-filter: blur(20px);
-                z-index: 1001;
-                border-left: 1px solid var(--border-subtle);
-                box-shadow: -4px 0 24px rgba(0,0,0,0.25);
-                display: flex !important;
-                visibility: hidden;
-                opacity: 0;
-            }
-            .nav-links.active {
-                right: 0 !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-            }
-            [data-theme="light"] .nav-links {
-                background: rgba(255,255,255,0.98) !important;
-            }
-            .nav-links li a,
-            .nav-links li button {
-                font-size: 0.92rem !important;
-                padding: 0.55rem 0.9rem !important;
-                display: block;
-                width: 100%;
-                text-align: right;
-            }
-            .nav-links .btn-primary {
-                font-size: 0.88rem !important;
-                padding: 0.55rem 1rem !important;
-                width: 100%;
-            }
-            .menu-toggle {
-                display: block !important;
-            }
-            .menu-close {
-                display: none;
-            }
-            .nav-links.active .menu-close {
-                display: flex;
-            }
-        }
     </style>
 </head>
 <body>
@@ -1457,12 +1501,13 @@
             <button class="menu-toggle" onclick="toggleMenu()">☰</button>
             <ul class="nav-links" id="navLinks">
                 <button class="menu-close" onclick="toggleMenu()">✕</button>
-                <li><a href="#home" onclick="toggleMenu()">الرئيسية</a></li>
-                <li><a href="#features" onclick="toggleMenu()">المميزات</a></li>
-                <li><a href="#books" onclick="toggleMenu()">المصادر</a></li>
-                <li><a href="#testimonials" onclick="toggleMenu()">آراء المستخدمين</a></li>
-                <li><a href="#founder" onclick="toggleMenu()">المؤسس</a></li>
-                <li><a href="#about" onclick="toggleMenu()">عن الموقع</a></li>
+                <div class="sidebar-logo">🌙</div>
+                <li><a href="#home" onclick="scrollToSection('home')">🏠 الرئيسية</a></li>
+                <li><a href="#features" onclick="scrollToSection('features')">✨ المميزات</a></li>
+                <li><a href="#books" onclick="scrollToSection('books')">📚 المصادر</a></li>
+                <li><a href="#testimonials" onclick="scrollToSection('testimonials')">💬 آراء المستخدمين</a></li>
+                <li><a href="#founder" onclick="scrollToSection('founder')">👤 المؤسس</a></li>
+                <li><a href="#about" onclick="scrollToSection('about')">ℹ️ عن الموقع</a></li>
                 <li><button class="btn-primary" onclick="goToChat()">ابدأ الآن</button></li>
             </ul>
         </div>
