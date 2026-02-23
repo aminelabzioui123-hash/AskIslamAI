@@ -1253,10 +1253,13 @@
                 background: var(--bg-secondary);
                 flex-direction: column;
                 padding: 5rem 2rem;
-                transition: right 0.3s ease;
+                transition: right 0.35s cubic-bezier(0.4,0,0.2,1);
                 backdrop-filter: blur(20px);
                 z-index: 1001;
                 border-left: 1px solid var(--border-subtle);
+                display: flex !important;
+                visibility: hidden;
+                opacity: 0;
             }
 
             [data-theme="light"] .nav-links {
@@ -1266,6 +1269,8 @@
 
             .nav-links.active {
                 right: 0;
+                visibility: visible;
+                opacity: 1;
             }
 
             .menu-close {
@@ -1366,8 +1371,8 @@
 
         /* ===== جوال: سلايدبار ضيق وطويل ===== */
         @media (max-width: 768px) {
-            .logo .site-logo { height: 52px; }
-            .logo::before { width:65px; height:65px; }
+            .logo .site-logo { height: 90px; }
+            .logo::before { width:100px; height:100px; }
 
             .nav-links {
                 width: 55% !important;
