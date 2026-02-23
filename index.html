@@ -1253,7 +1253,7 @@
         /* ========== لوغو أسطوري (مصغر قليلاً) ========== */
         .logo { position: relative; }
         .logo .site-logo {
-            height: 170px;
+            height: 100px;
             width: auto;
             display: block;
             position: relative;
@@ -1571,7 +1571,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
                 لينكداين
             </a>
-            <a class="footer-btn" href="mailto:contact@askislamai.com">
+            <a class="footer-btn" href="/cdn-cgi/l/email-protection#f5969a9b81949681b594869e9c86999498949cdb969a98">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                 تواصل معنا
             </a>
@@ -1582,7 +1582,7 @@
         <p class="footer-copy">© 2026 AskIslamAI - جميع الحقوق محفوظة | صُنع بـ ❤️ لخدمة الإسلام</p>
     </footer>
 
-   <script>
+   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     // 🌙☀️ نظام تبديل الوضع الأسطوري
     function initTheme() {
         const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -1773,13 +1773,4 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     updateCounter();
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-        
-        observer.observe(counter);
-    }
-</script>
-</body>
-</html>
+                    observer.unobserve(entr
