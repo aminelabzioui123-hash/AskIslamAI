@@ -816,7 +816,7 @@
                 </div>
                 <p>إجابة موسعة عن <strong>حكم صلاة الجماعة</strong> مع الأدلة من القرآن والسنة</p>
             </div>
-            <button onclick="window.location.href='/chat'" style="width:100%;background:linear-gradient(135deg,rgba(10,95,79,0.2),rgba(10,95,79,0.05));border:1px solid rgba(10,95,79,0.4);color:var(--secondary-green);padding:0.7rem;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.87rem;font-weight:600;transition:all 0.3s;">
+            <button onclick="window.location.href='https://askislamai.com/chat'" style="width:100%;background:linear-gradient(135deg,rgba(10,95,79,0.2),rgba(10,95,79,0.05));border:1px solid rgba(10,95,79,0.4);color:var(--secondary-green);padding:0.7rem;border-radius:10px;cursor:pointer;font-family:inherit;font-size:0.87rem;font-weight:600;transition:all 0.3s;">
                 🤖 اسأل الذكاء الاصطناعي الآن
             </button>
         </div>
@@ -1269,7 +1269,7 @@ function renderDetail(d, comments) {
         ${d.ai_linked && d.ai_snippet ? `
         <div class="ai-answer-box">
             <div class="ai-answer-header">🤖 إجابة الذكاء الاصطناعي المرتبطة</div>
-            <div class="ai-answer-body">${escapeHtml(d.ai_snippet)} <a href="/chat" style="color:var(--secondary-green);font-weight:600;">← اقرأ الإجابة الكاملة</a></div>
+            <div class="ai-answer-body">${escapeHtml(d.ai_snippet)} <a href="https://askislamai.com/chat" style="color:var(--secondary-green);font-weight:600;">← اقرأ الإجابة الكاملة</a></div>
         </div>` : ''}
         <h4 style="margin:1.5rem 0 1rem;font-size:1rem;color:var(--accent-gold);">💬 التعليقات (${d.comments_count || 0})</h4>
         <div class="replies-list" id="commentsList">
@@ -1582,7 +1582,7 @@ function showBadge(icon, name, desc, pts, locked) {
 // ─── AI Bridge ───
 // ============================================================
 function openAI(topic) {
-    window.location.href = `/chat?q=${encodeURIComponent(topic)}`;
+    window.location.href = `https://askislamai.com/chat?q=${encodeURIComponent(topic)}`;
 }
 
 function scrollToDiscuss() {
