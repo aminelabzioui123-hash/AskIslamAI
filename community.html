@@ -628,6 +628,43 @@
             filter: brightness(0) invert(0);
         }
 
+
+        /* ===== Auth: زر تسجيل الدخول / الخروج ===== */
+        #userSection {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        .login-btn, .logout-btn {
+            background: rgba(212,165,116,0.15);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 0.5rem 1.1rem;
+            border-radius: 10px;
+            font-size: 0.83rem;
+            font-weight: 600;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+        }
+        .login-btn:hover, .logout-btn:hover {
+            background: var(--accent-gold);
+            color: #0a0e14;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(212,165,116,0.3);
+        }
+        [data-theme="light"] .login-btn,
+        [data-theme="light"] .logout-btn {
+            border-color: #c4956a;
+            color: #c4956a;
+            background: rgba(196,149,106,0.1);
+        }
     </style>
 </head>
 <body>
@@ -647,7 +684,8 @@
             <span class="theme-icon moon">🌙</span>
             <span class="theme-icon sun">☀️</span>
         </button>
-        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+        <div id="userSection"></div>
+            <button class="menu-toggle" onclick="toggleMenu()">☰</button>
         <ul class="nav-links" id="navLinks">
             <button class="menu-close" onclick="toggleMenu()">✕</button>
             <div class="sidebar-logo">
@@ -1618,5 +1656,141 @@ function scrollToDiscuss() {
 })();
 
 </script>
+    <!-- ========== 🔥 Firebase Authentication ========== -->
+    <script type="module">
+        import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics }    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import {
+            getAuth, GoogleAuthProvider, GithubAuthProvider,
+            OAuthProvider, signInWithRedirect, getRedirectResult,
+            signOut, onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey:            "AIzaSyBf1ImP5YtSHf9ZnGd71n-QoX0Ao_WcJk0",
+            authDomain:        "askislam-e9803.firebaseapp.com",
+            projectId:         "askislam-e9803",
+            storageBucket:     "askislam-e9803.firebasestorage.app",
+            messagingSenderId: "707749928558",
+            appId:             "1:707749928558:web:d47d6968baca2c7436907f",
+            measurementId:     "G-WT3XWTMCJH"
+        };
+
+        const app      = initializeApp(firebaseConfig);
+        getAnalytics(app);
+        const auth     = getAuth(app);
+
+        const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+        // ✅ معالجة نتيجة إعادة التوجيه
+        getRedirectResult(auth)
+            .then(result => {
+                if (result?.user)
+                    console.log("✅ تسجيل دخول ناجح:", result.user.displayName);
+            })
+            .catch(err => console.error("❌ خطأ في تسجيل الدخول:", err));
+
+        window.currentUser = null;
+
+        // ── دوال تسجيل الدخول ──────────────────────────────
+        window.loginGoogle = async () => {
+            try { await signInWithRedirect(auth, googleProvider); }
+            catch (e) { alert("فشل تسجيل الدخول عبر Google. حاول مرة أخرى."); }
+        };
+
+        window.loginGithub = async () => {
+            try { await signInWithRedirect(auth, new GithubAuthProvider()); }
+            catch (e) { alert("فشل تسجيل الدخول عبر GitHub. حاول مرة أخرى."); }
+        };
+
+        window.loginApple = async () => {
+            try { await signInWithRedirect(auth, new OAuthProvider('apple.com')); }
+            catch (e) { alert("فشل تسجيل الدخول عبر Apple. حاول مرة أخرى."); }
+        };
+
+        window.logout = async () => {
+            try { await signOut(auth); }
+            catch (e) { console.error("خطأ في تسجيل الخروج:", e); }
+        };
+
+        // ── تحديث واجهة المستخدم ───────────────────────────
+        function updateUserUI(user) {
+            const sec = document.getElementById('userSection');
+            if (!sec) return;
+            if (user) {
+                const photo = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+                const name  = user.displayName || 'مستخدم';
+                const short = name.length > 10 ? name.substring(0, 10) + '…' : name;
+                sec.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <img src="${photo}" alt="${name}"
+                             style="width:28px;height:28px;border-radius:50%;border:2px solid var(--accent-gold);object-fit:cover;"
+                             onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
+                        <span style="font-size:0.83rem;font-weight:600;color:var(--text-primary,#f0ece4);white-space:nowrap;">${short}</span>
+                    </div>
+                    <button class="logout-btn" onclick="logout()">خروج</button>`;
+            } else {
+                sec.innerHTML = `
+                    <div style="position:relative;display:inline-block;" id="authDropdownWrap">
+                        <button class="login-btn" onclick="toggleAuthMenu()">🔐 تسجيل الدخول ▾</button>
+                        <div id="authMenu" style="
+                            display:none;position:absolute;top:calc(100% + 6px);left:0;
+                            background:var(--bg-secondary,#1a1f28);border:1px solid var(--border-subtle,rgba(212,165,116,0.2));
+                            border-radius:12px;padding:0.5rem;min-width:190px;z-index:9999;
+                            box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+                            <button onclick="loginGoogle()" style="
+                                width:100%;display:flex;align-items:center;gap:0.6rem;
+                                padding:0.55rem 0.8rem;background:transparent;border:none;
+                                color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;
+                                font-family:inherit;cursor:pointer;border-radius:8px;transition:background 0.2s;">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;">
+                                Google
+                            </button>
+                            <button onclick="loginGithub()" style="
+                                width:100%;display:flex;align-items:center;gap:0.6rem;
+                                padding:0.55rem 0.8rem;background:transparent;border:none;
+                                color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;
+                                font-family:inherit;cursor:pointer;border-radius:8px;transition:background 0.2s;">
+                                <span style="font-size:1.1rem;">🐙</span> GitHub
+                            </button>
+                            <button onclick="loginApple()" style="
+                                width:100%;display:flex;align-items:center;gap:0.6rem;
+                                padding:0.55rem 0.8rem;background:transparent;border:none;
+                                color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;
+                                font-family:inherit;cursor:pointer;border-radius:8px;transition:background 0.2s;">
+                                <span style="font-size:1.1rem;">🍎</span> Apple
+                            </button>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        window.toggleAuthMenu = () => {
+            const m = document.getElementById('authMenu');
+            if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+        };
+        document.addEventListener('click', e => {
+            const wrap = document.getElementById('authDropdownWrap');
+            const m    = document.getElementById('authMenu');
+            if (m && wrap && !wrap.contains(e.target)) m.style.display = 'none';
+        });
+
+        // ── مراقبة حالة المصادقة ───────────────────────────
+        onAuthStateChanged(auth, user => {
+            window.currentUser = user;
+            updateUserUI(user);
+            if (user) {
+                localStorage.setItem('askislam_user', JSON.stringify({
+                    uid: user.uid, displayName: user.displayName,
+                    photoURL: user.photoURL, email: user.email
+                }));
+            } else {
+                localStorage.removeItem('askislam_user');
+            }
+        });
+
+        setTimeout(() => { if (!window.currentUser) updateUserUI(null); }, 400);
+    </script>
 </body>
 </html>
