@@ -1527,7 +1527,7 @@
 
         /* ===== Auth Buttons ===== */
         #userSection { display:flex;align-items:center;gap:0.5rem;flex-shrink:0; }
-        .login-btn, .logout-btn {
+        .login-btn,.logout-btn {
             background:rgba(212,165,116,0.15);border:1px solid var(--accent-gold);
             color:var(--accent-gold);padding:0.5rem 1.1rem;border-radius:10px;
             font-size:0.83rem;font-weight:600;font-family:'IBM Plex Sans Arabic',sans-serif;
@@ -2341,7 +2341,8 @@
         import { getAnalytics }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import {
             getAuth, GoogleAuthProvider, GithubAuthProvider, OAuthProvider,
-            signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
+            signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged,
+            browserLocalPersistence, setPersistence
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -2358,39 +2359,50 @@
         getAnalytics(app);
         const auth = getAuth(app);
 
+        // ✅ ضمان حفظ الجلسة في localStorage دائماً
+        await setPersistence(auth, browserLocalPersistence);
+
         const googleProvider = new GoogleAuthProvider();
         googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-        // معالجة نتيجة العودة من redirect
-        getRedirectResult(auth)
-            .then(result => {
-                if (result && result.user)
-                    console.log("✅ تسجيل دخول ناجح:", result.user.displayName);
-            })
-            .catch(error => {
-                console.error("❌ خطأ redirect:", error.code, error.message);
-            });
+        // ✅ أول شيء: تحقق هل المستخدم عائد من redirect
+        try {
+            const result = await getRedirectResult(auth);
+            if (result?.user) {
+                console.log("✅ تسجيل دخول ناجح بعد redirect:", result.user.displayName);
+            }
+        } catch(e) {
+            console.error("❌ خطأ redirect:", e.code, e.message);
+        }
 
         window.currentUser = null;
 
         window.loginGoogle = async () => {
-            try { await signInWithRedirect(auth, googleProvider); }
-            catch (e) { console.error("Google login error:", e); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, googleProvider);
+            } catch(e) { console.error("Google error:", e); }
         };
 
         window.loginGithub = async () => {
-            try { await signInWithRedirect(auth, new GithubAuthProvider()); }
-            catch (e) { console.error("GitHub login error:", e); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, new GithubAuthProvider());
+            } catch(e) { console.error("GitHub error:", e); }
         };
 
         window.loginApple = async () => {
-            try { await signInWithRedirect(auth, new OAuthProvider('apple.com')); }
-            catch (e) { console.error("Apple login error:", e); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, new OAuthProvider('apple.com'));
+            } catch(e) { console.error("Apple error:", e); }
         };
 
         window.logout = async () => {
-            try { await signOut(auth); }
-            catch (e) { console.error("Logout error:", e); }
+            try {
+                await signOut(auth);
+                localStorage.removeItem('askislam_user');
+            } catch(e) { console.error("Logout error:", e); }
         };
 
         function updateUserUI(user) {
@@ -2441,6 +2453,7 @@
             if (m && wrap && !wrap.contains(e.target)) m.style.display = 'none';
         });
 
+        // ✅ مراقبة حالة المصادقة — يُستدعى تلقائياً عند كل تحميل للصفحة
         onAuthStateChanged(auth, user => {
             window.currentUser = user;
             updateUserUI(user);
@@ -2454,7 +2467,7 @@
             }
         });
 
-        setTimeout(() => { if (!window.currentUser) updateUserUI(null); }, 500);
+        console.log("✅ Firebase Auth جاهز");
     </script>
 </body>
 </html>
