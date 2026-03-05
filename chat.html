@@ -1546,117 +1546,119 @@
             sendMessage(); // ✅ الآن الأزرار السريعة تعمل
         }
     </script>
-
     <!-- ========== 🔥 Firebase Authentication + حفظ المحادثات لكل مستخدم ========== -->
     <script type="module">
-        // 1. استيراد Firebase
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAnalytics }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import {
+            getAuth, GoogleAuthProvider, GithubAuthProvider, OAuthProvider,
+            signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // 2. إعدادات Firebase (خاصة بك)
         const firebaseConfig = {
-            apiKey: "AIzaSyBf1ImP5YtSHf9ZnGd71n-QoX0Ao_WcJk0",
-            authDomain: "askislam-e9803.firebaseapp.com",
-            projectId: "askislam-e9803",
-            storageBucket: "askislam-e9803.firebasestorage.app",
+            apiKey:            "AIzaSyBf1ImP5YtSHf9ZnGd71n-QoX0Ao_WcJk0",
+            authDomain:        "askislam-e9803.firebaseapp.com",
+            projectId:         "askislam-e9803",
+            storageBucket:     "askislam-e9803.firebasestorage.app",
             messagingSenderId: "707749928558",
-            appId: "1:707749928558:web:d47d6968baca2c7436907f",
-            measurementId: "G-WT3XWTMCJH"
+            appId:             "1:707749928558:web:1d9a606bda870f0036907f",
+            measurementId:     "G-6KKBXQ4GL6"
         };
 
-        // 3. تهيئة Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+        const app  = initializeApp(firebaseConfig);
+        getAnalytics(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-        
-        // ✅ إجبار اختيار الحساب لتحسين نجاح تسجيل الدخول
-        provider.setCustomParameters({ prompt: 'select_account' });
 
-        // ✅ معالجة نتيجة التوجيه عند العودة من Google
+        const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: 'select_account' });
+
         getRedirectResult(auth)
-            .then((result) => {
-                if (result && result.user) {
+            .then(result => {
+                if (result && result.user)
                     console.log("✅ تم تسجيل الدخول بنجاح:", result.user.displayName);
-                }
             })
-            .catch((error) => {
+            .catch(error => {
                 console.error("❌ خطأ في معالجة تسجيل الدخول:", error);
-                alert("حدث خطأ أثناء تسجيل الدخول: " + error.message);
             });
 
-        // 4. المتغيرات العامة
         window.currentUser = null;
 
-        // 5. دالة تسجيل الدخول
         window.loginGoogle = async () => {
-            try {
-                await signInWithRedirect(auth, provider);
-            } catch (error) {
-                console.error("خطأ في تسجيل الدخول:", error);
-                alert("فشل تسجيل الدخول. حاول مرة أخرى.");
-            }
+            try { await signInWithRedirect(auth, googleProvider); }
+            catch (error) { console.error("خطأ في تسجيل الدخول:", error); }
         };
 
-        // 6. دالة تسجيل الخروج
+        window.loginGithub = async () => {
+            try { await signInWithRedirect(auth, new GithubAuthProvider()); }
+            catch (error) { console.error("GitHub login error:", error); }
+        };
+
+        window.loginApple = async () => {
+            try { await signInWithRedirect(auth, new OAuthProvider('apple.com')); }
+            catch (error) { console.error("Apple login error:", error); }
+        };
+
         window.logout = async () => {
-            try {
-                await signOut(auth);
-                console.log("تم تسجيل الخروج");
-            } catch (error) {
-                console.error("خطأ في تسجيل الخروج:", error);
-            }
+            try { await signOut(auth); console.log("تم تسجيل الخروج"); }
+            catch (error) { console.error("خطأ في تسجيل الخروج:", error); }
         };
 
-        // 7. تحديث واجهة المستخدم بناءً على حالة المصادقة
         function updateUserUI(user) {
             const userSection = document.getElementById('userSection');
-            if (!userSection) {
-                console.error('❌ userSection غير موجود في الصفحة!');
-                return;
-            }
-
+            if (!userSection) return;
             console.log('✅ تحديث واجهة المستخدم:', user ? user.displayName : 'غير مسجل');
-
             if (user) {
-                const photoURL = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
+                const photoURL    = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
                 const displayName = user.displayName || 'مستخدم';
-                
-                // تقصير الاسم إذا كان طويلاً
-                const shortName = displayName.length > 10 ? displayName.substring(0, 10) + '...' : displayName;
-
+                const shortName   = displayName.length > 10 ? displayName.substring(0, 10) + '...' : displayName;
                 userSection.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <img src="${photoURL}" alt="${displayName}" 
-                             style="width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--accent-gold); object-fit: cover;"
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <img src="${photoURL}" alt="${displayName}"
+                             style="width:28px;height:28px;border-radius:50%;border:2px solid var(--accent-gold);object-fit:cover;"
                              onerror="this.src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg'">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">${shortName}</span>
+                        <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);white-space:nowrap;">${shortName}</span>
                     </div>
-                    <button class="logout-btn" onclick="logout()">خروج</button>
-                `;
+                    <button class="logout-btn" onclick="logout()">خروج</button>`;
             } else {
                 userSection.innerHTML = `
-                    <button class="login-btn" onclick="loginGoogle()">
-                        🔐 تسجيل الدخول
-                    </button>
-                `;
+                    <div style="position:relative;display:inline-block;" id="authDropdownWrap">
+                        <button class="login-btn" onclick="toggleAuthMenu()">🔐 تسجيل الدخول ▾</button>
+                        <div id="authMenu" style="display:none;position:absolute;top:calc(100% + 6px);left:0;
+                            background:var(--bg-secondary,#1a1f28);
+                            border:1px solid rgba(212,165,116,0.25);
+                            border-radius:12px;padding:0.5rem;min-width:185px;z-index:9999;
+                            box-shadow:0 8px 24px rgba(0,0,0,0.45);">
+                            <button onclick="loginGoogle()" style="width:100%;display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;background:transparent;border:none;color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;" onmouseover="this.style.background='rgba(212,165,116,0.12)'" onmouseout="this.style.background='transparent'">
+                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:18px;height:18px;"> Google
+                            </button>
+                            <button onclick="loginGithub()" style="width:100%;display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;background:transparent;border:none;color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;" onmouseover="this.style.background='rgba(212,165,116,0.12)'" onmouseout="this.style.background='transparent'">
+                                <span style="font-size:1.1rem;">🐙</span> GitHub
+                            </button>
+                            <button onclick="loginApple()" style="width:100%;display:flex;align-items:center;gap:0.6rem;padding:0.55rem 0.8rem;background:transparent;border:none;color:var(--text-primary,#f0ece4);font-size:0.85rem;font-weight:600;font-family:inherit;cursor:pointer;border-radius:8px;" onmouseover="this.style.background='rgba(212,165,116,0.12)'" onmouseout="this.style.background='transparent'">
+                                <span style="font-size:1.1rem;">🍎</span> Apple
+                            </button>
+                        </div>
+                    </div>`;
             }
         }
 
-        // 8. مراقبة حالة المصادقة
+        window.toggleAuthMenu = () => {
+            const m = document.getElementById('authMenu');
+            if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+        };
+        document.addEventListener('click', e => {
+            const wrap = document.getElementById('authDropdownWrap');
+            const m    = document.getElementById('authMenu');
+            if (m && wrap && !wrap.contains(e.target)) m.style.display = 'none';
+        });
+
         onAuthStateChanged(auth, (user) => {
             window.currentUser = user;
             updateUserUI(user);
             loadHistory();
         });
 
-        // ✅ استدعاء فوري لضمان ظهور واجهة تسجيل الدخول
-        setTimeout(() => {
-            if (!window.currentUser) {
-                updateUserUI(null);
-            }
-        }, 500);
+        setTimeout(() => { if (!window.currentUser) updateUserUI(null); }, 500);
 
         // ========== دوال حفظ المحادثات لكل مستخدم ==========
         function getHistoryKey() {
@@ -1667,8 +1669,6 @@
         window.saveConversation = function(question, answer) {
             const key = getHistoryKey();
             let history = JSON.parse(localStorage.getItem(key) || '[]');
-            
-            // استخراج tags تلقائية
             const tags = [];
             if (question.includes('قرآن') || answer.includes('﴿')) tags.push('قرآن');
             if (question.includes('حديث') || answer.includes('روى')) tags.push('حديث');
@@ -1676,17 +1676,13 @@
             if (question.includes('دعاء') || question.includes('أدعية')) tags.push('دعاء');
             if (question.includes('صلاة')) tags.push('عبادة');
             if (question.includes('زكاة') || question.includes('صيام') || question.includes('حج')) tags.push('أركان');
-            
             const entry = {
                 question: question.substring(0, 100) + (question.length > 100 ? '...' : ''),
                 answer: answer.replace(/<[^>]*>/g, '').substring(0, 120) + (answer.length > 120 ? '...' : ''),
                 timestamp: new Date().toISOString(),
-                fullQuestion: question,
-                fullAnswer: answer,
-                tags: tags,
+                fullQuestion: question, fullAnswer: answer, tags: tags,
                 id: Date.now() + Math.random()
             };
-            
             history.unshift(entry);
             if (history.length > 100) history.pop();
             localStorage.setItem(key, JSON.stringify(history));
@@ -1697,14 +1693,9 @@
             const key = getHistoryKey();
             const stored = localStorage.getItem(key);
             if (stored) {
-                try {
-                    window.conversationHistory = JSON.parse(stored);
-                } catch (e) {
-                    window.conversationHistory = [];
-                }
-            } else {
-                window.conversationHistory = [];
-            }
+                try { window.conversationHistory = JSON.parse(stored); }
+                catch (e) { window.conversationHistory = []; }
+            } else { window.conversationHistory = []; }
             renderHistorySidebar();
         };
 
@@ -1720,12 +1711,10 @@
         window.renderHistorySidebar = function() {
             const historyList = document.getElementById('historyList');
             if (!historyList) return;
-            
             if (!window.conversationHistory || window.conversationHistory.length === 0) {
                 historyList.innerHTML = '<div class="history-empty">لا توجد محفوظات بعد</div>';
                 return;
             }
-
             let html = '';
             window.conversationHistory.forEach((item, index) => {
                 html += `
@@ -1733,75 +1722,53 @@
                         <div class="history-item-content">
                             <div class="history-question">❓ ${item.question}</div>
                             <div class="history-answer">${item.answer}</div>
-                            <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.3rem;">
+                            <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.3rem;">
                                 ${new Date(item.timestamp).toLocaleString('ar-EG')}
                             </div>
                         </div>
-                        <button class="history-delete-btn" data-delete-index="${index}" title="حذف">
-                            🗑️
-                        </button>
-                    </div>
-                `;
+                        <button class="history-delete-btn" data-delete-index="${index}" title="حذف">🗑️</button>
+                    </div>`;
             });
             historyList.innerHTML = html;
-
             document.querySelectorAll('.history-item-content').forEach(el => {
-                el.addEventListener('click', function(e) {
-                    const index = this.parentElement.dataset.index;
-                    const item = window.conversationHistory[index];
+                el.addEventListener('click', function() {
+                    const item = window.conversationHistory[this.parentElement.dataset.index];
                     if (item) {
                         document.getElementById('messageInput').value = item.fullQuestion || item.question;
                         document.getElementById('messageInput').focus();
                     }
                 });
             });
-
             document.querySelectorAll('.history-delete-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    const index = parseInt(this.dataset.deleteIndex);
-                    deleteHistoryItem(index);
+                    if (confirm('هل تريد حذف هذه المحادثة؟')) {
+                        const key = getHistoryKey();
+                        let history = JSON.parse(localStorage.getItem(key) || '[]');
+                        history.splice(parseInt(this.dataset.deleteIndex), 1);
+                        localStorage.setItem(key, JSON.stringify(history));
+                        window.conversationHistory = history;
+                        renderHistorySidebar();
+                    }
                 });
             });
         };
 
-        function deleteHistoryItem(index) {
-            if (confirm('هل تريد حذف هذه المحادثة؟')) {
-                const key = getHistoryKey();
-                let history = JSON.parse(localStorage.getItem(key) || '[]');
-                history.splice(index, 1);
-                localStorage.setItem(key, JSON.stringify(history));
-                window.conversationHistory = history;
-                renderHistorySidebar();
-            }
-        }
-
-        // تهيئة أولية
         window.loadHistory();
         document.getElementById('clearHistoryBtn').addEventListener('click', window.clearHistory);
 
-        // البحث في المحفوظات
         document.getElementById('searchHistory').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
             const historyItems = document.querySelectorAll('.history-item');
-            
-            if (!searchTerm) {
-                historyItems.forEach(item => item.style.display = 'block');
-                return;
-            }
-
+            if (!searchTerm) { historyItems.forEach(item => item.style.display = 'block'); return; }
             historyItems.forEach(item => {
-                const question = item.querySelector('.history-question').textContent.toLowerCase();
-                const answer = item.querySelector('.history-answer').textContent.toLowerCase();
-                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+                const q = item.querySelector('.history-question').textContent.toLowerCase();
+                const a = item.querySelector('.history-answer').textContent.toLowerCase();
+                item.style.display = (q.includes(searchTerm) || a.includes(searchTerm)) ? 'block' : 'none';
             });
         });
 
-        console.log('✅ Firebase Authentication جاهز، المحفوظات لكل مستخدم + البحث + حذف فردي');
+        console.log('✅ Firebase Authentication جاهز');
     </script>
 </body>
 </html>
