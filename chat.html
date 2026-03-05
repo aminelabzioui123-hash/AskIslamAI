@@ -33,9 +33,9 @@
             --accent-hover: #333333;
             --border: rgba(0, 0, 0, 0.18);
             --border-strong: rgba(0, 0, 0, 0.30);
-            --shadow-sm: 0 2px 6px rgba(0,0,0,0.18);
-            --shadow-md: 0 6px 20px rgba(0,0,0,0.28);
-            --shadow-lg: 0 12px 36px rgba(0,0,0,0.36);
+            --shadow-sm: 0 1px 4px rgba(0,0,0,0.10);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.14);
+            --shadow-lg: 0 8px 28px rgba(0,0,0,0.18);
             --sidebar-width: 300px;
             --header-height: 0px;
             --radius: 12px;
@@ -77,8 +77,8 @@
         }
 
         .sidebar-logo {
-            width: 200px;
-            height: 200px;
+            width: 90px;
+            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -333,16 +333,99 @@
             border-color: #ef4444;
         }
 
+        .delete-all-btn {
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .delete-all-btn:hover {
+            background: rgba(239, 68, 68, 0.08);
+            border-color: #ef4444;
+        }
+
+        /* Confirm dialog */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 99999;
+            align-items: center;
+            justify-content: center;
+        }
+        .confirm-overlay.active { display: flex; }
+
+        .confirm-box {
+            background: var(--bg-card);
+            border: 1.5px solid #1a1a1a;
+            border-radius: var(--radius);
+            box-shadow: 5px 7px 0px rgba(0,0,0,0.18);
+            padding: 1.8rem 1.6rem;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .confirm-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .confirm-sub {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: 0.7rem;
+            justify-content: center;
+            margin-top: 0.3rem;
+        }
+
+        .confirm-yes {
+            padding: 0.6rem 1.4rem;
+            background: #ef4444;
+            color: white;
+            border: 1.5px solid #dc2626;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .confirm-yes:hover { background: #dc2626; }
+
+        .confirm-no {
+            padding: 0.6rem 1.4rem;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1.5px solid #1a1a1a;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
+        }
+        .confirm-no:hover { background: var(--bg-secondary); }
+
         /* ========== Header with Hamburger Menu ========== */
         .header {
             display: none;
             align-items: center;
             justify-content: space-between;
-            padding: 0.6rem 1rem;
+            padding: 0.4rem 1rem;
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
-            min-height: 52px;
+            min-height: 68px;
         }
 
         .hamburger-btn {
@@ -379,8 +462,8 @@
         }
 
         .header-logo-img {
-            width: 32px;
-            height: 32px;
+            width: 56px;
+            height: 56px;
             object-fit: contain;
             mix-blend-mode: multiply;
         }
@@ -539,7 +622,7 @@
             max-width: 70%;
             line-height: 1.6;
             font-size: 0.95rem;
-            box-shadow: 5px 7px 0px #000000;
+            box-shadow: 3px 5px 0px rgba(0,0,0,0.18);
             color: var(--text-primary);
             word-wrap: break-word;
             overflow-wrap: break-word;
@@ -549,7 +632,7 @@
             background: var(--accent);
             color: white;
             border-color: #000;
-            box-shadow: 5px 7px 0px #000000;
+            box-shadow: 3px 5px 0px rgba(0,0,0,0.18);
         }
 
         /* ========== Typing Indicator ========== */
@@ -557,12 +640,12 @@
             display: none;
             align-items: center;
             gap: 0.8rem;
-            padding: 1rem 1.2rem;
+            padding: 0.9rem 1.2rem;
             background: var(--bg-card);
-            border: 1px solid var(--border);
+            border: 1.5px solid #1a1a1a;
             border-radius: var(--radius);
             width: fit-content;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 3px 4px 0px rgba(0,0,0,0.12);
             flex-shrink: 0;
         }
 
@@ -570,29 +653,31 @@
 
         .typing-dots {
             display: flex;
-            gap: 0.4rem;
+            gap: 0.5rem;
             align-items: center;
         }
 
         .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--text-secondary);
+            width: 9px;
+            height: 9px;
+            background: #1a1a1a;
             border-radius: 50%;
-            animation: typing 1.4s infinite;
+            animation: typingBounce 1.2s ease-in-out infinite;
         }
 
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.18s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.36s; }
 
-        @keyframes typing {
-            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
-            30% { opacity: 1; transform: translateY(-10px); }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
+            40% { transform: translateY(-7px); opacity: 1; }
         }
 
         .typing-text {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-primary);
         }
 
         /* ========== Input Area ========== */
@@ -868,10 +953,10 @@
         @media (max-width: 768px) {
             :root { --sidebar-width: 0; }
             .header { display: flex; }
-            .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; transition: right 0.3s ease; z-index: 10001; }
+            .sidebar { position: fixed; top: 0; right: -100%; width: 290px; height: 100vh; transition: right 0.3s ease; z-index: 10001; }
             .sidebar.active { right: 0; }
             .main-container { margin-right: 0; height: 100vh; }
-            .sidebar-logo { width: 220px; height: 220px; }
+            .sidebar-logo { width: 90px; height: 90px; }
             .chat-container { padding: 0.6rem 0.5rem 0; }
             .messages-area { padding: 0.8rem 0; gap: 1rem; }
             .message-content { max-width: 85%; font-size: 0.9rem; padding: 0.8rem 1rem; }
@@ -903,7 +988,7 @@
             .header { display: flex; }
             .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; transition: right 0.3s ease; z-index: 10001; }
             .sidebar.active { right: 0; }
-            .sidebar-logo { width: 230px; height: 230px; }
+            .sidebar-logo { width: 90px; height: 90px; }
             .welcome-logo { width: 50px; height: 50px; }
             .welcome-title { font-size: 1.2rem; margin-bottom: 0.2rem; }
             .welcome-subtitle { font-size: 0.8rem; margin-bottom: 0.8rem; }
@@ -977,23 +1062,13 @@
             </div>
         </div>
 
-        <div class="spaces-section">
-            <div class="section-title">الفئات</div>
-            <div class="space-item">
-                <div class="space-dot" style="background: #3b82f6;"></div>
-                <div class="space-name">القرآن الكريم</div>
-            </div>
-            <div class="space-item">
-                <div class="space-dot" style="background: #ef4444;"></div>
-                <div class="space-name">الفقه والأحكام</div>
-            </div>
-            <div class="space-item">
-                <div class="space-dot" style="background: #8b5cf6;"></div>
-                <div class="space-name">السيرة النبوية</div>
-            </div>
-        </div>
+        <div class="spaces-section"></div>
 
         <div class="sidebar-footer">
+            <button class="footer-btn delete-all-btn" id="deleteAllBtn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                حذف جميع المحادثات
+            </button>
             <button class="footer-btn" id="settingsBtn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 الإعدادات
@@ -1026,7 +1101,7 @@
                     <div class="welcome-basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
                     <div>
                         <div class="welcome-title">كيف يمكنني مساعدتك؟</div>
-                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة</div>
+                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة و نجيبك من المصادر المعتمدة في الاسلام</div>
                     </div>
                 </div>
 
@@ -1045,20 +1120,9 @@
             <div class="input-area">
                 <div class="input-wrapper">
                     <div class="input-row" style="position: relative;">
-                        <button class="options-toggle" id="optionsToggle" title="خيارات متقدمة">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-                        </button>
+
                         
-                        <div class="options-menu" id="optionsMenu">
-                            <button class="option-item" id="deepSearchOption" data-option="deep-search">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                البحث المتقدم
-                            </button>
-                            <button class="option-item" id="deepThinkOption" data-option="deep-think">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                تفكير عميق
-                            </button>
-                        </div>
+                        
                         
                         <textarea 
                             id="messageInput" 
@@ -1067,7 +1131,7 @@
                             rows="1"
                         ></textarea>
                         <button class="send-btn" id="sendBtn" title="إرسال">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z"/></svg>
                         </button>
                     </div>
                     <div class="input-tools" id="inputTools"></div>
@@ -1086,10 +1150,6 @@
         const conversationList = document.getElementById('conversationList');
         const userSection = document.getElementById('userSection');
         const logoutBtn = document.getElementById('logoutBtn');
-        const optionsToggle = document.getElementById('optionsToggle');
-        const optionsMenu = document.getElementById('optionsMenu');
-        const deepSearchOption = document.getElementById('deepSearchOption');
-        const deepThinkOption = document.getElementById('deepThinkOption');
         const inputTools = document.getElementById('inputTools');
         const hamburgerBtn = document.getElementById('hamburgerBtn');
         const sidebar = document.getElementById('sidebar');
@@ -1134,15 +1194,9 @@
         newChatBtn.addEventListener('click', startNewChat);
 
         // التحكم في قائمة الخيارات
-        optionsToggle.addEventListener('click', function(e) {
-            e.stopPropagation();
-            optionsMenu.classList.toggle('active');
-        });
-
-        // إغلاق القائمة عند الضغط في أي مكان
+                // إغلاق القائمة عند الضغط في أي مكان
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.options-toggle') && !e.target.closest('.options-menu')) {
-                optionsMenu.classList.remove('active');
             }
         });
 
@@ -1367,15 +1421,12 @@
             chatHistory = [];
             selectedOptions.clear();
             updateToolsDisplay();
-            optionsMenu.classList.remove('active');
-            deepSearchOption.classList.remove('active');
-            deepThinkOption.classList.remove('active');
             messagesArea.innerHTML = `
                 <div class="welcome-section">
                     <div class="welcome-basmala">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
                     <div>
                         <div class="welcome-title">كيف يمكنني مساعدتك؟</div>
-                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة</div>
+                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة و نجيبك من المصادر المعتمدة في الاسلام</div>
                     </div>
                 </div>
             `;
@@ -1431,8 +1482,7 @@
                 chatHistory = data.history;
                 selectedOptions.clear();
                 updateToolsDisplay();
-                optionsMenu.classList.remove('active');
-                messagesArea.innerHTML = '';
+                    messagesArea.innerHTML = '';
                 chatHistory.forEach(msg => {
                     addMessage(msg.content, msg.role);
                 });
@@ -1445,7 +1495,52 @@
             messageInput.focus();
             sendMessage();
         };
+
+        // ── Delete all chats ──────────────────────────────────────────────
+        const deleteAllBtn = document.getElementById('deleteAllBtn');
+        const confirmOverlay = document.getElementById('confirmOverlay');
+        const confirmYes = document.getElementById('confirmYes');
+        const confirmNo = document.getElementById('confirmNo');
+
+        deleteAllBtn.addEventListener('click', () => {
+            confirmOverlay.classList.add('active');
+        });
+
+        confirmNo.addEventListener('click', () => {
+            confirmOverlay.classList.remove('active');
+        });
+
+        confirmOverlay.addEventListener('click', (e) => {
+            if (e.target === confirmOverlay) confirmOverlay.classList.remove('active');
+        });
+
+        confirmYes.addEventListener('click', () => {
+            const userId = window.currentUser?.uid || 'guest';
+            const prefix = `chat_${userId}_`;
+            const keysToDelete = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith(prefix)) keysToDelete.push(key);
+            }
+            keysToDelete.forEach(k => localStorage.removeItem(k));
+            allChats = [];
+            renderConversations();
+            confirmOverlay.classList.remove('active');
+            startNewChat();
+        });
     </script>
+
+    <!-- ========== Confirm Delete Dialog ========== -->
+    <div class="confirm-overlay" id="confirmOverlay">
+        <div class="confirm-box">
+            <div class="confirm-title">🗑️ حذف جميع المحادثات</div>
+            <div class="confirm-sub">هل أنت متأكد؟ سيتم حذف جميع المحادثات المحفوظة نهائياً.</div>
+            <div class="confirm-btns">
+                <button class="confirm-yes" id="confirmYes">نعم، احذف</button>
+                <button class="confirm-no" id="confirmNo">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ========== Firebase Authentication ========== -->
     <script type="module">
