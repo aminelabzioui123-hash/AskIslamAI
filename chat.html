@@ -1546,13 +1546,15 @@
             sendMessage(); // ✅ الآن الأزرار السريعة تعمل
         }
     </script>
-    <!-- ========== 🔥 Firebase Authentication + حفظ المحادثات لكل مستخدم ========== -->
+
+    <!-- ========== 🔥 Firebase Authentication + حفظ المحادثات ========== -->
     <script type="module">
         import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAnalytics }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import {
             getAuth, GoogleAuthProvider, GithubAuthProvider, OAuthProvider,
-            signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged
+            signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged,
+            browserLocalPersistence, setPersistence
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -1569,44 +1571,53 @@
         getAnalytics(app);
         const auth = getAuth(app);
 
+        await setPersistence(auth, browserLocalPersistence);
+
         const googleProvider = new GoogleAuthProvider();
         googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-        getRedirectResult(auth)
-            .then(result => {
-                if (result && result.user)
-                    console.log("✅ تم تسجيل الدخول بنجاح:", result.user.displayName);
-            })
-            .catch(error => {
-                console.error("❌ خطأ في معالجة تسجيل الدخول:", error);
-            });
+        try {
+            const result = await getRedirectResult(auth);
+            if (result?.user)
+                console.log("✅ تسجيل دخول ناجح:", result.user.displayName);
+        } catch(e) {
+            console.error("❌ خطأ redirect:", e.code, e.message);
+        }
 
         window.currentUser = null;
 
         window.loginGoogle = async () => {
-            try { await signInWithRedirect(auth, googleProvider); }
-            catch (error) { console.error("خطأ في تسجيل الدخول:", error); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, googleProvider);
+            } catch(e) { console.error("Google error:", e); }
         };
 
         window.loginGithub = async () => {
-            try { await signInWithRedirect(auth, new GithubAuthProvider()); }
-            catch (error) { console.error("GitHub login error:", error); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, new GithubAuthProvider());
+            } catch(e) { console.error("GitHub error:", e); }
         };
 
         window.loginApple = async () => {
-            try { await signInWithRedirect(auth, new OAuthProvider('apple.com')); }
-            catch (error) { console.error("Apple login error:", error); }
+            try {
+                await setPersistence(auth, browserLocalPersistence);
+                await signInWithRedirect(auth, new OAuthProvider('apple.com'));
+            } catch(e) { console.error("Apple error:", e); }
         };
 
         window.logout = async () => {
-            try { await signOut(auth); console.log("تم تسجيل الخروج"); }
-            catch (error) { console.error("خطأ في تسجيل الخروج:", error); }
+            try {
+                await signOut(auth);
+                localStorage.removeItem('askislam_user');
+            } catch(e) { console.error("Logout error:", e); }
         };
 
         function updateUserUI(user) {
             const userSection = document.getElementById('userSection');
             if (!userSection) return;
-            console.log('✅ تحديث واجهة المستخدم:', user ? user.displayName : 'غير مسجل');
+            console.log('updateUserUI:', user ? user.displayName : 'null');
             if (user) {
                 const photoURL    = user.photoURL || 'https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg';
                 const displayName = user.displayName || 'مستخدم';
@@ -1652,15 +1663,21 @@
             if (m && wrap && !wrap.contains(e.target)) m.style.display = 'none';
         });
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, user => {
             window.currentUser = user;
             updateUserUI(user);
             loadHistory();
+            if (user) {
+                localStorage.setItem('askislam_user', JSON.stringify({
+                    uid: user.uid, displayName: user.displayName,
+                    photoURL: user.photoURL, email: user.email
+                }));
+            } else {
+                localStorage.removeItem('askislam_user');
+            }
         });
 
-        setTimeout(() => { if (!window.currentUser) updateUserUI(null); }, 500);
-
-        // ========== دوال حفظ المحادثات لكل مستخدم ==========
+        // ========== دوال المحفوظات ==========
         function getHistoryKey() {
             const uid = window.currentUser ? window.currentUser.uid : 'guest';
             return `askislam_history_${uid}`;
@@ -1680,7 +1697,7 @@
                 question: question.substring(0, 100) + (question.length > 100 ? '...' : ''),
                 answer: answer.replace(/<[^>]*>/g, '').substring(0, 120) + (answer.length > 120 ? '...' : ''),
                 timestamp: new Date().toISOString(),
-                fullQuestion: question, fullAnswer: answer, tags: tags,
+                fullQuestion: question, fullAnswer: answer, tags,
                 id: Date.now() + Math.random()
             };
             history.unshift(entry);
@@ -1690,19 +1707,16 @@
         };
 
         window.loadHistory = function() {
-            const key = getHistoryKey();
+            const key    = getHistoryKey();
             const stored = localStorage.getItem(key);
-            if (stored) {
-                try { window.conversationHistory = JSON.parse(stored); }
-                catch (e) { window.conversationHistory = []; }
-            } else { window.conversationHistory = []; }
+            try { window.conversationHistory = stored ? JSON.parse(stored) : []; }
+            catch(e) { window.conversationHistory = []; }
             renderHistorySidebar();
         };
 
         window.clearHistory = function() {
             if (confirm('هل أنت متأكد من حذف جميع المحفوظات؟')) {
-                const key = getHistoryKey();
-                localStorage.removeItem(key);
+                localStorage.removeItem(getHistoryKey());
                 window.conversationHistory = [];
                 renderHistorySidebar();
             }
@@ -1711,25 +1725,22 @@
         window.renderHistorySidebar = function() {
             const historyList = document.getElementById('historyList');
             if (!historyList) return;
-            if (!window.conversationHistory || window.conversationHistory.length === 0) {
+            if (!window.conversationHistory?.length) {
                 historyList.innerHTML = '<div class="history-empty">لا توجد محفوظات بعد</div>';
                 return;
             }
-            let html = '';
-            window.conversationHistory.forEach((item, index) => {
-                html += `
-                    <div class="history-item" data-index="${index}">
-                        <div class="history-item-content">
-                            <div class="history-question">❓ ${item.question}</div>
-                            <div class="history-answer">${item.answer}</div>
-                            <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.3rem;">
-                                ${new Date(item.timestamp).toLocaleString('ar-EG')}
-                            </div>
+            historyList.innerHTML = window.conversationHistory.map((item, index) => `
+                <div class="history-item" data-index="${index}">
+                    <div class="history-item-content">
+                        <div class="history-question">❓ ${item.question}</div>
+                        <div class="history-answer">${item.answer}</div>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.3rem;">
+                            ${new Date(item.timestamp).toLocaleString('ar-EG')}
                         </div>
-                        <button class="history-delete-btn" data-delete-index="${index}" title="حذف">🗑️</button>
-                    </div>`;
-            });
-            historyList.innerHTML = html;
+                    </div>
+                    <button class="history-delete-btn" data-delete-index="${index}" title="حذف">🗑️</button>
+                </div>`).join('');
+
             document.querySelectorAll('.history-item-content').forEach(el => {
                 el.addEventListener('click', function() {
                     const item = window.conversationHistory[this.parentElement.dataset.index];
@@ -1744,10 +1755,10 @@
                     e.stopPropagation();
                     if (confirm('هل تريد حذف هذه المحادثة؟')) {
                         const key = getHistoryKey();
-                        let history = JSON.parse(localStorage.getItem(key) || '[]');
-                        history.splice(parseInt(this.dataset.deleteIndex), 1);
-                        localStorage.setItem(key, JSON.stringify(history));
-                        window.conversationHistory = history;
+                        let h = JSON.parse(localStorage.getItem(key) || '[]');
+                        h.splice(parseInt(this.dataset.deleteIndex), 1);
+                        localStorage.setItem(key, JSON.stringify(h));
+                        window.conversationHistory = h;
                         renderHistorySidebar();
                     }
                 });
@@ -1756,19 +1767,17 @@
 
         window.loadHistory();
         document.getElementById('clearHistoryBtn').addEventListener('click', window.clearHistory);
-
         document.getElementById('searchHistory').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            const historyItems = document.querySelectorAll('.history-item');
-            if (!searchTerm) { historyItems.forEach(item => item.style.display = 'block'); return; }
-            historyItems.forEach(item => {
-                const q = item.querySelector('.history-question').textContent.toLowerCase();
-                const a = item.querySelector('.history-answer').textContent.toLowerCase();
-                item.style.display = (q.includes(searchTerm) || a.includes(searchTerm)) ? 'block' : 'none';
+            const q = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('.history-item').forEach(item => {
+                if (!q) { item.style.display = 'block'; return; }
+                const t = item.querySelector('.history-question').textContent.toLowerCase()
+                        + item.querySelector('.history-answer').textContent.toLowerCase();
+                item.style.display = t.includes(q) ? 'block' : 'none';
             });
         });
 
-        console.log('✅ Firebase Authentication جاهز');
+        console.log('✅ Firebase Auth + محفوظات جاهز');
     </script>
 </body>
 </html>
