@@ -64,7 +64,6 @@
             flex-direction: column;
             z-index: 10001;
             overflow: hidden;
-            transition: transform 0.3s ease;
         }
 
         .sidebar-header {
@@ -344,7 +343,6 @@
             margin-right: var(--sidebar-width);
             min-width: 0;
             height: 100vh;
-            transition: margin-right 0.3s ease;
         }
 
         .chat-container {
@@ -354,8 +352,8 @@
             max-width: 900px;
             width: 100%;
             margin: 0 auto;
-            padding: 1.5rem 1rem 0;
-            position: relative;
+            padding: 1rem 1rem 0;
+            min-height: 0;
             overflow: hidden;
         }
 
@@ -366,161 +364,141 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-strong) transparent;
+            min-height: 0;
         }
 
         .messages-area::-webkit-scrollbar { width: 6px; }
         .messages-area::-webkit-scrollbar-track { background: transparent; }
         .messages-area::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
 
-        /* Welcome Section */
+        /* ========== Welcome Message ========== */
         .welcome-section {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
+            gap: 1.5rem;
             padding: 2rem 1rem;
-            margin: auto 0;
+            text-align: center;
         }
 
         .welcome-logo {
             width: 80px;
             height: 80px;
-            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .welcome-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
             filter: brightness(0) saturate(100%);
         }
 
         .welcome-title {
-            font-family: 'Amiri Quran', serif;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
             color: var(--text-primary);
+            margin-bottom: 0.5rem;
         }
 
         .welcome-subtitle {
             font-size: 1rem;
             color: var(--text-secondary);
-            margin-bottom: 2rem;
-            max-width: 500px;
+            margin-bottom: 1.5rem;
         }
 
         .welcome-features {
             display: flex;
+            gap: 1rem;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 0.8rem;
-            max-width: 600px;
         }
 
         .feature-badge {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 0.6rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
+            padding: 0.6rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         .feature-badge svg {
             width: 16px;
             height: 16px;
-            color: var(--accent);
         }
 
-        /* Message Styles */
+        /* ========== Messages ========== */
         .message {
             display: flex;
-            gap: 1rem;
-            max-width: 100%;
-            animation: fadeIn 0.3s ease-out;
+            gap: 0.8rem;
+            align-items: flex-start;
+            animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .message.user {
-            flex-direction: row-reverse;
-        }
+        .message.user { flex-direction: row-reverse; }
 
         .message-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 0.9rem;
             flex-shrink: 0;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .message.user .message-avatar {
+            font-weight: 600;
             background: var(--accent);
             color: white;
-            border: none;
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .message.assistant .message-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: contain;
+            filter: brightness(0) saturate(100%);
         }
 
         .message-content {
-            max-width: 75%;
-            padding: 1rem 1.2rem;
-            border-radius: var(--radius);
-            font-size: 0.95rem;
-            line-height: 1.6;
-            position: relative;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .message.assistant .message-content {
             background: var(--bg-card);
-            color: var(--text-primary);
             border: 1px solid var(--border);
-            border-top-right-radius: 2px;
+            border-radius: var(--radius);
+            padding: 1rem 1.2rem;
+            max-width: 70%;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow-sm);
+            color: var(--text-primary);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .message.user .message-content {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border-top-left-radius: 2px;
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
-        .message-sources {
-            margin-top: 0.8rem;
-            padding-top: 0.8rem;
-            border-top: 1px solid var(--border);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .source-tag {
-            font-size: 0.75rem;
-            background: var(--bg-primary);
-            color: var(--text-secondary);
-            padding: 0.2rem 0.6rem;
-            border-radius: 4px;
-            border: 1px solid var(--border);
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .source-tag:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border-color: var(--border-strong);
-        }
-
-        /* Typing Indicator */
+        /* ========== Typing Indicator ========== */
         .typing-indicator {
             display: none;
             align-items: center;
@@ -530,34 +508,32 @@
             border: 1px solid var(--border);
             border-radius: var(--radius);
             width: fit-content;
-            margin-bottom: 1rem;
             box-shadow: var(--shadow-sm);
+            flex-shrink: 0;
         }
 
-        .typing-indicator.active {
-            display: flex;
-        }
+        .typing-indicator.active { display: flex; }
 
         .typing-dots {
             display: flex;
-            gap: 4px;
+            gap: 0.4rem;
+            align-items: center;
         }
 
         .typing-dot {
-            width: 6px;
-            height: 6px;
-            background: var(--text-tertiary);
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
             border-radius: 50%;
-            animation: typing 1.4s infinite ease-in-out;
+            animation: typing 1.4s infinite;
         }
 
-        .typing-dot:nth-child(1) { animation-delay: 0s; }
         .typing-dot:nth-child(2) { animation-delay: 0.2s; }
         .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes typing {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
+            0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+            30% { opacity: 1; transform: translateY(-10px); }
         }
 
         .typing-text {
@@ -571,6 +547,9 @@
             background: var(--bg-primary);
             border-top: 1px solid var(--border);
             flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 100;
         }
 
         .input-wrapper {
@@ -579,12 +558,10 @@
             gap: 0.5rem;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 24px; /* جعل المربع أكثر انسيابية */
-            padding: 0.6rem 1.2rem; /* زيادة الحشو الجانبي */
+            border-radius: var(--radius);
+            padding: 0.6rem 0.8rem;
             transition: all 0.2s;
             box-shadow: var(--shadow-sm);
-            max-width: 700px; /* جعل المربع نحيفاً */
-            margin: 0 auto; /* توسيط المربع */
         }
 
         .input-wrapper:focus-within {
@@ -595,7 +572,7 @@
         .input-row {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 0.5rem;
         }
 
         .options-toggle {
@@ -696,10 +673,10 @@
             font-size: 0.95rem;
             resize: none;
             outline: none;
-            max-height: 150px; /* زيادة الارتفاع الأقصى */
-            line-height: 1.5;
-            min-height: 24px;
-            padding: 0.5rem 0;
+            max-height: 80px;
+            line-height: 1.4;
+            min-height: 36px;
+            padding: 0.2rem 0;
         }
 
         .message-input::placeholder {
@@ -710,9 +687,9 @@
             background: var(--accent);
             color: white;
             border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%; /* جعل زر الإرسال دائرياً */
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -726,45 +703,50 @@
             box-shadow: var(--shadow-md);
         }
 
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+        .send-btn:active:not(:disabled) { transform: scale(0.95); }
+        .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .send-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
         }
 
         .input-tools {
             display: flex;
+            gap: 0.4rem;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            padding-top: 0.2rem;
+            align-items: center;
+            min-height: 0;
+        }
+
+        .input-tools.hidden {
+            display: none;
+        }
+
+        .input-tools:empty {
+            display: none;
         }
 
         .tool-btn {
             padding: 0.4rem 0.8rem;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            color: var(--text-secondary);
             cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            font-family: inherit;
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            transition: all 0.2s;
+            gap: 0.3rem;
+            white-space: nowrap;
         }
 
         .tool-btn:hover {
             background: var(--bg-primary);
             border-color: var(--border-strong);
-        }
-
-        .tool-btn svg {
-            width: 14px;
-            height: 14px;
+            color: var(--text-primary);
         }
 
         .tool-btn.active {
@@ -807,12 +789,6 @@
             color: var(--text-primary);
         }
 
-        .action-btn svg {
-            width: 16px;
-            height: 16px;
-            display: block;
-        }
-
         .action-btn.btn-copy { color: #3b82f6; }
         .action-btn.btn-copy:hover { border-color: #3b82f6; background: #eff6ff; }
         .action-btn.btn-copy.copied { color: #16a34a; border-color: #16a34a; background: #f0fdf4; }
@@ -828,25 +804,6 @@
         .action-btn.btn-regen { color: var(--text-tertiary); }
         .action-btn.btn-regen:hover { border-color: #8b5cf6; color: #8b5cf6; }
 
-        /* Mobile Sidebar Toggle */
-        .mobile-sidebar-toggle {
-            display: none;
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            z-index: 10002;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow-md);
-            color: var(--text-primary);
-        }
-
         /* ========== Responsive ========== */
         @media (max-width: 1024px) {
             :root { --sidebar-width: 250px; }
@@ -856,26 +813,18 @@
 
         @media (max-width: 768px) {
             :root { --sidebar-width: 0; }
-            .sidebar { 
-                display: flex; 
-                transform: translateX(100%); /* إخفاء السلايدبار افتراضياً في الجوال */
-                width: 280px;
-            }
-            .sidebar.active {
-                transform: translateX(0);
-            }
-            .mobile-sidebar-toggle {
-                display: flex; /* إظهار أيقونة السلايدبار في الجوال فقط */
-            }
-            .main-container { margin-right: 0; }
-            .chat-container { padding: 0.8rem 0.6rem 0; }
+            .sidebar { display: none; }
+            .main-container { margin-right: 0; height: 100vh; }
+            .chat-container { padding: 0.6rem 0.5rem 0; }
+            .messages-area { padding: 0.8rem 0; gap: 1rem; }
             .message-content { max-width: 85%; font-size: 0.9rem; padding: 0.8rem 1rem; }
-            .input-area { padding: 0.8rem 0.6rem; }
-            .input-wrapper { padding: 0.6rem 1rem; gap: 0.6rem; max-width: 100%; }
-            .input-row { gap: 0.5rem; }
-            .send-btn { width: 36px; height: 36px; }
-            .send-btn svg { width: 18px; height: 18px; }
-            .message-input { font-size: 0.9rem; max-height: 100px; }
+            .input-area { padding: 0.6rem 0.5rem; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; background: var(--bg-primary); border-top: 1px solid var(--border); z-index: 100; }
+            .main-container { padding-bottom: 120px; }
+            .input-wrapper { padding: 0.5rem; gap: 0.5rem; }
+            .input-row { gap: 0.4rem; }
+            .send-btn { width: 34px; height: 34px; }
+            .send-btn svg { width: 16px; height: 16px; }
+            .message-input { font-size: 0.9rem; max-height: 80px; }
             .input-tools { gap: 0.3rem; }
             .tool-btn { padding: 0.35rem 0.7rem; font-size: 0.75rem; }
             .welcome-section { padding: 1rem 0.8rem; }
@@ -893,16 +842,22 @@
         }
 
         @media (max-width: 480px) {
-            .welcome-logo { width: 60px; height: 60px; }
-            .welcome-title { font-size: 1.3rem; margin-bottom: 0.3rem; }
-            .welcome-subtitle { font-size: 0.85rem; margin-bottom: 1rem; }
-            .message-content { max-width: 92%; font-size: 0.88rem; padding: 0.7rem 0.9rem; }
-            .input-area { padding: 0.7rem 0.5rem; }
-            .input-wrapper { padding: 0.5rem 0.8rem; gap: 0.6rem; }
-            .input-row { gap: 0.4rem; }
-            .send-btn { width: 34px; height: 34px; }
-            .send-btn svg { width: 16px; height: 16px; }
-            .message-input { font-size: 0.85rem; max-height: 80px; }
+            :root { --sidebar-width: 0; }
+            .welcome-logo { width: 50px; height: 50px; }
+            .welcome-title { font-size: 1.2rem; margin-bottom: 0.2rem; }
+            .welcome-subtitle { font-size: 0.8rem; margin-bottom: 0.8rem; }
+            .welcome-section { padding: 1rem 0.8rem; gap: 1rem; }
+            .message-content { max-width: 92%; font-size: 0.85rem; padding: 0.6rem 0.8rem; }
+            .message-avatar { width: 32px; height: 32px; }
+            .input-area { padding: 0.5rem 0.4rem; position: fixed; bottom: 0; left: 0; right: 0; width: 100%; background: var(--bg-primary); border-top: 1px solid var(--border); z-index: 100; }
+            .main-container { padding-bottom: 110px; }
+            .input-wrapper { padding: 0.4rem; gap: 0.4rem; }
+            .input-row { gap: 0.3rem; }
+            .send-btn { width: 32px; height: 32px; }
+            .send-btn svg { width: 14px; height: 14px; }
+            .message-input { font-size: 0.8rem; max-height: 60px; min-height: 32px; }
+            .options-toggle { width: 32px; height: 32px; }
+            .options-toggle svg { width: 18px; height: 18px; }
             .tool-btn { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
             .message-avatar { width: 28px; height: 28px; }
             .feature-badge { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
@@ -919,15 +874,13 @@
             .welcome-subtitle { font-size: 0.8rem; margin-bottom: 0.8rem; }
             .welcome-features { gap: 0.3rem; }
             .feature-badge { padding: 0.3rem 0.6rem; font-size: 0.7rem; }
+            .input-area { padding: 0.4rem 0.3rem; }
+            .input-wrapper { padding: 0.3rem; gap: 0.3rem; }
+            .message-input { max-height: 50px; min-height: 28px; font-size: 0.75rem; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Mobile Sidebar Toggle -->
-    <button class="mobile-sidebar-toggle" id="mobileSidebarToggle">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-    </button>
 
     <!-- ========== Sidebar ========== -->
     <aside class="sidebar" id="sidebar">
@@ -961,11 +914,18 @@
         </div>
 
         <div class="spaces-section">
-            <div class="section-title">المساحات</div>
+            <div class="section-title">الفئات</div>
             <div class="space-item">
                 <div class="space-dot" style="background: #3b82f6;"></div>
-                <div class="space-name">عام</div>
-                <div class="space-count">0</div>
+                <div class="space-name">القرآن الكريم</div>
+            </div>
+            <div class="space-item">
+                <div class="space-dot" style="background: #ef4444;"></div>
+                <div class="space-name">الفقه والأحكام</div>
+            </div>
+            <div class="space-item">
+                <div class="space-dot" style="background: #8b5cf6;"></div>
+                <div class="space-name">السيرة النبوية</div>
             </div>
         </div>
 
@@ -976,28 +936,32 @@
             </button>
             <button class="footer-btn logout-btn" id="logoutBtn" style="display:none;">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                تسجيل الخروج
+                خروج
             </button>
         </div>
     </aside>
 
-    <!-- ========== Main Chat Area ========== -->
+    <!-- ========== Main Container ========== -->
     <div class="main-container">
         <div class="chat-container">
             <div class="messages-area" id="messagesArea">
                 <!-- Welcome Section -->
-                <div class="welcome-section" id="welcomeSection">
-                    <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام" class="welcome-logo">
-                    <h1 class="welcome-title">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1>
-                    <p class="welcome-subtitle">مرحباً بك في "اسأل الإسلام AI". أنا هنا لمساعدتك في فهم القضايا الإسلامية وتوفير إجابات موثوقة من القرآن والسنة.</p>
+                <div class="welcome-section">
+                    <div class="welcome-logo">
+                        <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">
+                    </div>
+                    <div>
+                        <div class="welcome-title">كيف يمكنني مساعدتك؟</div>
+                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة</div>
+                    </div>
                     <div class="welcome-features">
                         <div class="feature-badge">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                            إجابات موثوقة
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C6.5 6.253 2 10.998 2 17s4.5 10.747 10 10.747c5.5 0 10-4.998 10-10.747 0-6.002-4.5-10.747-10-10.747z"/></svg>
+                            متوفر 24/7
                         </div>
                         <div class="feature-badge">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                            مصادر شرعية
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            آمن وموثوق
                         </div>
                         <div class="feature-badge">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -1022,7 +986,7 @@
             <div class="input-area">
                 <div class="input-wrapper">
                     <div class="input-row" style="position: relative;">
-                        <button class="options-toggle" id="optionsToggle" title="خيارات">
+                        <button class="options-toggle" id="optionsToggle" title="خيارات متقدمة">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
                         </button>
                         
@@ -1068,8 +1032,6 @@
         const deepSearchOption = document.getElementById('deepSearchOption');
         const deepThinkOption = document.getElementById('deepThinkOption');
         const inputTools = document.getElementById('inputTools');
-        const sidebar = document.getElementById('sidebar');
-        const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
 
         const WORKER_URL = '/api/chat';
         let chatHistory = [];
@@ -1078,24 +1040,10 @@
         let allChats = [];
         let selectedOptions = new Set();
 
-        // التحكم في السلايدبار في الجوال
-        mobileSidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-        });
-
-        // إغلاق السلايدبار عند الضغط خارجه في الجوال
-        document.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                if (!sidebar.contains(e.target) && !mobileSidebarToggle.contains(e.target)) {
-                    sidebar.classList.remove('active');
-                }
-            }
-        });
-
         // تعديل حجم textarea تلقائياً
         messageInput.addEventListener('input', function() {
             this.style.height = 'auto';
-            this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+            this.style.height = Math.min(this.scrollHeight, 100) + 'px';
         });
 
         // إرسال بالضغط على Enter
@@ -1141,7 +1089,9 @@
         // تحديث عرض الأدوات المختارة
         function updateToolsDisplay() {
             inputTools.innerHTML = '';
-            if (selectedOptions.size > 0) {
+            if (selectedOptions.size === 0) {
+                inputTools.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">اختر خيارات متقدمة من القائمة</span>';
+            } else {
                 if (selectedOptions.has('deep-search')) {
                     const btn = document.createElement('button');
                     btn.className = 'tool-btn active';
@@ -1211,125 +1161,158 @@
 
             } catch (error) {
                 console.error('❌ خطأ:', error);
-                addMessage("⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.", 'assistant');
+                let errorMessage = "⚠️ حدث خطأ في الاتصال بالخادم. يرجى المحاولة مرة أخرى.";
+                if (error.message.includes('Failed to fetch')) {
+                    errorMessage = "🔌 لا يمكن الاتصال بالخادم. تأكد من أن الـ Worker منشور.";
+                }
+                addMessage(errorMessage, 'assistant', null, text);
             } finally {
+                typingIndicator.classList.remove('active');
                 isProcessing = false;
                 sendBtn.disabled = false;
-                typingIndicator.classList.remove('active');
-                messagesArea.scrollTop = messagesArea.scrollHeight;
+                messageInput.focus();
             }
         }
 
-        function addMessage(content, role, sources = null, originalText = null) {
-            const welcomeSection = document.getElementById('welcomeSection');
-            if (welcomeSection) welcomeSection.style.display = 'none';
+        function addMessage(content, role, sources = null, userQuestion = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
 
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${role}`;
-            
-            let avatar = role === 'assistant' ? '🕌' : '👤';
-            if (role === 'user' && window.currentUser?.photoURL) {
-                avatar = `<img src="${window.currentUser.photoURL}" style="width:100%;height:100%;border-radius:50%;">`;
-            }
+            const avatarContent = role === 'user' 
+                ? '👤' 
+                : `<img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">`;
 
-            let html = `
-                <div class="message-avatar">${avatar}</div>
+            const actionsHTML = role === 'assistant' ? `
+                <div class="message-actions">
+                    <button class="action-btn btn-copy" title="نسخ" onclick="copyMsg(this)">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    </button>
+                    <button class="action-btn btn-like" title="إعجاب" onclick="likeMsg(this)">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h-2m0 0H8m4 0v4m0-4v-2m0 0h2m-2 0H8m4 0v4m0-4v-2"/></svg>
+                    </button>
+                    <button class="action-btn btn-dislike" title="عدم إعجاب" onclick="dislikeMsg(this)">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H8m0 0H6m2 0v4m0-4v-2m0 0h2m-2 0H6m4 0v4m0-4v-2"/></svg>
+                    </button>
+                    <button class="action-btn btn-regen" title="إعادة التوليد" onclick="regenMsg(this)">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    </button>
+                </div>
+            ` : '';
+
+            let messageHTML = `
+                <div class="message-avatar">${avatarContent}</div>
                 <div class="message-content">
-                    <div class="text">${formatContent(content)}</div>
-            `;
-
-            if (sources && sources.length > 0) {
-                html += `<div class="message-sources">`;
-                sources.forEach(source => {
-                    html += `<a href="${source.url}" target="_blank" class="source-tag">${source.title}</a>`;
-                });
-                html += `</div>`;
-            }
-
-            html += `
-                    <div class="message-actions">
-                        <button class="action-btn btn-copy" onclick="copyText(this, \`${content.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)" title="نسخ">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
-                        </button>
-                        ${role === 'assistant' ? `
-                            <button class="action-btn btn-like" onclick="toggleLike(this)" title="أعجبني">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.704a2 2 0 011.94 2.515l-1.203 4.812A2 2 0 0117.501 19H9.5a2 2 0 01-2-2v-7a2 2 0 01.586-1.414l5.414-5.414A2 2 0 0116.914 6V10z"/></svg>
-                            </button>
-                            <button class="action-btn btn-dislike" onclick="toggleDislike(this)" title="لم يعجبني">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14H5.296a2 2 0 01-1.94-2.515l1.203-4.812A2 2 0 016.499 5h8a2 2 0 012 2v7a2 2 0 01-.586 1.414l-5.414 5.414A2 2 0 017.086 18V14z"/></svg>
-                            </button>
-                            <button class="action-btn btn-regen" onclick="regenerateMessage(this)" title="إعادة توليد">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            </button>
-                        ` : ''}
-                    </div>
+                    ${formatContent(content)}
+                    ${sources ? formatSources(sources) : ''}
+                    ${actionsHTML}
                 </div>
             `;
-
-            msgDiv.innerHTML = html;
-            messagesArea.appendChild(msgDiv);
+            messageDiv.innerHTML = messageHTML;
+            if (userQuestion) messageDiv.dataset.uq = userQuestion;
+            messagesArea.appendChild(messageDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
         }
 
-        function formatContent(text) {
-            return text
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>');
-        }
-
-        window.copyText = (btn, text) => {
+        function copyMsg(btn) {
+            const lines = btn.closest('.message-content').cloneNode(true);
+            lines.querySelector('.message-actions')?.remove();
+            const text = lines.innerText.trim();
             navigator.clipboard.writeText(text).then(() => {
                 btn.classList.add('copied');
-                setTimeout(() => btn.classList.remove('copied'), 2000);
+                setTimeout(() => { btn.classList.remove('copied'); }, 2000);
             });
-        };
+        }
 
-        window.toggleLike = (btn) => {
+        function likeMsg(btn) {
             btn.classList.toggle('active-like');
-            const dislikeBtn = btn.nextElementSibling;
-            if (dislikeBtn) dislikeBtn.classList.remove('active-dislike');
-        };
+            btn.closest('.message-actions').querySelector('.btn-dislike').classList.remove('active-dislike');
+        }
 
-        window.toggleDislike = (btn) => {
+        function dislikeMsg(btn) {
             btn.classList.toggle('active-dislike');
-            const likeBtn = btn.previousElementSibling;
-            if (likeBtn) likeBtn.classList.remove('active-like');
-        };
+            btn.closest('.message-actions').querySelector('.btn-like').classList.remove('active-like');
+        }
 
-        window.regenerateMessage = (btn) => {
-            const lastUserMsg = [...chatHistory].reverse().find(m => m.role === 'user');
-            if (lastUserMsg) {
-                messageInput.value = lastUserMsg.content;
-                sendMessage();
+        async function regenMsg(btn) {
+            const msgDiv = btn.closest('.message.assistant');
+            const question = msgDiv?.dataset?.uq;
+            if (!question || isProcessing) return;
+            msgDiv.remove();
+            isProcessing = true;
+            sendBtn.disabled = true;
+            typingIndicator.classList.add('active');
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: question, 
+                        chatHistory: chatHistory.slice(-4),
+                        options: Array.from(selectedOptions)
+                    })
+                });
+                if (!response.ok) throw new Error();
+                const data = await response.json();
+                addMessage(data.content || 'عذراً، لم أتمكن من العثور على إجابة.', 'assistant', data.sources, question);
+                if (data.content) chatHistory.push({ role: 'assistant', content: data.content });
+                saveChat();
+            } catch {
+                addMessage('⚠️ حدث خطأ في الاتصال.', 'assistant', null, question);
+            } finally {
+                typingIndicator.classList.remove('active');
+                isProcessing = false;
+                sendBtn.disabled = false;
             }
-        };
+        }
+
+        function formatContent(text) {
+            if (!text) return '';
+            text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            text = text.replace(/﴿(.*?)﴾/gsu, '<span style="font-family: \'Amiri Quran\'; font-size: 1.1em; color: #000;">﴿$1﴾</span>');
+            text = text.replace(/«(.*?)»/gs, '<span style="color: #666; font-style: italic;">«$1»</span>');
+            text = text.replace(/(النبي محمد|رسول الله|النبي ﷺ)/g, '$1 ﷺ');
+            text = text.replace(/\n/g, '<br>');
+            return text;
+        }
+
+        function formatSources(sources) {
+            if (!sources) return '';
+            let sourcesText = [];
+            if (sources.quran > 0) sourcesText.push(`📖 ${sources.quran} آية`);
+            if (sources.islamweb > 0) sourcesText.push(`📚 ${sources.islamweb} فتوى`);
+            if (sourcesText.length === 0) return '';
+            return `
+                <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-secondary);">
+                    ${sourcesText.join(' • ')}
+                </div>
+            `;
+        }
 
         function startNewChat() {
-            currentChatId = Date.now();
+            currentChatId = Date.now() + Math.random();
             chatHistory = [];
+            selectedOptions.clear();
+            updateToolsDisplay();
+            optionsMenu.classList.remove('active');
+            deepSearchOption.classList.remove('active');
+            deepThinkOption.classList.remove('active');
             messagesArea.innerHTML = `
-                <div class="welcome-section" id="welcomeSection">
-                    <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام" class="welcome-logo">
-                    <h1 class="welcome-title">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</h1>
-                    <p class="welcome-subtitle">مرحباً بك في "اسأل الإسلام AI". أنا هنا لمساعدتك في فهم القضايا الإسلامية وتوفير إجابات موثوقة من القرآن والسنة.</p>
-                    <div class="welcome-features">
-                        <div class="feature-badge">إجابات موثوقة</div>
-                        <div class="feature-badge">مصادر شرعية</div>
-                        <div class="feature-badge">سريع وفعال</div>
+                <div class="welcome-section">
+                    <div class="welcome-logo">
+                        <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">
+                    </div>
+                    <div>
+                        <div class="welcome-title">كيف يمكنني مساعدتك؟</div>
+                        <div class="welcome-subtitle">اسأل عن أي موضوع إسلامي من القرآن والسنة</div>
                     </div>
                 </div>
             `;
-            selectedOptions.clear();
-            updateToolsDisplay();
-            renderConversations();
-            if (window.innerWidth <= 768) sidebar.classList.remove('active');
+            messageInput.focus();
         }
 
         function saveChat() {
-            if (!currentChatId || chatHistory.length === 0) return;
-            const userId = window.currentUser?.uid || 'guest';
-            const chatKey = `chat_${userId}_${currentChatId}`;
+            const chatKey = `chat_${window.currentUser?.uid || 'guest'}_${currentChatId}`;
             const firstMessage = chatHistory.find(m => m.role === 'user')?.content || 'محادثة جديدة';
             const chatData = {
                 id: currentChatId,
@@ -1347,7 +1330,7 @@
             allChats = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith(prefix)) {
+                if (key.startsWith(prefix)) {
                     const data = JSON.parse(localStorage.getItem(key));
                     allChats.push(data);
                 }
@@ -1383,7 +1366,6 @@
                     addMessage(msg.content, msg.role);
                 });
                 renderConversations();
-                if (window.innerWidth <= 768) sidebar.classList.remove('active');
             }
         }
 
