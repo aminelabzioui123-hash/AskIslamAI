@@ -334,6 +334,56 @@
             border-color: #ef4444;
         }
 
+        /* ========== Header with Hamburger Menu ========== */
+        .header {
+            display: none;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .hamburger-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .hamburger-btn:hover {
+            background: var(--bg-secondary);
+        }
+
+        .hamburger-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
         /* ========== Main Chat Area ========== */
         .main-container {
             flex: 1;
@@ -813,7 +863,9 @@
 
         @media (max-width: 768px) {
             :root { --sidebar-width: 0; }
-            .sidebar { display: none; }
+            .header { display: flex; }
+            .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; transition: right 0.3s ease; z-index: 10001; }
+            .sidebar.active { right: 0; }
             .main-container { margin-right: 0; height: 100vh; }
             .chat-container { padding: 0.6rem 0.5rem 0; }
             .messages-area { padding: 0.8rem 0; gap: 1rem; }
@@ -843,6 +895,9 @@
 
         @media (max-width: 480px) {
             :root { --sidebar-width: 0; }
+            .header { display: flex; }
+            .sidebar { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; transition: right 0.3s ease; z-index: 10001; }
+            .sidebar.active { right: 0; }
             .welcome-logo { width: 50px; height: 50px; }
             .welcome-title { font-size: 1.2rem; margin-bottom: 0.2rem; }
             .welcome-subtitle { font-size: 0.8rem; margin-bottom: 0.8rem; }
@@ -881,6 +936,16 @@
     </style>
 </head>
 <body>
+
+    <!-- ========== Sidebar Overlay ========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ========== Header with Hamburger Menu ========== -->
+    <header class="header" id="header">
+        <button class="hamburger-btn" id="hamburgerBtn">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+    </header>
 
     <!-- ========== Sidebar ========== -->
     <aside class="sidebar" id="sidebar">
@@ -1032,6 +1097,20 @@
         const deepSearchOption = document.getElementById('deepSearchOption');
         const deepThinkOption = document.getElementById('deepThinkOption');
         const inputTools = document.getElementById('inputTools');
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            if (!sidebar) return;
+            sidebar.classList.toggle('active');
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
+            }
+        }
+
+        if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
 
         const WORKER_URL = '/api/chat';
         let chatHistory = [];
