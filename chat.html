@@ -643,11 +643,10 @@
             align-items: center;
             gap: 0.9rem;
             padding: 0.85rem 1.3rem;
-            background: #1a1a1a;
-            border: 1.5px solid #1a1a1a;
+            background: transparent;
+            border: none;
             border-radius: var(--radius);
             width: fit-content;
-            box-shadow: 3px 4px 0px rgba(0,0,0,0.25);
             flex-shrink: 0;
         }
 
@@ -662,7 +661,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: #ffffff;
+            background: #1a1a1a;
             border-radius: 50%;
             animation: typingBounce 1.2s ease-in-out infinite;
         }
@@ -679,7 +678,7 @@
         .typing-text {
             font-size: 0.88rem;
             font-weight: 600;
-            color: #ffffff;
+            color: #1a1a1a;
             letter-spacing: 0.01em;
         }
 
@@ -1219,7 +1218,7 @@
         function updateToolsDisplay() {
             inputTools.innerHTML = '';
             if (selectedOptions.size === 0) {
-                inputTools.innerHTML = '<span style="font-size: 0.8rem; color: var(--text-secondary);">اختر خيارات متقدمة من القائمة</span>';
+                // nothing
             } else {
                 if (selectedOptions.has('deep-search')) {
                     const btn = document.createElement('button');
