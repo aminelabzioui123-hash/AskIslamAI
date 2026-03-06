@@ -1,1705 +1,1297 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اسأل الإسلام - شبكة التواصل الإسلامية</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #ffffff;
-            --bg-secondary: #f7f9fa;
-            --bg-tertiary: #eff3f4;
-            --text-primary: #0f1419;
-            --text-secondary: #536471;
-            --text-tertiary: #8899a6;
-            --border-color: #eff3f4;
-            --accent: #1d9bf0;
-            --accent-hover: #1a8cd8;
-            --like-color: #f91880;
-            --retweet-color: #17bf63;
-        }
-
-        html.dark-mode {
-            --bg-primary: #000000;
-            --bg-secondary: #16181c;
-            --bg-tertiary: #202327;
-            --text-primary: #e7e9ea;
-            --text-secondary: #71767b;
-            --text-tertiary: #536471;
-            --border-color: #2f3336;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
-
-        body {
-            font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.5;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .app-container {
-            display: grid;
-            grid-template-columns: 280px 1fr 350px;
-            height: 100vh;
-            gap: 0;
-        }
-
-        /* ========== Sidebar ========== */
-        .sidebar {
-            background: var(--bg-primary);
-            border-right: 1px solid var(--border-color);
-            padding: 1rem;
-            overflow-y: auto;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sidebar::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 2rem;
-            text-decoration: none;
-            color: var(--text-primary);
-            font-weight: 700;
-            font-size: 1.2rem;
-            cursor: pointer;
-        }
-
-        .logo img {
-            width: 32px;
-            height: 32px;
-            filter: brightness(0) saturate(100%);
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-            margin-bottom: 1rem;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.8rem 1rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-weight: 500;
-            text-decoration: none;
-            border: none;
-            background: transparent;
-            font-family: inherit;
-        }
-
-        .nav-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .nav-item.active {
-            color: var(--accent);
-        }
-
-        .nav-item svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .compose-btn {
-            width: 100%;
-            padding: 1rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-            margin-bottom: 1rem;
-        }
-
-        .compose-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem 1rem;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: var(--text-primary);
-            margin-top: auto;
-            border: none;
-            background: transparent;
-            font-family: inherit;
-        }
-
-        .user-profile:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            background-color: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            flex-shrink: 0;
-            font-size: 0.9rem;
-        }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-        }
-
-        .user-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .user-handle {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* ========== Feed ========== */
-        .feed {
-            background: var(--bg-primary);
-            border-right: 1px solid var(--border-color);
-            border-left: 1px solid var(--border-color);
-            height: 100vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .feed::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .feed::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        .feed-header {
-            position: sticky;
-            top: 0;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
-            z-index: 100;
-        }
-
-        .feed-header.dark-mode {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .feed-header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .feed-content {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        /* ========== Tweet Composer ========== */
-        .tweet-composer {
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
-            display: flex;
-            gap: 1rem;
-        }
-
-        .composer-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            background-color: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            flex-shrink: 0;
-            font-size: 1rem;
-        }
-
-        .composer-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .composer-input {
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            font-family: inherit;
-            resize: none;
-            outline: none;
-            min-height: 60px;
-        }
-
-        .composer-input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .composer-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top: 1px solid var(--border-color);
-            padding-top: 1rem;
-        }
-
-        .composer-icons {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .composer-icon-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: transparent;
-            border: none;
-            color: var(--accent);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            font-size: 1.1rem;
-        }
-
-        .composer-icon-btn:hover {
-            background: rgba(29, 155, 240, 0.1);
-        }
-
-        .composer-post-btn {
-            padding: 0.8rem 1.5rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 30px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .composer-post-btn:hover {
-            background: var(--accent-hover);
-        }
-
-        .composer-post-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ========== Tweet Card ========== */
-        .tweet {
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .tweet:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .tweet-container {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .tweet-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            background-color: #667eea;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            flex-shrink: 0;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
-        }
-
-        .tweet-avatar:hover {
-            opacity: 0.8;
-        }
-
-        .tweet-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .tweet-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .tweet-author {
-            font-weight: 700;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-
-        .tweet-author:hover {
-            text-decoration: underline;
-        }
-
-        .verified-badge {
-            width: 16px;
-            height: 16px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 700;
-        }
-
-        .tweet-handle {
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-
-        .tweet-handle:hover {
-            text-decoration: underline;
-        }
-
-        .tweet-time {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .tweet-text {
-            color: var(--text-primary);
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 1rem;
-            word-wrap: break-word;
-        }
-
-        .tweet-image {
-            width: 100%;
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            max-height: 300px;
-            object-fit: cover;
-            cursor: pointer;
-        }
-
-        .tweet-stats {
-            display: flex;
-            gap: 2rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .tweet-actions {
-            display: flex;
-            justify-content: space-around;
-            color: var(--text-secondary);
-        }
-
-        .tweet-action {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.85rem;
-        }
-
-        .tweet-action:hover {
-            background: rgba(29, 155, 240, 0.1);
-            color: var(--accent);
-        }
-
-        .tweet-action.like:hover {
-            background: rgba(249, 24, 128, 0.1);
-            color: var(--like-color);
-        }
-
-        .tweet-action.active {
-            font-weight: 700;
-        }
-
-        .tweet-action.like.active {
-            color: var(--like-color);
-        }
-
-        /* ========== Profile Page ========== */
-        .profile-header {
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .profile-cover {
-            width: 100%;
-            height: 200px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-size: cover;
-            background-position: center;
-            position: relative;
-        }
-
-        .profile-cover-upload {
-            position: absolute;
-            bottom: 1rem;
-            right: 1rem;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .profile-cover-upload:hover {
-            background: rgba(0, 0, 0, 0.7);
-        }
-
-        .profile-info {
-            padding: 1rem;
-            position: relative;
-        }
-
-        .profile-avatar-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .profile-avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            background-color: #667eea;
-            border: 4px solid var(--bg-primary);
-            margin-top: -60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 2rem;
-            position: relative;
-        }
-
-        .profile-avatar-upload {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 36px;
-            height: 36px;
-            background: var(--accent);
-            border-radius: 50%;
-            border: 4px solid var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            color: white;
-            font-size: 1.2rem;
-        }
-
-        .edit-profile-btn {
-            padding: 0.5rem 1.5rem;
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            background: transparent;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 700;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .edit-profile-btn:hover {
-            background: rgba(29, 155, 240, 0.1);
-        }
-
-        .profile-details {
-            margin-bottom: 1rem;
-        }
-
-        .profile-name {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .profile-handle {
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .profile-bio {
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .profile-stats {
-            display: flex;
-            gap: 2rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .profile-stat {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .profile-stat-value {
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        /* ========== Modal ========== */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: transparent;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-primary);
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .form-input, .form-textarea {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-            font-size: 1rem;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: var(--bg-primary);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-submit {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .form-submit:hover {
-            background: var(--accent-hover);
-        }
-
-        /* ========== Right Sidebar ========== */
-        .trends-sidebar {
-            background: var(--bg-primary);
-            padding: 1rem;
-            height: 100vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 30px;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--border-color);
-            transition: all 0.2s;
-        }
-
-        .search-box:focus-within {
-            background: var(--bg-primary);
-            border-color: var(--accent);
-        }
-
-        .search-box input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.95rem;
-            outline: none;
-        }
-
-        .search-box input::placeholder {
-            color: var(--text-secondary);
-        }
-
-        .trends-container {
-            background: var(--bg-secondary);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .trend-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .trend-item:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .trend-category {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .trend-title {
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0.2rem 0;
-        }
-
-        .trend-count {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .theme-toggle {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.2s;
-            margin-top: auto;
-        }
-
-        .theme-toggle:hover {
-            background: var(--bg-tertiary);
-        }
-
-        /* ========== Auth Page ========== */
-        .auth-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            background: var(--bg-primary);
-        }
-
-        .auth-form {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 2rem;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .auth-title {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-            text-align: center;
-        }
-
-        .auth-tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .auth-tab {
-            flex: 1;
-            padding: 1rem;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 600;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .auth-tab.active {
-            color: var(--accent);
-            border-bottom-color: var(--accent);
-        }
-
-        .auth-form-group {
-            margin-bottom: 1rem;
-        }
-
-        .auth-input {
-            width: 100%;
-            padding: 0.8rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            color: var(--text-primary);
-            background: var(--bg-secondary);
-            font-size: 1rem;
-        }
-
-        .auth-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .auth-submit {
-            width: 100%;
-            padding: 0.8rem;
-            background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .auth-submit:hover {
-            background: var(--accent-hover);
-        }
-
-        .auth-error {
-            color: #f91880;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        /* ========== Responsive ========== */
-        @media (max-width: 1024px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar, .trends-sidebar {
-                display: none;
-            }
-
-            .feed {
-                border: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .feed-header {
-                padding: 0.8rem;
-            }
-
-            .tweet {
-                padding: 0.8rem;
-            }
-
-            .composer-input {
-                font-size: 1.1rem;
-            }
-
-            .profile-avatar-large {
-                width: 80px;
-                height: 80px;
-                font-size: 1.5rem;
-                margin-top: -40px;
-            }
-
-            .profile-cover {
-                height: 150px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .feed-header {
-                padding: 0.6rem;
-            }
-
-            .tweet {
-                padding: 0.6rem;
-            }
-
-            .modal-content {
-                padding: 1.5rem;
-            }
-
-            .auth-form {
-                padding: 1.5rem;
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tweet {
-            animation: slideIn 0.3s ease-out;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اسأل الإسلام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #ffffff;
+  --bg2: #f7f9fa;
+  --bg3: #eff3f4;
+  --txt: #0f1419;
+  --txt2: #536471;
+  --txt3: #8899a6;
+  --border: #eff3f4;
+  --accent: #1d9bf0;
+  --accent2: #1a8cd8;
+  --like: #f91880;
+  --rt: #00ba7c;
+  --shadow: rgba(0,0,0,0.08);
+}
+html.dark {
+  --bg: #000;
+  --bg2: #16181c;
+  --bg3: #202327;
+  --txt: #e7e9ea;
+  --txt2: #71767b;
+  --txt3: #536471;
+  --border: #2f3336;
+  --shadow: rgba(255,255,255,0.04);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'IBM Plex Sans Arabic',sans-serif;background:var(--bg);color:var(--txt);line-height:1.5;}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:260px 1fr 340px;height:100vh;}
+@media(max-width:1100px){.app{grid-template-columns:60px 1fr;}.rside{display:none;}.nav-label{display:none;}.nav-item{justify-content:center;}.compose-btn span{display:none;}.compose-btn{width:44px;height:44px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;}}
+@media(max-width:640px){.app{grid-template-columns:1fr;}.sidebar{display:none;}.mobile-nav{display:flex;}}
+
+/* SIDEBAR */
+.sidebar{border-left:1px solid var(--border);padding:0.5rem 0.75rem;display:flex;flex-direction:column;gap:0.25rem;overflow-y:auto;position:sticky;top:0;height:100vh;}
+.logo{display:flex;align-items:center;gap:0.6rem;padding:0.75rem 0.75rem 1.25rem;font-weight:700;font-size:1.1rem;cursor:pointer;color:var(--txt);text-decoration:none;}
+.logo svg{flex-shrink:0;}
+.nav-item{display:flex;align-items:center;gap:0.9rem;padding:0.7rem 0.75rem;border-radius:30px;cursor:pointer;font-size:1rem;font-weight:500;border:none;background:transparent;color:var(--txt);font-family:inherit;transition:background 0.15s;}
+.nav-item:hover{background:var(--bg3);}
+.nav-item.active{color:var(--accent);}
+.nav-item svg{width:22px;height:22px;flex-shrink:0;}
+.compose-btn{margin:0.5rem 0;padding:0.85rem 1.5rem;background:var(--accent);color:#fff;border:none;border-radius:30px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;width:100%;}
+.compose-btn:hover{background:var(--accent2);}
+.user-card{margin-top:auto;display:flex;align-items:center;gap:0.75rem;padding:0.75rem;border-radius:12px;cursor:pointer;border:none;background:transparent;color:var(--txt);font-family:inherit;transition:background 0.15s;width:100%;}
+.user-card:hover{background:var(--bg3);}
+
+/* AVATAR */
+.ava{border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;font-size:0.85rem;overflow:hidden;}
+.ava img{width:100%;height:100%;object-fit:cover;}
+.ava-sm{width:36px;height:36px;}
+.ava-md{width:44px;height:44px;font-size:1rem;}
+.ava-lg{width:56px;height:56px;font-size:1.2rem;}
+.ava-xl{width:80px;height:80px;font-size:1.8rem;border:3px solid var(--bg);}
+
+/* FEED */
+.feed{border-right:1px solid var(--border);border-left:1px solid var(--border);height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.feed::-webkit-scrollbar{width:6px;}
+.feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.feed-top{position:sticky;top:0;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0.85rem 1rem;z-index:50;display:flex;align-items:center;gap:0.75rem;}
+html.dark .feed-top{background:rgba(0,0,0,0.85);}
+.feed-top h2{font-size:1.1rem;font-weight:700;flex:1;}
+.back-btn{background:none;border:none;cursor:pointer;color:var(--txt);padding:0.35rem;border-radius:50%;display:flex;transition:background 0.15s;}
+.back-btn:hover{background:var(--bg3);}
+
+/* PAGE */
+.page{display:none;}
+.page.active{display:block;}
+
+/* COMPOSER */
+.composer{border-bottom:1px solid var(--border);padding:0.75rem 1rem;display:flex;gap:0.75rem;}
+.composer-right{flex:1;display:flex;flex-direction:column;}
+.composer textarea{background:transparent;border:none;color:var(--txt);font-size:1.1rem;font-family:inherit;resize:none;outline:none;min-height:60px;width:100%;padding-top:0.5rem;}
+.composer textarea::placeholder{color:var(--txt2);}
+.composer-footer{display:flex;align-items:center;justify-content:space-between;padding-top:0.75rem;border-top:1px solid var(--border);margin-top:0.5rem;}
+.composer-tools{display:flex;gap:0.25rem;}
+.icon-btn{width:34px;height:34px;border-radius:50%;background:transparent;border:none;color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.icon-btn:hover{background:rgba(29,155,240,0.1);}
+.icon-btn svg{width:18px;height:18px;}
+.post-btn{padding:0.5rem 1.25rem;background:var(--accent);color:#fff;border:none;border-radius:20px;font-weight:700;cursor:pointer;font-size:0.9rem;font-family:inherit;transition:background 0.15s;}
+.post-btn:hover{background:var(--accent2);}
+.post-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.char-count{font-size:0.8rem;color:var(--txt2);}
+.char-count.warn{color:#ffa500;}
+.char-count.over{color:var(--like);}
+
+/* TWEET */
+.tweet{border-bottom:1px solid var(--border);padding:0.85rem 1rem;cursor:pointer;transition:background 0.15s;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.tweet:hover{background:var(--bg2);}
+.tweet-inner{display:flex;gap:0.75rem;}
+.tweet-body{flex:1;min-width:0;}
+.tweet-head{display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.3rem;}
+.tweet-name{font-weight:700;font-size:0.95rem;cursor:pointer;}
+.tweet-name:hover{text-decoration:underline;}
+.tweet-handle{color:var(--txt2);font-size:0.88rem;}
+.tweet-time{color:var(--txt2);font-size:0.88rem;}
+.tweet-text{font-size:0.97rem;line-height:1.55;word-break:break-word;margin-bottom:0.75rem;white-space:pre-wrap;}
+.tweet-text a{color:var(--accent);text-decoration:none;}
+.tweet-text a:hover{text-decoration:underline;}
+.tweet-img{width:100%;border-radius:12px;max-height:280px;object-fit:cover;margin-bottom:0.75rem;display:block;}
+.tweet-actions{display:flex;gap:0;margin-top:0.25rem;}
+.tact{display:flex;align-items:center;gap:0.35rem;padding:0.4rem 0.6rem;border-radius:20px;cursor:pointer;transition:all 0.15s;color:var(--txt2);font-size:0.82rem;border:none;background:transparent;font-family:inherit;flex:1;justify-content:center;}
+.tact svg{width:17px;height:17px;}
+.tact:hover{background:rgba(29,155,240,0.1);color:var(--accent);}
+.tact.like:hover{background:rgba(249,24,128,0.1);color:var(--like);}
+.tact.like.on{color:var(--like);}
+.tact.like.on svg{fill:var(--like);stroke:var(--like);}
+.tact.rt:hover{background:rgba(0,186,124,0.1);color:var(--rt);}
+.tact.rt.on{color:var(--rt);}
+.tact.bm.on{color:var(--accent);}
+.tact.bm.on svg{fill:var(--accent);}
+.tact.del:hover{background:rgba(249,24,128,0.1);color:var(--like);}
+.tweet-replies{padding-right:1rem;border-right:2px solid var(--border);}
+
+/* RIGHT SIDEBAR */
+.rside{padding:0.75rem 1rem;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:1rem;}
+.rside::-webkit-scrollbar{width:6px;}
+.rside::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.search-wrap{background:var(--bg3);border-radius:25px;display:flex;align-items:center;gap:0.5rem;padding:0.6rem 1rem;border:1px solid transparent;transition:all 0.15s;}
+.search-wrap:focus-within{background:var(--bg);border-color:var(--accent);}
+.search-wrap input{background:transparent;border:none;color:var(--txt);font-family:inherit;font-size:0.9rem;outline:none;width:100%;}
+.search-wrap input::placeholder{color:var(--txt2);}
+.card{background:var(--bg2);border-radius:16px;overflow:hidden;}
+.card-title{font-weight:700;font-size:1rem;padding:0.75rem 1rem;border-bottom:1px solid var(--border);}
+.trend{padding:0.7rem 1rem;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;}
+.trend:last-child{border-bottom:none;}
+.trend:hover{background:var(--bg3);}
+.trend-cat{font-size:0.75rem;color:var(--txt2);}
+.trend-tag{font-weight:700;font-size:0.95rem;}
+.trend-num{font-size:0.78rem;color:var(--txt2);margin-top:0.1rem;}
+.suggest{display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;border-bottom:1px solid var(--border);transition:background 0.15s;}
+.suggest:last-child{border-bottom:none;}
+.suggest:hover{background:var(--bg3);}
+.suggest-info{flex:1;min-width:0;}
+.suggest-name{font-weight:700;font-size:0.88rem;}
+.suggest-handle{color:var(--txt2);font-size:0.8rem;}
+.follow-btn{padding:0.35rem 0.9rem;border:1px solid var(--txt);border-radius:20px;background:transparent;color:var(--txt);font-weight:700;font-size:0.8rem;cursor:pointer;font-family:inherit;transition:all 0.15s;flex-shrink:0;}
+.follow-btn:hover{background:var(--txt);color:var(--bg);}
+.follow-btn.following{background:transparent;border-color:var(--txt2);color:var(--txt2);}
+.theme-btn{padding:0.6rem 1rem;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--txt);font-family:inherit;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;transition:all 0.15s;}
+.theme-btn:hover{background:var(--bg3);}
+.logout-btn{padding:0.6rem 1rem;border:1px solid var(--like);border-radius:20px;background:transparent;color:var(--like);font-family:inherit;font-size:0.85rem;cursor:pointer;font-weight:600;transition:all 0.15s;}
+.logout-btn:hover{background:var(--like);color:#fff;}
+
+/* PROFILE */
+.cover{height:160px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);position:relative;overflow:hidden;}
+.cover-btn{position:absolute;bottom:0.6rem;left:0.6rem;padding:0.35rem 0.8rem;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:15px;cursor:pointer;font-family:inherit;font-size:0.8rem;}
+.profile-meta{padding:0.75rem 1rem 0;}
+.ava-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;}
+.ava-xl{margin-top:-44px;position:relative;}
+.ava-cam{position:absolute;bottom:0;left:0;width:28px;height:28px;background:var(--accent);border-radius:50%;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.ava-cam svg{width:13px;height:13px;color:#fff;}
+.edit-btn{padding:0.4rem 1rem;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:20px;cursor:pointer;font-weight:700;font-size:0.85rem;font-family:inherit;transition:all 0.15s;}
+.edit-btn:hover{background:rgba(29,155,240,0.1);}
+.pname{font-weight:700;font-size:1.15rem;}
+.phandle{color:var(--txt2);font-size:0.9rem;margin-bottom:0.4rem;}
+.pbio{font-size:0.9rem;color:var(--txt);line-height:1.5;margin-bottom:0.6rem;}
+.pstats{display:flex;gap:1.5rem;}
+.pstat span{font-weight:700;}
+.pstat small{color:var(--txt2);font-size:0.85rem;}
+.ptabs{display:flex;border-bottom:1px solid var(--border);margin-top:0.75rem;}
+.ptab{flex:1;padding:0.75rem;text-align:center;cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--txt2);border-bottom:2px solid transparent;transition:all 0.15s;}
+.ptab.active{color:var(--accent);border-color:var(--accent);}
+.ptab:hover{background:var(--bg3);}
+.empty-state{padding:2.5rem 1rem;text-align:center;color:var(--txt2);}
+.empty-state svg{width:42px;height:42px;margin-bottom:0.75rem;opacity:0.4;}
+.empty-state p{font-size:0.9rem;}
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--bg);border-radius:16px;padding:1.5rem;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;}
+.modal-head h3{font-size:1.1rem;font-weight:700;}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--txt);padding:0.3rem;border-radius:50%;display:flex;transition:background 0.15s;}
+.close-btn:hover{background:var(--bg3);}
+.close-btn svg{width:20px;height:20px;}
+.form-g{margin-bottom:1rem;}
+.form-g label{display:block;font-weight:600;font-size:0.85rem;margin-bottom:0.35rem;color:var(--txt2);}
+.form-g input,.form-g textarea{width:100%;padding:0.65rem 0.85rem;border:1px solid var(--border);border-radius:8px;font-family:inherit;color:var(--txt);background:var(--bg2);font-size:0.95rem;transition:border 0.15s;}
+.form-g input:focus,.form-g textarea:focus{outline:none;border-color:var(--accent);background:var(--bg);}
+.form-g textarea{resize:vertical;min-height:80px;}
+.form-submit{width:100%;padding:0.7rem;background:var(--accent);color:#fff;border:none;border-radius:20px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.95rem;transition:background 0.15s;}
+.form-submit:hover{background:var(--accent2);}
+.err{color:var(--like);font-size:0.82rem;margin-top:0.3rem;}
+
+/* AUTH */
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.auth-box{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:2.5rem 2rem;width:100%;max-width:400px;}
+.auth-logo{font-size:1.8rem;font-weight:700;text-align:center;margin-bottom:1.5rem;color:var(--txt);}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:1.25rem;}
+.auth-tab{flex:1;padding:0.65rem;text-align:center;cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--txt2);border-bottom:2px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+.auth-tab.active{color:var(--accent);border-color:var(--accent);}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;}
+.toast{background:#333;color:#fff;padding:0.65rem 1.25rem;border-radius:20px;font-size:0.88rem;font-weight:500;animation:toastIn 0.25s ease;white-space:nowrap;}
+html.dark .toast{background:#e7e9ea;color:#000;}
+@keyframes toastIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.toast.out{animation:toastOut 0.3s ease forwards;}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px);}}
+
+/* MOBILE NAV */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);z-index:100;padding:0.5rem;}
+.mobile-nav-inner{display:flex;justify-content:space-around;}
+.mnav-btn{background:none;border:none;cursor:pointer;color:var(--txt2);padding:0.5rem;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:0.15rem;font-size:0.65rem;font-family:inherit;transition:color 0.15s;}
+.mnav-btn svg{width:22px;height:22px;}
+.mnav-btn.active{color:var(--accent);}
+
+/* REPLY THREAD */
+.reply-line{width:2px;background:var(--border);margin:0.3rem auto;flex:1;min-height:20px;}
+.tweet-thread{display:flex;flex-direction:column;align-items:center;width:44px;}
+
+/* BADGE */
+.badge{background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;font-size:0.65rem;display:inline-flex;align-items:center;justify-content:center;font-weight:700;margin-right:auto;}
+
+input[type=file]{display:none;}
+</style>
 </head>
 <body>
 
-<!-- ========== Auth Page ========== -->
-<div id="authPage" style="display: flex;">
-    <div class="auth-container">
-        <div class="auth-form">
-            <div class="auth-title">اسأل الإسلام</div>
-            
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="switchAuthTab('login')">دخول</button>
-                <button class="auth-tab" onclick="switchAuthTab('signup')">إنشاء حساب</button>
-            </div>
-
-            <!-- Login Form -->
-            <form id="loginForm" style="display: block;">
-                <div class="auth-form-group">
-                    <input type="email" class="auth-input" id="loginEmail" placeholder="البريد الإلكتروني" required>
-                </div>
-                <div class="auth-form-group">
-                    <input type="password" class="auth-input" id="loginPassword" placeholder="كلمة السر" required>
-                </div>
-                <button type="button" class="auth-submit" onclick="handleLogin()">دخول</button>
-                <div class="auth-error" id="loginError"></div>
-            </form>
-
-            <!-- Signup Form -->
-            <form id="signupForm" style="display: none;">
-                <div class="auth-form-group">
-                    <input type="text" class="auth-input" id="signupName" placeholder="الاسم الكامل" required>
-                </div>
-                <div class="auth-form-group">
-                    <input type="email" class="auth-input" id="signupEmail" placeholder="البريد الإلكتروني" required>
-                </div>
-                <div class="auth-form-group">
-                    <input type="password" class="auth-input" id="signupPassword" placeholder="كلمة السر" required>
-                </div>
-                <button type="button" class="auth-submit" onclick="handleSignup()">إنشاء حساب</button>
-                <div class="auth-error" id="signupError"></div>
-            </form>
-        </div>
+<!-- AUTH PAGE -->
+<div id="authPage" class="auth-page">
+  <div class="auth-box">
+    <div class="auth-logo">اسأل الإسلام</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="authTab('login')">دخول</button>
+      <button class="auth-tab" onclick="authTab('signup')">حساب جديد</button>
     </div>
+    <div id="loginForm">
+      <div class="form-g"><label>البريد الإلكتروني</label><input id="li-email" type="email" placeholder="example@mail.com"></div>
+      <div class="form-g"><label>كلمة المرور</label><input id="li-pass" type="password" placeholder="••••••"></div>
+      <div class="err" id="li-err"></div>
+      <button class="form-submit" style="margin-top:0.75rem" onclick="doLogin()">دخول</button>
+      <div style="margin-top:0.75rem;font-size:0.82rem;color:var(--txt2);text-align:center;">حساب تجريبي: test@test.com / 123456</div>
+    </div>
+    <div id="signupForm" style="display:none">
+      <div class="form-g"><label>الاسم الكامل</label><input id="su-name" type="text" placeholder="أحمد محمد"></div>
+      <div class="form-g"><label>اسم المستخدم</label><input id="su-handle" type="text" placeholder="ahmed_m"></div>
+      <div class="form-g"><label>البريد الإلكتروني</label><input id="su-email" type="email" placeholder="example@mail.com"></div>
+      <div class="form-g"><label>كلمة المرور</label><input id="su-pass" type="password" placeholder="••••••"></div>
+      <div class="err" id="su-err"></div>
+      <button class="form-submit" style="margin-top:0.75rem" onclick="doSignup()">إنشاء الحساب</button>
+    </div>
+  </div>
 </div>
 
-<!-- ========== Main App ========== -->
-<div id="appPage" style="display: none; width: 100%; height: 100vh; overflow: hidden;">
-    <div class="app-container">
-        <!-- Left Sidebar -->
-        <aside class="sidebar">
-            <a class="logo" onclick="navigateTo('home')">
-                <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">
-                <span>اسأل الإسلام</span>
-            </a>
+<!-- MAIN APP -->
+<div id="appPage" style="display:none">
+  <div class="app">
 
-            <nav class="nav-menu">
-                <button class="nav-item active" onclick="navigateTo('home')">🏠 الرئيسية</button>
-                <button class="nav-item" onclick="navigateTo('explore')">🔍 استكشاف</button>
-                <button class="nav-item" onclick="navigateTo('notifications')">🔔 الإشعارات</button>
-                <button class="nav-item" onclick="navigateTo('bookmarks')">🔖 الحفظ</button>
-                <button class="nav-item" onclick="navigateTo('profile')">👤 الملف الشخصي</button>
-            </nav>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <a class="logo" onclick="nav('home')">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="15" stroke="var(--accent)" stroke-width="2"/><path d="M16 8c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 2c.8 0 1.6.2 2.3.5L10.5 18.3C10.2 17.6 10 16.8 10 16c0-3.3 2.7-6 6-6zm0 12c-.8 0-1.6-.2-2.3-.5l7.8-7.8c.3.7.5 1.5.5 2.3 0 3.3-2.7 6-6 6z" fill="var(--accent)"/></svg>
+        <span class="nav-label">اسأل الإسلام</span>
+      </a>
+      <button class="nav-item active" id="nav-home" onclick="nav('home')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        <span class="nav-label">الرئيسية</span>
+      </button>
+      <button class="nav-item" id="nav-explore" onclick="nav('explore')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span class="nav-label">استكشاف</span>
+      </button>
+      <button class="nav-item" id="nav-notifications" onclick="nav('notifications')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="nav-label">الإشعارات <span class="badge" id="notif-badge" style="display:none">0</span></span>
+      </button>
+      <button class="nav-item" id="nav-bookmarks" onclick="nav('bookmarks')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-label">المحفوظات</span>
+      </button>
+      <button class="nav-item" id="nav-profile" onclick="nav('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-label">ملفي</span>
+      </button>
+      <button class="compose-btn" onclick="openCompose()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" style="margin-left:0.4rem"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>تغريدة جديدة</span>
+      </button>
+      <button class="user-card" id="sidebarCard" onclick="nav('profile')">
+        <div class="ava ava-sm" id="sidebarAva"></div>
+        <div style="flex:1;min-width:0;text-align:right">
+          <div style="font-weight:700;font-size:0.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="sidebarName"></div>
+          <div style="color:var(--txt2);font-size:0.78rem" id="sidebarHandle"></div>
+        </div>
+      </button>
+    </aside>
 
-            <button class="compose-btn" onclick="openComposeModal()">تغريد جديد</button>
+    <!-- FEED COLUMN -->
+    <main class="feed" id="feedCol">
 
-            <button class="user-profile" onclick="navigateTo('profile')">
-                <div class="user-avatar" id="sidebarAvatar">أ</div>
-                <div class="user-info">
-                    <div class="user-name" id="sidebarName">أحمد محمد</div>
-                    <div class="user-handle" id="sidebarHandle">@user</div>
-                </div>
-            </button>
-        </aside>
-
-        <!-- Feed -->
-        <main class="feed">
-            <!-- Home Page -->
-            <div id="homePage" class="page active">
-                <div class="feed-header">
-                    <div class="feed-header-title">الرئيسية</div>
-                </div>
-
-                <div class="feed-content">
-                    <div class="tweet-composer">
-                        <div class="composer-avatar" id="composerAvatar">أ</div>
-                        <div class="composer-content">
-                            <textarea class="composer-input" id="composerInput" placeholder="ما رأيك؟"></textarea>
-                            <div class="composer-actions">
-                                <div class="composer-icons">
-                                    <button class="composer-icon-btn" title="صورة" onclick="uploadImage()">🖼️</button>
-                                    <button class="composer-icon-btn" title="موقع">📍</button>
-                                </div>
-                                <button class="composer-post-btn" id="postBtn" onclick="postTweet()">تغريد</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="tweetsContainer"></div>
-                </div>
+      <!-- HOME PAGE -->
+      <div class="page active" id="pg-home">
+        <div class="feed-top"><h2>الرئيسية</h2></div>
+        <div class="composer">
+          <div class="ava ava-md" id="composerAva"></div>
+          <div class="composer-right">
+            <textarea id="composerTxt" placeholder="ما رأيك؟" oninput="updateComposer(this)" rows="3"></textarea>
+            <div class="composer-footer">
+              <div class="composer-tools">
+                <label class="icon-btn" title="إضافة صورة" for="imgUpload">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+                </label>
+                <input type="file" id="imgUpload" accept="image/*" onchange="handleImgUpload(this,'composer')">
+                <button class="icon-btn" title="هاشتاق" onclick="insertHashtag()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                </button>
+              </div>
+              <div style="display:flex;align-items:center;gap:0.75rem">
+                <span class="char-count" id="charCount">280</span>
+                <button class="post-btn" id="postBtn" disabled onclick="postTweet()">تغريد</button>
+              </div>
             </div>
+            <div id="composerImgPreview" style="margin-top:0.5rem"></div>
+          </div>
+        </div>
+        <div id="tweetsContainer"></div>
+      </div>
 
-            <!-- Explore Page -->
-            <div id="explorePage" class="page">
-                <div class="feed-header">
-                    <div class="feed-header-title">استكشاف</div>
-                </div>
-                <div class="feed-content" style="padding: 2rem; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">استكشف المحتوى الإسلامي</div>
-                    <div style="color: var(--text-secondary);">ابحث عن أسئلة وأجوبة إسلامية متنوعة</div>
-                    <div style="margin-top: 2rem;">
-                        <input type="text" placeholder="ابحث هنا..." style="width: 100%; max-width: 400px; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 20px; font-family: inherit; color: var(--text-primary); background: var(--bg-secondary);">
-                    </div>
-                </div>
-            </div>
+      <!-- EXPLORE PAGE -->
+      <div class="page" id="pg-explore">
+        <div class="feed-top"><h2>استكشاف</h2></div>
+        <div style="padding:0.75rem 1rem;border-bottom:1px solid var(--border)">
+          <div class="search-wrap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt2)" stroke-width="2.5" stroke-linecap="square"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="exploreSearch" type="text" placeholder="ابحث عن تغريدات أو مستخدمين..." oninput="doSearch(this.value)">
+          </div>
+        </div>
+        <div id="searchResults"></div>
+        <div id="exploreTrends"></div>
+      </div>
 
-            <!-- Notifications Page -->
-            <div id="notificationsPage" class="page">
-                <div class="feed-header">
-                    <div class="feed-header-title">الإشعارات</div>
-                </div>
-                <div class="feed-content" style="padding: 2rem; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔔</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">لا توجد إشعارات جديدة</div>
-                    <div style="color: var(--text-secondary);">ستظهر الإشعارات هنا عندما يرد عليك أحد</div>
-                </div>
-            </div>
+      <!-- NOTIFICATIONS PAGE -->
+      <div class="page" id="pg-notifications">
+        <div class="feed-top"><h2>الإشعارات</h2></div>
+        <div id="notifContainer"></div>
+      </div>
 
-            <!-- Bookmarks Page -->
-            <div id="bookmarksPage" class="page">
-                <div class="feed-header">
-                    <div class="feed-header-title">الحفظ</div>
-                </div>
-                <div class="feed-content" style="padding: 2rem; text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔖</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">لم تحفظ أي تغريدات</div>
-                    <div style="color: var(--text-secondary);">احفظ التغريدات المهمة لقراءتها لاحقاً</div>
-                </div>
-            </div>
+      <!-- BOOKMARKS PAGE -->
+      <div class="page" id="pg-bookmarks">
+        <div class="feed-top"><h2>المحفوظات</h2></div>
+        <div id="bookmarksContainer"></div>
+      </div>
 
-            <!-- Profile Page -->
-            <div id="profilePage" class="page">
-                <div class="profile-header">
-                    <div class="profile-cover" id="profileCover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                        <button class="profile-cover-upload" onclick="uploadCover()">تحديث الغلاف</button>
-                    </div>
-                    <div class="profile-info">
-                        <div class="profile-avatar-section">
-                            <div class="profile-avatar-large" id="profileAvatar">أ
-                                <div class="profile-avatar-upload" onclick="uploadProfilePic()">📷</div>
-                            </div>
-                            <button class="edit-profile-btn" onclick="openEditProfileModal()">تعديل الملف</button>
-                        </div>
-                        <div class="profile-details">
-                            <div class="profile-name" id="profileName">أحمد محمد</div>
-                            <div class="profile-handle" id="profileHandle">@user</div>
-                            <div class="profile-bio" id="profileBio">مهتم بالعلوم الإسلامية والتكنولوجيا</div>
-                            <div class="profile-stats">
-                                <div class="profile-stat">
-                                    <span class="profile-stat-value" id="profileTweets">0</span>
-                                    <span>تغريدة</span>
-                                </div>
-                                <div class="profile-stat">
-                                    <span class="profile-stat-value">0</span>
-                                    <span>متابع</span>
-                                </div>
-                                <div class="profile-stat">
-                                    <span class="profile-stat-value">0</span>
-                                    <span>متابع</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="feed-content" id="profileTweetsContainer"></div>
-            </div>
-        </main>
+      <!-- PROFILE PAGE -->
+      <div class="page" id="pg-profile">
+        <div class="feed-top">
+          <button class="back-btn" id="profileBackBtn" onclick="nav('home')" style="display:none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+          </button>
+          <h2 id="profileFeedTitle">ملفي الشخصي</h2>
+        </div>
+        <div id="profileContent"></div>
+      </div>
 
-        <!-- Right Sidebar -->
-        <aside class="trends-sidebar">
-            <div class="search-box">
-                <span style="font-size: 1.1rem;">🔍</span>
-                <input type="text" placeholder="ابحث عن أسئلة...">
-            </div>
+      <!-- TWEET DETAIL PAGE -->
+      <div class="page" id="pg-tweet">
+        <div class="feed-top">
+          <button class="back-btn" onclick="goBack()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+          </button>
+          <h2>التغريدة</h2>
+        </div>
+        <div id="tweetDetailContent"></div>
+      </div>
 
-            <div class="trends-container">
-                <div class="trend-item">
-                    <div class="trend-category">الترندات الآن</div>
-                    <div class="trend-title">#القرآن_الكريم</div>
-                    <div class="trend-count">245.3K تغريدة</div>
-                </div>
-                <div class="trend-item">
-                    <div class="trend-category">الترندات الآن</div>
-                    <div class="trend-title">#الفقه_الإسلامي</div>
-                    <div class="trend-count">189.2K تغريدة</div>
-                </div>
-                <div class="trend-item">
-                    <div class="trend-category">الترندات الآن</div>
-                    <div class="trend-title">#السيرة_النبوية</div>
-                    <div class="trend-count">156.8K تغريدة</div>
-                </div>
-                <div class="trend-item">
-                    <div class="trend-category">الترندات الآن</div>
-                    <div class="trend-title">#العقيدة_الإسلامية</div>
-                    <div class="trend-count">132.5K تغريدة</div>
-                </div>
-            </div>
+    </main>
 
-            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 الوضع الليلي</button>
-            <button class="theme-toggle" style="background: #f91880; color: white; border: none;" onclick="logout()">تسجيل الخروج</button>
-        </aside>
-    </div>
+    <!-- RIGHT SIDEBAR -->
+    <aside class="rside">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt2)" stroke-width="2.5" stroke-linecap="square"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="ابحث..." oninput="sideSearch(this.value)">
+      </div>
+      <div class="card" id="trendsCard">
+        <div class="card-title">الترندات الآن</div>
+        <div id="trendsContent"></div>
+      </div>
+      <div class="card" id="suggestCard">
+        <div class="card-title">حسابات مقترحة</div>
+        <div id="suggestContent"></div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+        <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          الوضع الليلي
+        </button>
+        <button class="logout-btn" onclick="doLogout()">خروج</button>
+      </div>
+    </aside>
+
+  </div>
 </div>
 
-<!-- ========== Modals ========== -->
-<!-- Edit Profile Modal -->
-<div id="editProfileModal" class="modal">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('editProfileModal')">✕</button>
-        <div class="modal-header">تعديل الملف الشخصي</div>
-        
-        <div class="form-group">
-            <label class="form-label">الاسم</label>
-            <input type="text" class="form-input" id="editName" placeholder="الاسم الكامل">
-        </div>
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-inner">
+    <button class="mnav-btn active" id="mnav-home" onclick="nav('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="22" height="22"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+    <button class="mnav-btn" id="mnav-explore" onclick="nav('explore')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+    <button class="mnav-btn" onclick="openCompose()" style="background:var(--accent);border-radius:50%;width:42px;height:42px;color:#fff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="20" height="20"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <button class="mnav-btn" id="mnav-notifications" onclick="nav('notifications')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="22" height="22"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+    <button class="mnav-btn" id="mnav-profile" onclick="nav('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button>
+  </div>
+</nav>
 
-        <div class="form-group">
-            <label class="form-label">اسم المستخدم</label>
-            <input type="text" class="form-input" id="editHandle" placeholder="@username">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">الوصف</label>
-            <textarea class="form-textarea" id="editBio" placeholder="أخبرنا عن نفسك"></textarea>
-        </div>
-
-        <button class="form-submit" onclick="saveProfile()">حفظ التغييرات</button>
+<!-- COMPOSE MODAL -->
+<div class="overlay" id="composeModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head">
+      <h3 id="composeTitle">تغريدة جديدة</h3>
+      <button class="close-btn" onclick="closeModal('composeModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
+    <div style="display:flex;gap:0.75rem">
+      <div class="ava ava-md" id="modalAva"></div>
+      <div style="flex:1">
+        <textarea id="modalTxt" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1.05rem;font-family:inherit;resize:none;outline:none;min-height:80px;padding-top:0.35rem" placeholder="ما رأيك؟" oninput="updateModalComposer(this)" rows="4"></textarea>
+        <div id="modalImgPreview" style="margin-bottom:0.5rem"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:0.75rem">
+          <div style="display:flex;gap:0.25rem">
+            <label class="icon-btn" for="modalImgUpload">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="18" height="18"><rect x="3" y="3" width="18" height="18"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            </label>
+            <input type="file" id="modalImgUpload" accept="image/*" onchange="handleImgUpload(this,'modal')">
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem">
+            <span class="char-count" id="modalCharCount">280</span>
+            <button class="post-btn" id="modalPostBtn" disabled onclick="postFromModal()">تغريد</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="replyToId" value="">
+  </div>
 </div>
 
-<!-- Compose Modal -->
-<div id="composeModal" class="modal">
-    <div class="modal-content">
-        <button class="modal-close" onclick="closeModal('composeModal')">✕</button>
-        <div class="modal-header">تغريد جديد</div>
-        
-        <div class="form-group">
-            <textarea class="form-textarea" id="modalComposerInput" placeholder="ما رأيك؟" style="min-height: 150px;"></textarea>
-        </div>
-
-        <button class="form-submit" onclick="postTweetFromModal()">تغريد</button>
+<!-- EDIT PROFILE MODAL -->
+<div class="overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>تعديل الملف الشخصي</h3>
+      <button class="close-btn" onclick="closeModal('editModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
+    <div class="form-g"><label>الاسم</label><input id="ed-name" type="text"></div>
+    <div class="form-g"><label>اسم المستخدم</label><input id="ed-handle" type="text"></div>
+    <div class="form-g"><label>الوصف</label><textarea id="ed-bio"></textarea></div>
+    <div class="err" id="ed-err"></div>
+    <button class="form-submit" onclick="saveProfile()">حفظ التغييرات</button>
+  </div>
 </div>
 
-<!-- ========== Scripts ========== -->
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
 <script>
-    // Global State
-    let currentUser = null;
-    let users = {};
-    let tweets = [];
-    let currentPage = 'home';
+// ============================================================
+// STATE
+// ============================================================
+const MAX_CHARS = 280;
+let me = null;
+let db = { users:{}, tweets:[], notifications:[] };
+let pendingImg = { composer:null, modal:null };
+let currentPage = 'home';
+let pageHistory = [];
+let viewingUserId = null;
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', function() {
-        loadData();
-        loadTheme();
-        setupEventListeners();
-        // Auto-restore session if user was logged in
-        const savedSession = sessionStorage.getItem('currentUser');
-        if (savedSession) {
-            try {
-                currentUser = JSON.parse(savedSession);
-                showApp();
-                updateUI();
-            } catch(e) {
-                showAuth();
-            }
-        } else {
-            showAuth();
-        }
-    });
+// ============================================================
+// INIT
+// ============================================================
+window.onload = () => {
+  loadDB();
+  loadTheme();
+  const saved = localStorage.getItem('session');
+  if(saved && db.users[saved]){
+    me = db.users[saved];
+    showApp();
+  } else {
+    document.getElementById('authPage').style.display='flex';
+  }
+};
 
-    function setupEventListeners() {
-        document.getElementById('composerInput').addEventListener('input', updatePostBtn);
-        document.getElementById('loginForm').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleLogin();
-        });
-        document.getElementById('signupForm').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') handleSignup();
-        });
+function loadDB(){
+  const raw = localStorage.getItem('isdb');
+  if(raw) db = JSON.parse(raw);
+  // seed demo user + tweets
+  if(!db.users['test@test.com']){
+    const uid = 'u_demo';
+    db.users['test@test.com'] = {id:uid,email:'test@test.com',pass:hash('123456'),name:'أحمد محمد',handle:'ahmed_m',bio:'مهتم بالعلوم الإسلامية 📖',avatar:null,color:'#1d9bf0',followers:[],following:[],bookmarks:[]};
+    const uid2 = 'u_fatima';
+    db.users['fatima@test.com'] = {id:uid2,email:'fatima@test.com',pass:hash('123456'),name:'فاطمة علي',handle:'fatima_ali',bio:'طالبة علم شرعي',avatar:null,color:'#e91e8c',followers:[],following:[],bookmarks:[]};
+    db.tweets = [
+      {id:'t1',uid:uid2,text:'بسم الله الرحمن الرحيم\nأسأل الله أن يرزقنا العلم النافع والعمل الصالح 🤲',ts:Date.now()-3600000*2,likes:[],retweets:[],replies:['t3'],img:null},
+      {id:'t2',uid:uid,text:'السلام عليكم! ما حكم قراءة القرآن من الهاتف بدون وضوء؟\n#فقه_إسلامي #القرآن',ts:Date.now()-3600000,likes:[uid2],retweets:[],replies:[],img:null},
+      {id:'t3',uid:uid,text:'جزاك الله خيراً أختي فاطمة 🌹',ts:Date.now()-3600000*1.5,likes:[],retweets:[],replies:[],replyTo:'t1',img:null},
+    ];
+    if(!db.notifications) db.notifications = [];
+    saveDB();
+  }
+  if(!db.notifications) db.notifications = [];
+}
+
+function saveDB(){localStorage.setItem('isdb',JSON.stringify(db));}
+function hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
+
+// ============================================================
+// AUTH
+// ============================================================
+function authTab(t){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.toggle('active',b.onclick.toString().includes(t)));
+  document.getElementById('loginForm').style.display = t==='login'?'block':'none';
+  document.getElementById('signupForm').style.display = t==='signup'?'block':'none';
+}
+
+function doLogin(){
+  const email=v('li-email').trim().toLowerCase();
+  const pass=v('li-pass');
+  const u = db.users[email];
+  if(!u || u.pass!==hash(pass)){
+    document.getElementById('li-err').textContent='البريد أو كلمة المرور غير صحيحة';return;
+  }
+  me=u; localStorage.setItem('session',email); showApp();
+}
+
+function doSignup(){
+  const name=v('su-name').trim();
+  const handle=v('su-handle').trim().replace(/\s+/g,'_').toLowerCase();
+  const email=v('su-email').trim().toLowerCase();
+  const pass=v('su-pass');
+  const err=document.getElementById('su-err');
+  if(!name||!handle||!email||!pass){err.textContent='يرجى ملء جميع الحقول';return;}
+  if(db.users[email]){err.textContent='هذا البريد مسجل مسبقاً';return;}
+  const handles = Object.values(db.users).map(u=>u.handle);
+  if(handles.includes(handle)){err.textContent='اسم المستخدم محجوز';return;}
+  const colors=['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
+  const uid='u_'+Date.now();
+  db.users[email]={id:uid,email,pass:hash(pass),name,handle,bio:'',avatar:null,color:colors[Math.floor(Math.random()*colors.length)],followers:[],following:[],bookmarks:[]};
+  me=db.users[email]; saveDB(); localStorage.setItem('session',email); showApp();
+}
+
+function doLogout(){
+  me=null; localStorage.removeItem('session');
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('authPage').style.display='flex';
+  sv('li-email',''); sv('li-pass','');
+}
+
+// ============================================================
+// APP
+// ============================================================
+function showApp(){
+  document.getElementById('authPage').style.display='none';
+  document.getElementById('appPage').style.display='block';
+  updateSidebar();
+  nav('home');
+  renderTrends();
+  renderSuggestions();
+  loadTheme();
+}
+
+function updateSidebar(){
+  document.getElementById('sidebarAva').innerHTML=avaHtml(me,36);
+  document.getElementById('sidebarName').textContent=me.name;
+  document.getElementById('sidebarHandle').textContent='@'+me.handle;
+  document.getElementById('composerAva').innerHTML=avaHtml(me,44);
+  document.getElementById('modalAva').innerHTML=avaHtml(me,44);
+  updateNotifBadge();
+}
+
+function avaHtml(u,size){
+  if(!u) return '';
+  if(u.avatar) return `<img src="${u.avatar}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
+  const letter = u.name.charAt(0);
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${u.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function nav(page, userId=null){
+  pageHistory.push(currentPage);
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+page).classList.add('active');
+  // sidebar active
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const nb=document.getElementById('nav-'+page);
+  if(nb) nb.classList.add('active');
+  // mobile
+  document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+  const mnb=document.getElementById('mnav-'+page);
+  if(mnb) mnb.classList.add('active');
+
+  if(page==='home') renderFeed();
+  if(page==='explore'){ renderExploreTrends(); document.getElementById('searchResults').innerHTML=''; }
+  if(page==='notifications') renderNotifications();
+  if(page==='bookmarks') renderBookmarks();
+  if(page==='profile'){
+    viewingUserId = userId;
+    renderProfile(userId);
+    document.getElementById('profileBackBtn').style.display = userId ? 'flex':'none';
+  }
+}
+
+function goBack(){
+  const prev = pageHistory.pop() || 'home';
+  currentPage=prev;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+prev).classList.add('active');
+}
+
+function openTweet(id){
+  pageHistory.push(currentPage);
+  currentPage='tweet';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-tweet').classList.add('active');
+  renderTweetDetail(id);
+}
+
+// ============================================================
+// FEED RENDER
+// ============================================================
+function renderFeed(){
+  const container=document.getElementById('tweetsContainer');
+  const sorted=[...db.tweets].sort((a,b)=>b.ts-a.ts);
+  const top = sorted.filter(t=>!t.replyTo);
+  if(!top.length){
+    container.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p>لا توجد تغريدات بعد.<br>كن أول من يغرّد!</p></div>`;
+    return;
+  }
+  container.innerHTML=top.map(t=>tweetCard(t,false,false)).join('');
+}
+
+function tweetCard(tweet, isDetail=false, isReply=false){
+  const author = getUserById(tweet.uid);
+  if(!author) return '';
+  const liked = tweet.likes.includes(me.id);
+  const retweeted = tweet.retweets.includes(me.id);
+  const bookmarked = me.bookmarks && me.bookmarks.includes(tweet.id);
+  const isMine = tweet.uid === me.id;
+  const timeStr = relTime(tweet.ts);
+  const textHtml = formatText(tweet.text);
+  const replyCount = (tweet.replies||[]).length;
+
+  return `<div class="tweet" id="tw-${tweet.id}" onclick="handleTweetClick(event,'${tweet.id}')">
+    <div class="tweet-inner">
+      <div onclick="event.stopPropagation();nav('profile','${author.id}')" style="cursor:pointer">${avaHtml(author,44)}</div>
+      <div class="tweet-body">
+        <div class="tweet-head">
+          <span class="tweet-name" onclick="event.stopPropagation();nav('profile','${author.id}')">${esc(author.name)}</span>
+          <span class="tweet-handle">@${esc(author.handle)}</span>
+          <span class="tweet-time">· ${timeStr}</span>
+        </div>
+        ${tweet.replyTo?`<div style="font-size:0.82rem;color:var(--txt2);margin-bottom:0.3rem">رداً على @${esc(getUserById(getTweetById(tweet.replyTo)?.uid)?.handle||'')}</div>`:''}
+        <div class="tweet-text">${textHtml}</div>
+        ${tweet.img?`<img class="tweet-img" src="${tweet.img}" onclick="event.stopPropagation()" loading="lazy">`:''}
+        <div class="tweet-actions" onclick="event.stopPropagation()">
+          <button class="tact" onclick="openReply('${tweet.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            ${replyCount||''}
+          </button>
+          <button class="tact rt ${retweeted?'on':''}" onclick="doRetweet('${tweet.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            ${tweet.retweets.length||''}
+          </button>
+          <button class="tact like ${liked?'on':''}" onclick="doLike('${tweet.id}')">
+            <svg viewBox="0 0 24 24" fill="${liked?'currentColor':'none'}" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            ${tweet.likes.length||''}
+          </button>
+          <button class="tact bm ${bookmarked?'on':''}" onclick="doBookmark('${tweet.id}')">
+            <svg viewBox="0 0 24 24" fill="${bookmarked?'currentColor':'none'}" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+          </button>
+          ${isMine?`<button class="tact del" onclick="deleteTweet('${tweet.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function handleTweetClick(e,id){
+  if(e.target.closest('button')||e.target.closest('a')) return;
+  openTweet(id);
+}
+
+// ============================================================
+// TWEET DETAIL
+// ============================================================
+function renderTweetDetail(id){
+  const tweet = getTweetById(id);
+  if(!tweet){document.getElementById('tweetDetailContent').innerHTML='<div class="empty-state"><p>التغريدة غير موجودة</p></div>';return;}
+  let html = tweetCard(tweet, true, false);
+  // reply composer
+  html += `<div class="composer" style="border-top:1px solid var(--border)">
+    <div class="ava ava-md">${avaHtml(me,44)}</div>
+    <div class="composer-right">
+      <textarea id="replyTxt" placeholder="أضف ردك..." oninput="updateReplyComposer(this)" rows="2" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1rem;font-family:inherit;resize:none;outline:none;min-height:50px;padding-top:0.35rem"></textarea>
+      <div style="display:flex;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--border);margin-top:0.5rem">
+        <button class="post-btn" id="replyPostBtn" disabled onclick="postReply('${id}')">رد</button>
+      </div>
+    </div>
+  </div>`;
+  // replies
+  const replies = (tweet.replies||[]).map(rid=>getTweetById(rid)).filter(Boolean).sort((a,b)=>a.ts-b.ts);
+  if(replies.length) html += `<div style="padding-top:0.5rem">`+replies.map(r=>tweetCard(r,false,true)).join('')+`</div>`;
+  document.getElementById('tweetDetailContent').innerHTML=html;
+}
+
+// ============================================================
+// TWEET ACTIONS
+// ============================================================
+function postTweet(){
+  const text = v('composerTxt').trim();
+  if(!text && !pendingImg.composer) return;
+  createTweet(text, null, pendingImg.composer);
+  sv('composerTxt','');
+  pendingImg.composer=null;
+  document.getElementById('composerImgPreview').innerHTML='';
+  document.getElementById('postBtn').disabled=true;
+  document.getElementById('charCount').textContent=MAX_CHARS;
+  document.getElementById('charCount').className='char-count';
+  renderFeed();
+  toast('تم النشر بنجاح ✓');
+}
+
+function postFromModal(){
+  const text = v('modalTxt').trim();
+  const replyTo = v('replyToId');
+  if(!text && !pendingImg.modal) return;
+  const tw = createTweet(text, replyTo||null, pendingImg.modal);
+  if(replyTo){
+    const parent = getTweetById(replyTo);
+    if(parent){
+      if(!parent.replies) parent.replies=[];
+      parent.replies.push(tw.id);
+      // notification
+      if(parent.uid !== me.id){
+        addNotif(parent.uid,'reply',tw.id,me.id);
+      }
     }
+  }
+  sv('modalTxt',''); sv('replyToId','');
+  pendingImg.modal=null;
+  document.getElementById('modalImgPreview').innerHTML='';
+  document.getElementById('modalPostBtn').disabled=true;
+  document.getElementById('modalCharCount').textContent=MAX_CHARS;
+  closeModal('composeModal');
+  saveDB();
+  if(currentPage==='home') renderFeed();
+  if(currentPage==='tweet') renderTweetDetail(replyTo||tw.id);
+  toast(replyTo?'تم إرسال الرد ✓':'تم النشر ✓');
+}
 
-    // Auth Functions
-    function switchAuthTab(tab) {
-        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('form').forEach(f => f.style.display = 'none');
-        
-        if (tab === 'login') {
-            document.querySelector('[onclick="switchAuthTab(\'login\')"]').classList.add('active');
-            document.getElementById('loginForm').style.display = 'block';
-        } else {
-            document.querySelector('[onclick="switchAuthTab(\'signup\')"]').classList.add('active');
-            document.getElementById('signupForm').style.display = 'block';
-        }
+function createTweet(text, replyTo=null, img=null){
+  const tw={id:'t'+Date.now(),uid:me.id,text,ts:Date.now(),likes:[],retweets:[],replies:[],replyTo,img};
+  db.tweets.unshift(tw);
+  saveDB();
+  return tw;
+}
+
+function postReply(parentId){
+  const text=v('replyTxt').trim();
+  if(!text) return;
+  const tw=createTweet(text,parentId,null);
+  const parent=getTweetById(parentId);
+  if(parent){
+    if(!parent.replies) parent.replies=[];
+    parent.replies.push(tw.id);
+    if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id);
+    saveDB();
+  }
+  renderTweetDetail(parentId);
+  toast('تم إرسال الرد ✓');
+}
+
+function doLike(id){
+  const tw=getTweetById(id);
+  if(!tw) return;
+  const idx=tw.likes.indexOf(me.id);
+  if(idx>=0) tw.likes.splice(idx,1);
+  else {
+    tw.likes.push(me.id);
+    if(tw.uid!==me.id) addNotif(tw.uid,'like',id,me.id);
+  }
+  saveDB();
+  refreshTweetCard(id);
+  updateNotifBadge();
+}
+
+function doRetweet(id){
+  const tw=getTweetById(id);
+  if(!tw) return;
+  const idx=tw.retweets.indexOf(me.id);
+  if(idx>=0){tw.retweets.splice(idx,1);toast('تم إلغاء إعادة النشر');}
+  else {
+    tw.retweets.push(me.id);
+    if(tw.uid!==me.id) addNotif(tw.uid,'retweet',id,me.id);
+    toast('تمت إعادة النشر ✓');
+  }
+  saveDB();
+  refreshTweetCard(id);
+  updateNotifBadge();
+}
+
+function doBookmark(id){
+  if(!me.bookmarks) me.bookmarks=[];
+  const idx=me.bookmarks.indexOf(id);
+  if(idx>=0){me.bookmarks.splice(idx,1);toast('تمت إزالته من المحفوظات');}
+  else {me.bookmarks.push(id);toast('تمت إضافته للمحفوظات ✓');}
+  db.users[me.email]=me; saveDB();
+  refreshTweetCard(id);
+}
+
+function deleteTweet(id){
+  if(!confirm('هل أنت متأكد من حذف هذه التغريدة؟')) return;
+  const idx=db.tweets.findIndex(t=>t.id===id);
+  if(idx>=0) db.tweets.splice(idx,1);
+  // remove from parent replies
+  db.tweets.forEach(t=>{if(t.replies) t.replies=t.replies.filter(r=>r!==id);});
+  if(me.bookmarks) me.bookmarks=me.bookmarks.filter(b=>b!==id);
+  db.users[me.email]=me; saveDB();
+  const el=document.getElementById('tw-'+id);
+  if(el) el.remove();
+  toast('تم حذف التغريدة');
+  if(currentPage==='tweet') goBack();
+}
+
+function refreshTweetCard(id){
+  const tw=getTweetById(id);
+  if(!tw) return;
+  const el=document.getElementById('tw-'+id);
+  if(!el) return;
+  el.outerHTML=tweetCard(tw,false,false);
+}
+
+// ============================================================
+// REPLY / COMPOSE MODAL
+// ============================================================
+function openCompose(){
+  sv('replyToId','');
+  document.getElementById('composeTitle').textContent='تغريدة جديدة';
+  sv('modalTxt','');
+  document.getElementById('modalPostBtn').disabled=true;
+  document.getElementById('modalCharCount').textContent=MAX_CHARS;
+  document.getElementById('modalImgPreview').innerHTML='';
+  pendingImg.modal=null;
+  openModal('composeModal');
+}
+
+function openReply(id){
+  sv('replyToId',id);
+  const tw=getTweetById(id);
+  const auth=tw?getUserById(tw.uid):null;
+  document.getElementById('composeTitle').textContent=`رد على ${auth?'@'+auth.handle:''}`;
+  sv('modalTxt','');
+  document.getElementById('modalPostBtn').disabled=true;
+  document.getElementById('modalCharCount').textContent=MAX_CHARS;
+  document.getElementById('modalImgPreview').innerHTML='';
+  pendingImg.modal=null;
+  openModal('composeModal');
+}
+
+function updateComposer(ta){
+  const len=ta.value.length;
+  const rem=MAX_CHARS-len;
+  const cc=document.getElementById('charCount');
+  cc.textContent=rem;
+  cc.className='char-count'+(rem<20?' warn':'')+(rem<0?' over':'');
+  document.getElementById('postBtn').disabled = len===0&&!pendingImg.composer || rem<0;
+}
+
+function updateModalComposer(ta){
+  const len=ta.value.length;
+  const rem=MAX_CHARS-len;
+  const cc=document.getElementById('modalCharCount');
+  cc.textContent=rem;
+  cc.className='char-count'+(rem<20?' warn':'')+(rem<0?' over':'');
+  document.getElementById('modalPostBtn').disabled = (len===0&&!pendingImg.modal) || rem<0;
+}
+
+function updateReplyComposer(ta){
+  document.getElementById('replyPostBtn').disabled=ta.value.trim().length===0;
+}
+
+function insertHashtag(){
+  const ta=document.getElementById('composerTxt');
+  ta.value+='#'; ta.focus(); updateComposer(ta);
+}
+
+// ============================================================
+// IMAGE UPLOAD
+// ============================================================
+function handleImgUpload(input, target){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    pendingImg[target]=e.target.result;
+    const previewId=target==='composer'?'composerImgPreview':'modalImgPreview';
+    document.getElementById(previewId).innerHTML=
+      `<div style="position:relative;display:inline-block">
+        <img src="${e.target.result}" style="max-width:100%;border-radius:10px;max-height:200px;object-fit:cover">
+        <button onclick="removeImg('${target}')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#fff;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>`;
+    if(target==='composer'){
+      document.getElementById('postBtn').disabled=false;
+    } else {
+      document.getElementById('modalPostBtn').disabled=false;
     }
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
 
-    function handleLogin() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
-        const errorDiv = document.getElementById('loginError');
+function removeImg(target){
+  pendingImg[target]=null;
+  const previewId=target==='composer'?'composerImgPreview':'modalImgPreview';
+  document.getElementById(previewId).innerHTML='';
+  if(target==='composer'){
+    const txt=document.getElementById('composerTxt');
+    document.getElementById('postBtn').disabled=txt.value.trim().length===0;
+  } else {
+    const txt=document.getElementById('modalTxt');
+    document.getElementById('modalPostBtn').disabled=txt.value.trim().length===0;
+  }
+}
 
-        if (!email || !password) {
-            errorDiv.textContent = 'يرجى ملء جميع الحقول';
-            return;
-        }
+// ============================================================
+// PROFILE
+// ============================================================
+function renderProfile(userId=null){
+  const user = userId ? getUserById(userId) : me;
+  if(!user){document.getElementById('profileContent').innerHTML='<div class="empty-state"><p>المستخدم غير موجود</p></div>';return;}
+  const isMine = user.id===me.id;
+  const isFollowing = me.following && me.following.includes(user.id);
+  const userTweets=db.tweets.filter(t=>t.uid===user.id&&!t.replyTo).sort((a,b)=>b.ts-a.ts);
+  const userReplies=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
+  document.getElementById('profileFeedTitle').textContent=user.name;
 
-        if (users[email] && users[email].password === password) {
-            currentUser = { email, ...users[email] };
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            showApp();
-            updateUI();
-        } else {
-            errorDiv.textContent = 'بيانات الدخول غير صحيحة';
-        }
-    }
+  let html=`<div class="cover">
+    ${isMine?`<button class="cover-btn" onclick="toast('قريباً: رفع صورة الغلاف')">تغيير الغلاف</button>`:''}
+  </div>
+  <div class="profile-meta">
+    <div class="ava-row">
+      <div class="ava ava-xl" style="position:relative">
+        ${user.avatar?`<img src="${user.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--bg)">`:`<div style="width:80px;height:80px;border-radius:50%;background:${user.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;border:3px solid var(--bg)">${user.name.charAt(0)}</div>`}
+        ${isMine?`<div class="ava-cam" onclick="uploadAvatar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`:''}
+      </div>
+      ${isMine?`<button class="edit-btn" onclick="openEditProfile()">تعديل الملف</button>`:
+        `<button class="edit-btn ${isFollowing?'':'follow-btn'}" onclick="toggleFollow('${user.id}')">${isFollowing?'متابَع ✓':'متابعة'}</button>`}
+    </div>
+    <div class="pname">${esc(user.name)}</div>
+    <div class="phandle">@${esc(user.handle)}</div>
+    ${user.bio?`<div class="pbio">${esc(user.bio)}</div>`:''}
+    <div class="pstats">
+      <div class="pstat"><span>${userTweets.length}</span> <small>تغريدة</small></div>
+      <div class="pstat"><span>${(user.followers||[]).length}</span> <small>متابِع</small></div>
+      <div class="pstat"><span>${(user.following||[]).length}</span> <small>يتابع</small></div>
+    </div>
+    <div class="ptabs">
+      <div class="ptab active" id="ptab-tweets" onclick="switchProfileTab('tweets','${user.id}')">التغريدات</div>
+      <div class="ptab" id="ptab-replies" onclick="switchProfileTab('replies','${user.id}')">الردود</div>
+      ${isMine?`<div class="ptab" id="ptab-likes" onclick="switchProfileTab('likes','${user.id}')">الإعجابات</div>`:''}
+    </div>
+  </div>
+  <div id="profileTweets">
+    ${userTweets.length?userTweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا توجد تغريدات بعد</p></div>`}
+  </div>`;
+  document.getElementById('profileContent').innerHTML=html;
+}
 
-    function handleSignup() {
-        const name = document.getElementById('signupName').value;
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const errorDiv = document.getElementById('signupError');
+function switchProfileTab(tab, userId){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('ptab-'+tab).classList.add('active');
+  const user=getUserById(userId)||me;
+  let tweets=[];
+  if(tab==='tweets') tweets=db.tweets.filter(t=>t.uid===user.id&&!t.replyTo).sort((a,b)=>b.ts-a.ts);
+  else if(tab==='replies') tweets=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
+  else if(tab==='likes') tweets=db.tweets.filter(t=>t.likes.includes(me.id)).sort((a,b)=>b.ts-a.ts);
+  document.getElementById('profileTweets').innerHTML=
+    tweets.length?tweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا يوجد محتوى</p></div>`;
+}
 
-        if (!name || !email || !password) {
-            errorDiv.textContent = 'يرجى ملء جميع الحقول';
-            return;
-        }
+function openEditProfile(){
+  sv('ed-name',me.name); sv('ed-handle',me.handle); sv('ed-bio',me.bio||'');
+  document.getElementById('ed-err').textContent='';
+  openModal('editModal');
+}
 
-        if (users[email]) {
-            errorDiv.textContent = 'هذا البريد الإلكتروني مسجل بالفعل';
-            return;
-        }
+function saveProfile(){
+  const name=v('ed-name').trim();
+  const handle=v('ed-handle').trim().replace(/\s+/g,'_').toLowerCase();
+  const bio=v('ed-bio').trim();
+  if(!name||!handle){document.getElementById('ed-err').textContent='الاسم واسم المستخدم مطلوبان';return;}
+  const taken=Object.values(db.users).filter(u=>u.id!==me.id).map(u=>u.handle);
+  if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
+  me.name=name; me.handle=handle; me.bio=bio;
+  db.users[me.email]=me; saveDB(); closeModal('editModal');
+  updateSidebar(); renderProfile(); toast('تم حفظ التغييرات ✓');
+}
 
-        users[email] = {
-            name,
-            email,
-            password,
-            handle: '@' + name.replace(/\s+/g, '_').toLowerCase(),
-            bio: '',
-            avatar: name.charAt(0),
-            cover: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            tweets: []
-        };
+function uploadAvatar(){
+  const input=document.createElement('input');
+  input.type='file'; input.accept='image/*';
+  input.onchange=e=>{
+    const f=e.target.files[0];
+    const r=new FileReader();
+    r.onload=ev=>{me.avatar=ev.target.result;db.users[me.email]=me;saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة ✓');};
+    r.readAsDataURL(f);
+  };
+  input.click();
+}
 
-        currentUser = { email, ...users[email] };
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-        saveData();
-        showApp();
-        updateUI();
-    }
+// ============================================================
+// FOLLOW
+// ============================================================
+function toggleFollow(userId){
+  const target=getUserById(userId);
+  if(!target) return;
+  if(!me.following) me.following=[];
+  if(!target.followers) target.followers=[];
+  const idx=me.following.indexOf(userId);
+  if(idx>=0){
+    me.following.splice(idx,1);
+    target.followers=target.followers.filter(f=>f!==me.id);
+    toast('تم إلغاء المتابعة');
+  } else {
+    me.following.push(userId);
+    target.followers.push(me.id);
+    addNotif(userId,'follow',null,me.id);
+    toast('تمت المتابعة ✓');
+  }
+  db.users[me.email]=me;
+  // save target user
+  const tEmail=Object.keys(db.users).find(k=>db.users[k].id===userId);
+  if(tEmail) db.users[tEmail]=target;
+  saveDB(); updateNotifBadge();
+  renderProfile(userId);
+  renderSuggestions();
+}
 
-    function logout() {
-        currentUser = null;
-        sessionStorage.removeItem('currentUser');
-        showAuth();
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('signupName').value = '';
-        document.getElementById('signupEmail').value = '';
-        document.getElementById('signupPassword').value = '';
-    }
+// ============================================================
+// BOOKMARKS
+// ============================================================
+function renderBookmarks(){
+  if(!me.bookmarks || !me.bookmarks.length){
+    document.getElementById('bookmarksContainer').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><p>لم تحفظ أي تغريدات بعد</p></div>`;
+    return;
+  }
+  const bms=me.bookmarks.map(id=>getTweetById(id)).filter(Boolean).reverse();
+  document.getElementById('bookmarksContainer').innerHTML=bms.map(t=>tweetCard(t,false,false)).join('');
+}
 
-    // Navigation
-    function navigateTo(page) {
-        currentPage = page;
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-        
-        if (page === 'home') {
-            document.getElementById('homePage').classList.add('active');
-            document.querySelector('[onclick="navigateTo(\'home\')"]').classList.add('active');
-            renderTweets();
-        } else if (page === 'explore') {
-            document.getElementById('explorePage').classList.add('active');
-            document.querySelector('[onclick="navigateTo(\'explore\')"]').classList.add('active');
-        } else if (page === 'notifications') {
-            document.getElementById('notificationsPage').classList.add('active');
-            document.querySelector('[onclick="navigateTo(\'notifications\')"]').classList.add('active');
-        } else if (page === 'bookmarks') {
-            document.getElementById('bookmarksPage').classList.add('active');
-            document.querySelector('[onclick="navigateTo(\'bookmarks\')"]').classList.add('active');
-        } else if (page === 'profile') {
-            document.getElementById('profilePage').classList.add('active');
-            document.querySelector('[onclick="navigateTo(\'profile\')"]').classList.add('active');
-            renderProfile();
-        }
-    }
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+function addNotif(toUserId, type, tweetId, fromUserId){
+  if(!db.notifications) db.notifications=[];
+  db.notifications.push({id:'n'+Date.now(),to:toUserId,type,tweetId,from:fromUserId,ts:Date.now(),read:false});
+  saveDB();
+}
 
-    // Tweet Functions
-    function postTweet() {
-        const text = document.getElementById('composerInput').value.trim();
-        if (!text) return;
+function updateNotifBadge(){
+  if(!db.notifications) return;
+  const unread=db.notifications.filter(n=>n.to===me.id&&!n.read).length;
+  const badge=document.getElementById('notif-badge');
+  if(badge){badge.style.display=unread?'inline-flex':'none';badge.textContent=unread>9?'9+':unread;}
+}
 
-        const tweet = {
-            id: Date.now(),
-            author: currentUser.name,
-            handle: currentUser.handle,
-            avatar: currentUser.avatar,
-            text: text,
-            timestamp: 'الآن',
-            replies: 0,
-            retweets: 0,
-            likes: 0,
-            liked: false,
-            userEmail: currentUser.email
-        };
+function renderNotifications(){
+  if(!db.notifications) db.notifications=[];
+  const mine=db.notifications.filter(n=>n.to===me.id).sort((a,b)=>b.ts-a.ts);
+  // mark read
+  mine.forEach(n=>n.read=true);
+  saveDB(); updateNotifBadge();
+  if(!mine.length){
+    document.getElementById('notifContainer').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>لا توجد إشعارات</p></div>`;
+    return;
+  }
+  document.getElementById('notifContainer').innerHTML=mine.map(n=>{
+    const from=getUserById(n.from);
+    if(!from) return '';
+    const labels={like:'أعجب بتغريدتك',reply:'رد على تغريدتك',retweet:'أعاد نشر تغريدتك',follow:'بدأ بمتابعتك'};
+    const icons={
+      like:`<svg width="18" height="18" viewBox="0 0 24 24" fill="var(--like)" stroke="var(--like)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+      reply:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+      retweet:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rt)" stroke-width="2.5"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+      follow:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+    };
+    return `<div class="tweet" onclick="${n.tweetId?`openTweet('${n.tweetId}')`:`nav('profile','${from.id}')`}">
+      <div class="tweet-inner" style="align-items:center">
+        <div style="width:44px;display:flex;justify-content:center">${icons[n.type]||''}</div>
+        <div>
+          <div style="cursor:pointer;font-weight:600" onclick="event.stopPropagation();nav('profile','${from.id}')">${avaHtml(from,32)}</div>
+          <div style="margin-top:0.35rem"><strong>${esc(from.name)}</strong> ${labels[n.type]||''}</div>
+          <div style="color:var(--txt2);font-size:0.8rem">${relTime(n.ts)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
 
-        tweets.unshift(tweet);
-        currentUser.tweets.push(tweet.id);
-        document.getElementById('composerInput').value = '';
-        updatePostBtn();
-        saveData();
-        renderTweets();
-    }
+// ============================================================
+// TRENDS & EXPLORE
+// ============================================================
+function getTrends(){
+  const tags={};
+  db.tweets.forEach(t=>{
+    const matches=t.text.match(/#[\u0600-\u06FFa-zA-Z0-9_]+/g)||[];
+    matches.forEach(tag=>{tags[tag]=(tags[tag]||0)+1;});
+  });
+  return Object.entries(tags).sort((a,b)=>b[1]-a[1]).slice(0,5);
+}
 
-    function postTweetFromModal() {
-        const text = document.getElementById('modalComposerInput').value.trim();
-        if (!text) return;
+function renderTrends(){
+  const trends=getTrends();
+  const staticTrends=[['#القرآن_الكريم',245300],['#الفقه_الإسلامي',189200],['#السيرة_النبوية',156800],['#العقيدة',132500]];
+  const all=[...trends.map(([t,n])=>[t,n]),...staticTrends].slice(0,5);
+  document.getElementById('trendsContent').innerHTML=all.map(([tag,num])=>
+    `<div class="trend" onclick="searchByTag('${tag}')">
+      <div class="trend-cat">ترند</div>
+      <div class="trend-tag">${esc(tag)}</div>
+      <div class="trend-num">${fmtNum(num)} تغريدة</div>
+    </div>`).join('');
+}
 
-        const tweet = {
-            id: Date.now(),
-            author: currentUser.name,
-            handle: currentUser.handle,
-            avatar: currentUser.avatar,
-            text: text,
-            timestamp: 'الآن',
-            replies: 0,
-            retweets: 0,
-            likes: 0,
-            liked: false,
-            userEmail: currentUser.email
-        };
+function renderExploreTrends(){
+  const trends=getTrends();
+  const staticTrends=[['#القرآن_الكريم',245300],['#الفقه_الإسلامي',189200],['#السيرة_النبوية',156800],['#العقيدة',132500],['#رمضان',98700],['#الصلاة',75300]];
+  const all=[...trends.map(([t,n])=>[t,n]),...staticTrends].slice(0,8);
+  document.getElementById('exploreTrends').innerHTML=`<div class="card" style="margin:0.75rem 1rem"><div class="card-title">مواضيع رائجة</div>`
+    +all.map(([tag,num])=>`<div class="trend" onclick="searchByTag('${tag}')">`+
+      `<div class="trend-cat">ترند</div><div class="trend-tag">${esc(tag)}</div><div class="trend-num">${fmtNum(num)} تغريدة</div></div>`).join('')
+    +`</div>`;
+}
 
-        tweets.unshift(tweet);
-        currentUser.tweets.push(tweet.id);
-        document.getElementById('modalComposerInput').value = '';
-        saveData();
-        renderTweets();
-        closeModal('composeModal');
-    }
+function renderSuggestions(){
+  const others=Object.values(db.users).filter(u=>u.id!==me.id).slice(0,4);
+  if(!others.length){document.getElementById('suggestContent').innerHTML='<div style="padding:1rem;color:var(--txt2);font-size:0.85rem;text-align:center">لا توجد اقتراحات</div>';return;}
+  document.getElementById('suggestContent').innerHTML=others.map(u=>{
+    const isFollowing=me.following&&me.following.includes(u.id);
+    return `<div class="suggest">
+      <div onclick="nav('profile','${u.id}')" style="cursor:pointer">${avaHtml(u,36)}</div>
+      <div class="suggest-info" onclick="nav('profile','${u.id}')" style="cursor:pointer">
+        <div class="suggest-name">${esc(u.name)}</div>
+        <div class="suggest-handle">@${esc(u.handle)}</div>
+      </div>
+      <button class="follow-btn ${isFollowing?'following':''}" onclick="toggleFollow('${u.id}')">${isFollowing?'متابَع':'متابعة'}</button>
+    </div>`;
+  }).join('');
+}
 
-    function renderTweets() {
-        const container = document.getElementById('tweetsContainer');
-        container.innerHTML = tweets.map(tweet => `
-            <div class="tweet">
-                <div class="tweet-container">
-                    <div class="tweet-avatar">${tweet.avatar}</div>
-                    <div class="tweet-content">
-                        <div class="tweet-header">
-                            <span class="tweet-author">${tweet.author}</span>
-                            <span class="tweet-handle">${tweet.handle}</span>
-                            <span class="tweet-time">· ${tweet.timestamp}</span>
-                        </div>
-                        <div class="tweet-text">${escapeHtml(tweet.text)}</div>
-                        <div class="tweet-stats">
-                            <div>💬 ${tweet.replies}</div>
-                            <div>🔄 ${tweet.retweets}</div>
-                            <div>❤️ ${tweet.likes}</div>
-                        </div>
-                        <div class="tweet-actions">
-                            <div class="tweet-action" onclick="replyTweet(${tweet.id})">💬</div>
-                            <div class="tweet-action" onclick="retweetTweet(${tweet.id})">🔄</div>
-                            <div class="tweet-action like ${tweet.liked ? 'active' : ''}" onclick="likeTweet(${tweet.id})">❤️</div>
-                            <div class="tweet-action" onclick="shareTweet(${tweet.id})">📤</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
+function searchByTag(tag){
+  nav('explore');
+  const input=document.getElementById('exploreSearch');
+  input.value=tag; doSearch(tag);
+}
 
-    function likeTweet(id) {
-        const tweet = tweets.find(t => t.id === id);
-        if (tweet) {
-            tweet.liked = !tweet.liked;
-            tweet.likes += tweet.liked ? 1 : -1;
-            saveData();
-            renderTweets();
-        }
-    }
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  document.getElementById('exploreTrends').style.display=q?'none':'block';
+  if(!q){document.getElementById('searchResults').innerHTML='';return;}
+  // tweets
+  const tweetMatches=db.tweets.filter(t=>t.text.toLowerCase().includes(q)).sort((a,b)=>b.ts-a.ts);
+  // users
+  const userMatches=Object.values(db.users).filter(u=>u.name.toLowerCase().includes(q)||u.handle.toLowerCase().includes(q)||('@'+u.handle).includes(q));
+  let html='';
+  if(userMatches.length){
+    html+=`<div style="padding:0.75rem 1rem;font-weight:700;border-bottom:1px solid var(--border)">مستخدمون</div>`;
+    html+=userMatches.map(u=>{
+      const isFollowing=me.following&&me.following.includes(u.id);
+      return `<div class="suggest" style="padding:0.85rem 1rem">
+        <div onclick="nav('profile','${u.id}')" style="cursor:pointer">${avaHtml(u,40)}</div>
+        <div class="suggest-info" onclick="nav('profile','${u.id}')" style="cursor:pointer">
+          <div class="suggest-name">${esc(u.name)}</div>
+          <div class="suggest-handle">@${esc(u.handle)}</div>
+          ${u.bio?`<div style="font-size:0.82rem;color:var(--txt2);margin-top:0.15rem">${esc(u.bio.slice(0,60))}</div>`:''}
+        </div>
+        <button class="follow-btn ${isFollowing?'following':''}" onclick="toggleFollow('${u.id}')">${isFollowing?'متابَع':'متابعة'}</button>
+      </div>`;
+    }).join('');
+  }
+  if(tweetMatches.length){
+    html+=`<div style="padding:0.75rem 1rem;font-weight:700;border-bottom:1px solid var(--border);border-top:1px solid var(--border)">تغريدات</div>`;
+    html+=tweetMatches.map(t=>tweetCard(t,false,false)).join('');
+  }
+  if(!html) html=`<div class="empty-state"><p>لا توجد نتائج لـ "${esc(q)}"</p></div>`;
+  document.getElementById('searchResults').innerHTML=html;
+}
 
-    function retweetTweet(id) {
-        alert('تم إعادة النشر');
-    }
+function sideSearch(q){
+  if(!q.trim()) return;
+  nav('explore');
+  document.getElementById('exploreSearch').value=q;
+  doSearch(q);
+}
 
-    function replyTweet(id) {
-        document.getElementById('composerInput').focus();
-    }
+// ============================================================
+// THEME
+// ============================================================
+function toggleTheme(){
+  const isDark=document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme',isDark?'dark':'light');
+  const btn=document.getElementById('themeBtn');
+  if(isDark){
+    btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> الوضع الفاتح`;
+  } else {
+    btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> الوضع الليلي`;
+  }
+}
 
-    function shareTweet(id) {
-        alert('تم نسخ الرابط');
-    }
+function loadTheme(){
+  const t=localStorage.getItem('theme')||'light';
+  const btn=document.getElementById('themeBtn');
+  if(t==='dark'){
+    document.documentElement.classList.add('dark');
+    if(btn) btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> الوضع الفاتح`;
+  }
+}
 
-    // Profile Functions
-    function renderProfile() {
-        document.getElementById('profileName').textContent = currentUser.name;
-        document.getElementById('profileHandle').textContent = currentUser.handle;
-        document.getElementById('profileBio').textContent = currentUser.bio || 'لا يوجد وصف';
-        document.getElementById('profileAvatar').textContent = currentUser.avatar;
-        document.getElementById('profileTweets').textContent = currentUser.tweets.length;
+// ============================================================
+// TOAST
+// ============================================================
+function toast(msg){
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div');
+  el.className='toast'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300);},2500);
+}
 
-        const userTweets = tweets.filter(t => t.userEmail === currentUser.email);
-        const container = document.getElementById('profileTweetsContainer');
-        container.innerHTML = userTweets.map(tweet => `
-            <div class="tweet">
-                <div class="tweet-container">
-                    <div class="tweet-avatar">${tweet.avatar}</div>
-                    <div class="tweet-content">
-                        <div class="tweet-header">
-                            <span class="tweet-author">${tweet.author}</span>
-                            <span class="tweet-handle">${tweet.handle}</span>
-                        </div>
-                        <div class="tweet-text">${escapeHtml(tweet.text)}</div>
-                        <div class="tweet-actions">
-                            <div class="tweet-action" onclick="likeTweet(${tweet.id})">❤️</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
-    }
+// ============================================================
+// MODAL
+// ============================================================
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('overlay')&&e.target.classList.contains('open'))
+    e.target.classList.remove('open');
+});
 
-    function openEditProfileModal() {
-        document.getElementById('editName').value = currentUser.name;
-        document.getElementById('editHandle').value = currentUser.handle;
-        document.getElementById('editBio').value = currentUser.bio;
-        openModal('editProfileModal');
-    }
+// ============================================================
+// HELPERS
+// ============================================================
+function v(id){return document.getElementById(id).value;}
+function sv(id,val){document.getElementById(id).value=val;}
+function esc(s){if(!s) return '';const d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+function getTweetById(id){return db.tweets.find(t=>t.id===id);}
+function getUserById(id){return Object.values(db.users).find(u=>u.id===id);}
 
-    function saveProfile() {
-        currentUser.name = document.getElementById('editName').value;
-        currentUser.handle = document.getElementById('editHandle').value;
-        currentUser.bio = document.getElementById('editBio').value;
-        currentUser.avatar = currentUser.name.charAt(0);
-        users[currentUser.email] = currentUser;
-        sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-        saveData();
-        updateUI();
-        renderProfile();
-        closeModal('editProfileModal');
-    }
+function relTime(ts){
+  const diff=(Date.now()-ts)/1000;
+  if(diff<60) return 'الآن';
+  if(diff<3600) return `${Math.floor(diff/60)}د`;
+  if(diff<86400) return `${Math.floor(diff/3600)}س`;
+  if(diff<604800) return `${Math.floor(diff/86400)}ي`;
+  return new Date(ts).toLocaleDateString('ar-EG',{month:'short',day:'numeric'});
+}
 
-    function uploadProfilePic() {
-        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
-    }
+function fmtNum(n){if(n>=1000) return (n/1000).toFixed(1)+'K';return n;}
 
-    function uploadCover() {
-        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
-    }
+function formatText(text){
+  if(!text) return '';
+  let t=esc(text);
+  // hashtags
+  t=t.replace(/#([\u0600-\u06FFa-zA-Z0-9_]+)/g,'<a href="#" onclick="event.preventDefault();searchByTag(\'#$1\')">#$1</a>');
+  // mentions
+  t=t.replace(/@([a-zA-Z0-9_\u0600-\u06FF]+)/g,(m,h)=>{
+    const u=Object.values(db.users).find(u=>u.handle===h);
+    return u?`<a href="#" onclick="event.preventDefault();nav('profile','${u.id}')">@${h}</a>`:m;
+  });
+  // links
+  t=t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+  return t;
+}
 
-    function uploadImage() {
-        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
-    }
-
-    // Modal Functions
-    function openModal(id) {
-        document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
-
-    function openComposeModal() {
-        document.getElementById('modalComposerInput').value = '';
-        openModal('composeModal');
-    }
-
-    // UI Functions
-    function updateUI() {
-        document.getElementById('sidebarName').textContent = currentUser.name;
-        document.getElementById('sidebarHandle').textContent = currentUser.handle;
-        document.getElementById('sidebarAvatar').textContent = currentUser.avatar;
-        document.getElementById('composerAvatar').textContent = currentUser.avatar;
-        document.getElementById('profileAvatar').textContent = currentUser.avatar;
-    }
-
-    function updatePostBtn() {
-        const btn = document.getElementById('postBtn');
-        btn.disabled = document.getElementById('composerInput').value.trim().length === 0;
-    }
-
-    function showAuth() {
-        const authPage = document.getElementById('authPage');
-        const appPage = document.getElementById('appPage');
-        authPage.style.cssText = 'display: flex !important; visibility: visible !important;';
-        appPage.style.cssText = 'display: none !important; visibility: hidden !important;';
-    }
-
-    function showApp() {
-        const authPage = document.getElementById('authPage');
-        const appPage = document.getElementById('appPage');
-        authPage.style.cssText = 'display: none !important; visibility: hidden !important;';
-        appPage.style.cssText = 'display: block !important; visibility: visible !important; width: 100%; height: 100vh; overflow: hidden;';
-        // Force grid on inner container
-        const appContainer = appPage.querySelector('.app-container');
-        if (appContainer) appContainer.style.display = 'grid';
-        navigateTo('home');
-        renderTweets();
-    }
-
-    function toggleTheme() {
-        const html = document.documentElement;
-        const isDark = html.classList.contains('dark-mode');
-        
-        if (isDark) {
-            html.classList.remove('dark-mode');
-            document.getElementById('themeToggle').textContent = '🌙 الوضع الليلي';
-            localStorage.setItem('theme', 'light');
-        } else {
-            html.classList.add('dark-mode');
-            document.getElementById('themeToggle').textContent = '☀️ الوضع الفاتح';
-            localStorage.setItem('theme', 'dark');
-        }
-    }
-
-    function loadTheme() {
-        const theme = localStorage.getItem('theme') || 'light';
-        if (theme === 'dark') {
-            document.documentElement.classList.add('dark-mode');
-            document.getElementById('themeToggle').textContent = '☀️ الوضع الفاتح';
-        }
-    }
-
-    function saveData() {
-        localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('tweets', JSON.stringify(tweets));
-    }
-
-    function loadData() {
-        const savedUsers = localStorage.getItem('users');
-        const savedTweets = localStorage.getItem('tweets');
-        
-        if (savedUsers) users = JSON.parse(savedUsers);
-        if (savedTweets) tweets = JSON.parse(savedTweets);
-
-        // Sample data
-        if (Object.keys(users).length === 0) {
-            users = {
-                'test@example.com': {
-                    name: 'أحمد محمد',
-                    email: 'test@example.com',
-                    password: '123456',
-                    handle: '@ahmad_user',
-                    bio: 'مهتم بالعلوم الإسلامية',
-                    avatar: 'أ',
-                    tweets: []
-                }
-            };
-            tweets = [
-                {
-                    id: 1001,
-                    author: 'أحمد محمد',
-                    handle: '@ahmad_user',
-                    avatar: 'أ',
-                    text: 'قال رسول الله ﷺ: "إنما الأعمال بالنيات" — نية خالصة تُضاعف كل عمل ✨',
-                    timestamp: 'منذ ساعة',
-                    replies: 5, retweets: 12, likes: 48, liked: false,
-                    userEmail: 'test@example.com'
-                },
-                {
-                    id: 1002,
-                    author: 'أحمد محمد',
-                    handle: '@ahmad_user',
-                    avatar: 'أ',
-                    text: 'مرحباً بكم في منصة اسأل الإسلام 🌙 — مجتمع إسلامي للحوار والتعلم',
-                    timestamp: 'منذ يوم',
-                    replies: 2, retweets: 7, likes: 23, liked: false,
-                    userEmail: 'test@example.com'
-                }
-            ];
-            saveData();
-        }
-    }
-
-    function escapeHtml(text) {
-        const map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#039;'
-        };
-        return text.replace(/[&<>"']/g, m => map[m]);
-    }
-
-    // Close modals on background click
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.classList.remove('active');
-            }
-        });
-    });
+// keyboard shortcuts
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();nav('explore');document.getElementById('exploreSearch').focus();}
+  if(e.key==='Escape'){
+    document.querySelectorAll('.overlay.open').forEach(m=>m.classList.remove('open'));
+  }
+});
 </script>
-
 </body>
 </html>
