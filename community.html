@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المجتمع الإسلامي - اسأل الإسلام AI</title>
+    <title>اسأل الإسلام - شبكة التواصل الإسلامية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ========== CSS Variables ========== */
         :root {
             --bg-primary: #ffffff;
             --bg-secondary: #f7f9fa;
@@ -21,7 +20,6 @@
             --accent-hover: #1a8cd8;
             --like-color: #f91880;
             --retweet-color: #17bf63;
-            --reply-color: #1d9bf0;
         }
 
         html.dark-mode {
@@ -32,10 +30,8 @@
             --text-secondary: #71767b;
             --text-tertiary: #536471;
             --border-color: #2f3336;
-            --accent: #1d9bf0;
         }
 
-        /* ========== Reset ========== */
         * {
             margin: 0;
             padding: 0;
@@ -55,7 +51,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ========== Main Layout ========== */
         .app-container {
             display: grid;
             grid-template-columns: 280px 1fr 350px;
@@ -94,6 +89,7 @@
             color: var(--text-primary);
             font-weight: 700;
             font-size: 1.2rem;
+            cursor: pointer;
         }
 
         .logo img {
@@ -122,6 +118,9 @@
             font-size: 1rem;
             font-weight: 500;
             text-decoration: none;
+            border: none;
+            background: transparent;
+            font-family: inherit;
         }
 
         .nav-item:hover {
@@ -166,6 +165,9 @@
             transition: all 0.2s;
             color: var(--text-primary);
             margin-top: auto;
+            border: none;
+            background: transparent;
+            font-family: inherit;
         }
 
         .user-profile:hover {
@@ -176,13 +178,16 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            background-color: #667eea;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
             flex-shrink: 0;
+            font-size: 0.9rem;
         }
 
         .user-info {
@@ -241,15 +246,17 @@
             color: var(--text-primary);
         }
 
-        .feed-header-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-top: 0.2rem;
-        }
-
         .feed-content {
             flex: 1;
             overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
         }
 
         /* ========== Tweet Composer ========== */
@@ -264,13 +271,16 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            background-color: #667eea;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
             flex-shrink: 0;
+            font-size: 1rem;
         }
 
         .composer-content {
@@ -369,7 +379,9 @@
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            background-color: #667eea;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -378,6 +390,7 @@
             flex-shrink: 0;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 1rem;
         }
 
         .tweet-avatar:hover {
@@ -461,15 +474,6 @@
             color: var(--text-secondary);
         }
 
-        .tweet-stat {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tweet-stat:hover {
-            color: var(--accent);
-        }
-
         .tweet-actions {
             display: flex;
             justify-content: space-around;
@@ -491,17 +495,12 @@
 
         .tweet-action:hover {
             background: rgba(29, 155, 240, 0.1);
-            color: var(--reply-color);
+            color: var(--accent);
         }
 
         .tweet-action.like:hover {
             background: rgba(249, 24, 128, 0.1);
             color: var(--like-color);
-        }
-
-        .tweet-action.retweet:hover {
-            background: rgba(23, 191, 99, 0.1);
-            color: var(--retweet-color);
         }
 
         .tweet-action.active {
@@ -512,11 +511,236 @@
             color: var(--like-color);
         }
 
-        .tweet-action.retweet.active {
-            color: var(--retweet-color);
+        /* ========== Profile Page ========== */
+        .profile-header {
+            border-bottom: 1px solid var(--border-color);
         }
 
-        /* ========== Right Sidebar (Trends) ========== */
+        .profile-cover {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .profile-cover-upload {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .profile-cover-upload:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .profile-info {
+            padding: 1rem;
+            position: relative;
+        }
+
+        .profile-avatar-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            background-color: #667eea;
+            border: 4px solid var(--bg-primary);
+            margin-top: -60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 2rem;
+            position: relative;
+        }
+
+        .profile-avatar-upload {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: 4px solid var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .edit-profile-btn {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            background: transparent;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .edit-profile-btn:hover {
+            background: rgba(29, 155, 240, 0.1);
+        }
+
+        .profile-details {
+            margin-bottom: 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .profile-handle {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-bio {
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .profile-stats {
+            display: flex;
+            gap: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .profile-stat {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .profile-stat-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ========== Modal ========== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            font-size: 1rem;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--bg-primary);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .form-submit:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ========== Right Sidebar ========== */
         .trends-sidebar {
             background: var(--bg-primary);
             padding: 1rem;
@@ -525,15 +749,6 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
-        }
-
-        .trends-sidebar::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .trends-sidebar::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
         }
 
         .search-box {
@@ -566,11 +781,6 @@
             color: var(--text-secondary);
         }
 
-        .search-icon {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-        }
-
         .trends-container {
             background: var(--bg-secondary);
             border-radius: 16px;
@@ -582,17 +792,10 @@
             border-bottom: 1px solid var(--border-color);
             cursor: pointer;
             transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .trend-item:hover {
             background: var(--bg-tertiary);
-        }
-
-        .trend-info {
-            flex: 1;
         }
 
         .trend-category {
@@ -609,12 +812,6 @@
         .trend-count {
             font-size: 0.8rem;
             color: var(--text-secondary);
-        }
-
-        .trend-more {
-            color: var(--text-secondary);
-            font-size: 1.2rem;
-            cursor: pointer;
         }
 
         .theme-toggle {
@@ -634,49 +831,107 @@
             background: var(--bg-tertiary);
         }
 
-        /* ========== Animations ========== */
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* ========== Auth Page ========== */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: var(--bg-primary);
         }
 
-        @keyframes heartBeat {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.3); }
-            50% { transform: scale(1); }
+        .auth-form {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
         }
 
-        .tweet {
-            animation: slideIn 0.3s ease-out;
+        .auth-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
         }
 
-        .tweet-action.active.like {
-            animation: heartBeat 0.4s ease-in-out;
+        .auth-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .auth-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .auth-form-group {
+            margin-bottom: 1rem;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            font-size: 1rem;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .auth-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .auth-submit:hover {
+            background: var(--accent-hover);
+        }
+
+        .auth-error {
+            color: #f91880;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
         }
 
         /* ========== Responsive ========== */
-        @media (max-width: 1400px) {
-            .app-container {
-                grid-template-columns: 260px 1fr 320px;
-            }
-        }
-
         @media (max-width: 1024px) {
             .app-container {
                 grid-template-columns: 1fr;
             }
 
-            .sidebar {
-                display: none;
-            }
-
-            .trends-sidebar {
+            .sidebar, .trends-sidebar {
                 display: none;
             }
 
@@ -690,29 +945,23 @@
                 padding: 0.8rem;
             }
 
-            .feed-header-title {
-                font-size: 1.1rem;
-            }
-
             .tweet {
                 padding: 0.8rem;
             }
 
-            .tweet-container {
-                gap: 0.8rem;
-            }
-
-            .tweet-avatar {
-                width: 40px;
-                height: 40px;
-            }
-
-            .tweet-text {
-                font-size: 0.95rem;
-            }
-
             .composer-input {
                 font-size: 1.1rem;
+            }
+
+            .profile-avatar-large {
+                width: 80px;
+                height: 80px;
+                font-size: 1.5rem;
+                margin-top: -40px;
+            }
+
+            .profile-cover {
+                height: 150px;
             }
         }
 
@@ -721,328 +970,489 @@
                 padding: 0.6rem;
             }
 
-            .feed-header-title {
-                font-size: 1rem;
-            }
-
             .tweet {
                 padding: 0.6rem;
             }
 
-            .tweet-avatar {
-                width: 36px;
-                height: 36px;
+            .modal-content {
+                padding: 1.5rem;
             }
 
-            .tweet-actions {
-                font-size: 0.75rem;
+            .auth-form {
+                padding: 1.5rem;
             }
+        }
 
-            .composer-input {
-                font-size: 1rem;
-                min-height: 50px;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-            .composer-post-btn {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
-            }
+        .tweet {
+            animation: slideIn 0.3s ease-out;
         }
     </style>
 </head>
 <body>
 
-<div class="app-container">
-    <!-- ========== Left Sidebar ========== -->
-    <aside class="sidebar">
-        <a href="/" class="logo">
-            <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">
-            <span>اسأل الإسلام</span>
-        </a>
-
-        <nav class="nav-menu">
-            <a href="/" class="nav-item active">
-                <span>🏠</span>
-                <span>الرئيسية</span>
-            </a>
-            <a href="/explore" class="nav-item">
-                <span>🔍</span>
-                <span>استكشاف</span>
-            </a>
-            <a href="/notifications" class="nav-item">
-                <span>🔔</span>
-                <span>الإشعارات</span>
-            </a>
-            <a href="/messages" class="nav-item">
-                <span>💬</span>
-                <span>الرسائل</span>
-            </a>
-            <a href="/bookmarks" class="nav-item">
-                <span>🔖</span>
-                <span>الحفظ</span>
-            </a>
-            <a href="/profile" class="nav-item">
-                <span>👤</span>
-                <span>الملف الشخصي</span>
-            </a>
-        </nav>
-
-        <button class="compose-btn">تغريد جديد</button>
-
-        <div class="user-profile">
-            <div class="user-avatar">أ</div>
-            <div class="user-info">
-                <div class="user-name">أحمد محمد</div>
-                <div class="user-handle">@ahmad_user</div>
+<!-- ========== Auth Page ========== -->
+<div id="authPage" class="page active">
+    <div class="auth-container">
+        <div class="auth-form">
+            <div class="auth-title">اسأل الإسلام</div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">دخول</button>
+                <button class="auth-tab" onclick="switchAuthTab('signup')">إنشاء حساب</button>
             </div>
-        </div>
-    </aside>
 
-    <!-- ========== Feed ========== -->
-    <main class="feed">
-        <div class="feed-header">
-            <div class="feed-header-title">الرئيسية</div>
-            <div class="feed-header-subtitle">أحدث التغريدات والأسئلة الإسلامية</div>
-        </div>
+            <!-- Login Form -->
+            <form id="loginForm" style="display: block;">
+                <div class="auth-form-group">
+                    <input type="email" class="auth-input" id="loginEmail" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="auth-form-group">
+                    <input type="password" class="auth-input" id="loginPassword" placeholder="كلمة السر" required>
+                </div>
+                <button type="button" class="auth-submit" onclick="handleLogin()">دخول</button>
+                <div class="auth-error" id="loginError"></div>
+            </form>
 
-        <div class="feed-content">
-            <!-- Tweet Composer -->
-            <div class="tweet-composer">
-                <div class="composer-avatar">أ</div>
-                <div class="composer-content">
-                    <textarea class="composer-input" id="composerInput" placeholder="ما رأيك؟"></textarea>
-                    <div class="composer-actions">
-                        <div class="composer-icons">
-                            <button class="composer-icon-btn" title="صورة">🖼️</button>
-                            <button class="composer-icon-btn" title="استطلاع">📊</button>
-                            <button class="composer-icon-btn" title="موقع">📍</button>
+            <!-- Signup Form -->
+            <form id="signupForm" style="display: none;">
+                <div class="auth-form-group">
+                    <input type="text" class="auth-input" id="signupName" placeholder="الاسم الكامل" required>
+                </div>
+                <div class="auth-form-group">
+                    <input type="email" class="auth-input" id="signupEmail" placeholder="البريد الإلكتروني" required>
+                </div>
+                <div class="auth-form-group">
+                    <input type="password" class="auth-input" id="signupPassword" placeholder="كلمة السر" required>
+                </div>
+                <button type="button" class="auth-submit" onclick="handleSignup()">إنشاء حساب</button>
+                <div class="auth-error" id="signupError"></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ========== Main App ========== -->
+<div id="appPage" class="page" style="display: none;">
+    <div class="app-container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <a class="logo" onclick="navigateTo('home')">
+                <img src="https://private-us-east-1.manuscdn.com/user_upload_by_module/session_file/310519663406446349/wdjbvmzYyfONYqmA.png?Expires=1804261184&Signature=dR-gEtp5gPBlEkkK4amxdhy0vsdQmcPkwGh3EqXZasQ77dvYnSjyx3IBrfvjmV0QjMjf0-7m5w4mHe4Fhb6-VbEoW8lQ-QTysTk1Wap65MTb4~V8T5k1uCY1LOVv6uhnnlM9nvsjPMwmbevM3vwz5eSaOprEj4OE18xsDisX4Y-kfsZRn5-1IK3rryGGLNQyn-iTDxby7RswezuIjx0IQX1GWTfXRHk9x9MRkFVBK4i2dfRjG9mz1MLVIrabWI3M-vCKd4y1VfH9Ih9frQVc4mVDyIgh642WorxrH2ebuX9dmPMB1EjQY6HKG5Cc~VfdmHv5eugQv4XlI6vYVCX~VA__&Key-Pair-Id=K2HSFNDJXOU9YS" alt="اسأل الإسلام">
+                <span>اسأل الإسلام</span>
+            </a>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" onclick="navigateTo('home')">🏠 الرئيسية</button>
+                <button class="nav-item" onclick="navigateTo('explore')">🔍 استكشاف</button>
+                <button class="nav-item" onclick="navigateTo('notifications')">🔔 الإشعارات</button>
+                <button class="nav-item" onclick="navigateTo('bookmarks')">🔖 الحفظ</button>
+                <button class="nav-item" onclick="navigateTo('profile')">👤 الملف الشخصي</button>
+            </nav>
+
+            <button class="compose-btn" onclick="openComposeModal()">تغريد جديد</button>
+
+            <button class="user-profile" onclick="navigateTo('profile')">
+                <div class="user-avatar" id="sidebarAvatar">أ</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarName">أحمد محمد</div>
+                    <div class="user-handle" id="sidebarHandle">@user</div>
+                </div>
+            </button>
+        </aside>
+
+        <!-- Feed -->
+        <main class="feed">
+            <!-- Home Page -->
+            <div id="homePage" class="page active">
+                <div class="feed-header">
+                    <div class="feed-header-title">الرئيسية</div>
+                </div>
+
+                <div class="feed-content">
+                    <div class="tweet-composer">
+                        <div class="composer-avatar" id="composerAvatar">أ</div>
+                        <div class="composer-content">
+                            <textarea class="composer-input" id="composerInput" placeholder="ما رأيك؟"></textarea>
+                            <div class="composer-actions">
+                                <div class="composer-icons">
+                                    <button class="composer-icon-btn" title="صورة" onclick="uploadImage()">🖼️</button>
+                                    <button class="composer-icon-btn" title="موقع">📍</button>
+                                </div>
+                                <button class="composer-post-btn" id="postBtn" onclick="postTweet()">تغريد</button>
+                            </div>
                         </div>
-                        <button class="composer-post-btn" id="postBtn">تغريد</button>
+                    </div>
+                    <div id="tweetsContainer"></div>
+                </div>
+            </div>
+
+            <!-- Explore Page -->
+            <div id="explorePage" class="page">
+                <div class="feed-header">
+                    <div class="feed-header-title">استكشاف</div>
+                </div>
+                <div class="feed-content" style="padding: 2rem; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">استكشف المحتوى الإسلامي</div>
+                    <div style="color: var(--text-secondary);">ابحث عن أسئلة وأجوبة إسلامية متنوعة</div>
+                    <div style="margin-top: 2rem;">
+                        <input type="text" placeholder="ابحث هنا..." style="width: 100%; max-width: 400px; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 20px; font-family: inherit; color: var(--text-primary); background: var(--bg-secondary);">
                     </div>
                 </div>
             </div>
 
-            <!-- Tweets Container -->
-            <div id="tweetsContainer"></div>
-        </div>
-    </main>
+            <!-- Notifications Page -->
+            <div id="notificationsPage" class="page">
+                <div class="feed-header">
+                    <div class="feed-header-title">الإشعارات</div>
+                </div>
+                <div class="feed-content" style="padding: 2rem; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔔</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">لا توجد إشعارات جديدة</div>
+                    <div style="color: var(--text-secondary);">ستظهر الإشعارات هنا عندما يرد عليك أحد</div>
+                </div>
+            </div>
 
-    <!-- ========== Right Sidebar (Trends) ========== -->
-    <aside class="trends-sidebar">
-        <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" placeholder="ابحث عن أسئلة...">
-        </div>
+            <!-- Bookmarks Page -->
+            <div id="bookmarksPage" class="page">
+                <div class="feed-header">
+                    <div class="feed-header-title">الحفظ</div>
+                </div>
+                <div class="feed-content" style="padding: 2rem; text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔖</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">لم تحفظ أي تغريدات</div>
+                    <div style="color: var(--text-secondary);">احفظ التغريدات المهمة لقراءتها لاحقاً</div>
+                </div>
+            </div>
 
-        <div class="trends-container">
-            <div class="trend-item">
-                <div class="trend-info">
+            <!-- Profile Page -->
+            <div id="profilePage" class="page">
+                <div class="profile-header">
+                    <div class="profile-cover" id="profileCover" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <button class="profile-cover-upload" onclick="uploadCover()">تحديث الغلاف</button>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-avatar-section">
+                            <div class="profile-avatar-large" id="profileAvatar">أ
+                                <div class="profile-avatar-upload" onclick="uploadProfilePic()">📷</div>
+                            </div>
+                            <button class="edit-profile-btn" onclick="openEditProfileModal()">تعديل الملف</button>
+                        </div>
+                        <div class="profile-details">
+                            <div class="profile-name" id="profileName">أحمد محمد</div>
+                            <div class="profile-handle" id="profileHandle">@user</div>
+                            <div class="profile-bio" id="profileBio">مهتم بالعلوم الإسلامية والتكنولوجيا</div>
+                            <div class="profile-stats">
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value" id="profileTweets">0</span>
+                                    <span>تغريدة</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">0</span>
+                                    <span>متابع</span>
+                                </div>
+                                <div class="profile-stat">
+                                    <span class="profile-stat-value">0</span>
+                                    <span>متابع</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feed-content" id="profileTweetsContainer"></div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="trends-sidebar">
+            <div class="search-box">
+                <span style="font-size: 1.1rem;">🔍</span>
+                <input type="text" placeholder="ابحث عن أسئلة...">
+            </div>
+
+            <div class="trends-container">
+                <div class="trend-item">
                     <div class="trend-category">الترندات الآن</div>
                     <div class="trend-title">#القرآن_الكريم</div>
                     <div class="trend-count">245.3K تغريدة</div>
                 </div>
-                <div class="trend-more">⋯</div>
-            </div>
-            <div class="trend-item">
-                <div class="trend-info">
+                <div class="trend-item">
                     <div class="trend-category">الترندات الآن</div>
                     <div class="trend-title">#الفقه_الإسلامي</div>
                     <div class="trend-count">189.2K تغريدة</div>
                 </div>
-                <div class="trend-more">⋯</div>
-            </div>
-            <div class="trend-item">
-                <div class="trend-info">
+                <div class="trend-item">
                     <div class="trend-category">الترندات الآن</div>
                     <div class="trend-title">#السيرة_النبوية</div>
                     <div class="trend-count">156.8K تغريدة</div>
                 </div>
-                <div class="trend-more">⋯</div>
-            </div>
-            <div class="trend-item">
-                <div class="trend-info">
+                <div class="trend-item">
                     <div class="trend-category">الترندات الآن</div>
                     <div class="trend-title">#العقيدة_الإسلامية</div>
                     <div class="trend-count">132.5K تغريدة</div>
                 </div>
-                <div class="trend-more">⋯</div>
             </div>
-            <div class="trend-item">
-                <div class="trend-info">
-                    <div class="trend-category">الترندات الآن</div>
-                    <div class="trend-title">#الأحاديث_الشريفة</div>
-                    <div class="trend-count">98.7K تغريدة</div>
-                </div>
-                <div class="trend-more">⋯</div>
-            </div>
+
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 الوضع الليلي</button>
+            <button class="theme-toggle" style="background: #f91880; color: white; border: none;" onclick="logout()">تسجيل الخروج</button>
+        </aside>
+    </div>
+</div>
+
+<!-- ========== Modals ========== -->
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('editProfileModal')">✕</button>
+        <div class="modal-header">تعديل الملف الشخصي</div>
+        
+        <div class="form-group">
+            <label class="form-label">الاسم</label>
+            <input type="text" class="form-input" id="editName" placeholder="الاسم الكامل">
         </div>
 
-        <button class="theme-toggle" id="themeToggle">🌙 الوضع الليلي</button>
-    </aside>
+        <div class="form-group">
+            <label class="form-label">اسم المستخدم</label>
+            <input type="text" class="form-input" id="editHandle" placeholder="@username">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">الوصف</label>
+            <textarea class="form-textarea" id="editBio" placeholder="أخبرنا عن نفسك"></textarea>
+        </div>
+
+        <button class="form-submit" onclick="saveProfile()">حفظ التغييرات</button>
+    </div>
+</div>
+
+<!-- Compose Modal -->
+<div id="composeModal" class="modal">
+    <div class="modal-content">
+        <button class="modal-close" onclick="closeModal('composeModal')">✕</button>
+        <div class="modal-header">تغريد جديد</div>
+        
+        <div class="form-group">
+            <textarea class="form-textarea" id="modalComposerInput" placeholder="ما رأيك؟" style="min-height: 150px;"></textarea>
+        </div>
+
+        <button class="form-submit" onclick="postTweetFromModal()">تغريد</button>
+    </div>
 </div>
 
 <!-- ========== Scripts ========== -->
 <script>
-    // Sample tweets data
-    const sampleTweets = [
-        {
-            id: 1,
-            author: 'الشيخ أحمد الشريف',
-            handle: '@sheikh_ahmad',
-            avatar: 'ش',
-            verified: true,
-            text: 'قال تعالى: "وما أوتيتم من العلم إلا قليلا" - سورة الإسراء. العلم نور يضيء طريق الإنسان في هذه الحياة.',
-            image: null,
-            timestamp: 'قبل ساعة',
-            replies: 234,
-            retweets: 512,
-            likes: 1203,
-            liked: false,
-            retweeted: false
-        },
-        {
-            id: 2,
-            author: 'فاطمة المسلمة',
-            handle: '@fatima_muslim',
-            avatar: 'ف',
-            verified: false,
-            text: 'سؤال: ما حكم الصلاة في الطائرة؟ أنا مسافرة وقت الصلاة ولا أعرف كيف أصلي بشكل صحيح. 🤔',
-            image: null,
-            timestamp: 'قبل 2 ساعة',
-            replies: 89,
-            retweets: 156,
-            likes: 342,
-            liked: false,
-            retweeted: false
-        },
-        {
-            id: 3,
-            author: 'محمود الباحث',
-            handle: '@mahmoud_researcher',
-            avatar: 'م',
-            verified: true,
-            text: 'دراسة جديدة عن تأثير الصلاة على الصحة النفسية. أظهرت النتائج تحسناً ملحوظاً في مستويات التوتر والقلق لدى المصلين بانتظام.',
-            image: null,
-            timestamp: 'قبل 3 ساعات',
-            replies: 456,
-            retweets: 892,
-            likes: 2341,
-            liked: false,
-            retweeted: false
-        },
-        {
-            id: 4,
-            author: 'علي الحكيم',
-            handle: '@ali_wise',
-            avatar: 'ع',
-            verified: false,
-            text: 'تذكر: الصبر مفتاح الفرج. قال رسول الله ﷺ: "ما يصيب المسلم من نصب ولا وصب ولا هم ولا حزن ولا أذى ولا غم إلا كفر الله به من خطاياه"',
-            image: null,
-            timestamp: 'قبل 4 ساعات',
-            replies: 123,
-            retweets: 234,
-            likes: 567,
-            liked: false,
-            retweeted: false
-        }
-    ];
-
-    let tweets = [...sampleTweets];
-
-    // DOM Elements
-    const composerInput = document.getElementById('composerInput');
-    const postBtn = document.getElementById('postBtn');
-    const tweetsContainer = document.getElementById('tweetsContainer');
-    const themeToggle = document.getElementById('themeToggle');
-    const composeBtn = document.querySelector('.compose-btn');
+    // Global State
+    let currentUser = null;
+    let users = {};
+    let tweets = [];
+    let currentPage = 'home';
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-        renderTweets();
-        setupEventListeners();
+        loadData();
         loadTheme();
+        setupEventListeners();
     });
 
     function setupEventListeners() {
-        postBtn.addEventListener('click', postTweet);
-        composerInput.addEventListener('input', updatePostBtn);
-        composerInput.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                postTweet();
-            }
+        document.getElementById('composerInput').addEventListener('input', updatePostBtn);
+        document.getElementById('loginForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleLogin();
         });
-        themeToggle.addEventListener('click', toggleTheme);
-        composeBtn.addEventListener('click', function() {
-            composerInput.focus();
+        document.getElementById('signupForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') handleSignup();
         });
     }
 
-    function updatePostBtn() {
-        postBtn.disabled = composerInput.value.trim().length === 0;
+    // Auth Functions
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('form').forEach(f => f.style.display = 'none');
+        
+        if (tab === 'login') {
+            document.querySelector('[onclick="switchAuthTab(\'login\')"]').classList.add('active');
+            document.getElementById('loginForm').style.display = 'block';
+        } else {
+            document.querySelector('[onclick="switchAuthTab(\'signup\')"]').classList.add('active');
+            document.getElementById('signupForm').style.display = 'block';
+        }
     }
 
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        const errorDiv = document.getElementById('loginError');
+
+        if (!email || !password) {
+            errorDiv.textContent = 'يرجى ملء جميع الحقول';
+            return;
+        }
+
+        if (users[email] && users[email].password === password) {
+            currentUser = { email, ...users[email] };
+            showApp();
+            updateUI();
+        } else {
+            errorDiv.textContent = 'بيانات الدخول غير صحيحة';
+        }
+    }
+
+    function handleSignup() {
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+        const errorDiv = document.getElementById('signupError');
+
+        if (!name || !email || !password) {
+            errorDiv.textContent = 'يرجى ملء جميع الحقول';
+            return;
+        }
+
+        if (users[email]) {
+            errorDiv.textContent = 'هذا البريد الإلكتروني مسجل بالفعل';
+            return;
+        }
+
+        users[email] = {
+            name,
+            email,
+            password,
+            handle: '@' + name.replace(/\s+/g, '_').toLowerCase(),
+            bio: '',
+            avatar: name.charAt(0),
+            cover: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            tweets: []
+        };
+
+        currentUser = { email, ...users[email] };
+        saveData();
+        showApp();
+        updateUI();
+    }
+
+    function logout() {
+        currentUser = null;
+        showAuth();
+        document.getElementById('loginEmail').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('signupName').value = '';
+        document.getElementById('signupEmail').value = '';
+        document.getElementById('signupPassword').value = '';
+    }
+
+    // Navigation
+    function navigateTo(page) {
+        currentPage = page;
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        
+        if (page === 'home') {
+            document.getElementById('homePage').classList.add('active');
+            document.querySelector('[onclick="navigateTo(\'home\')"]').classList.add('active');
+            renderTweets();
+        } else if (page === 'explore') {
+            document.getElementById('explorePage').classList.add('active');
+            document.querySelector('[onclick="navigateTo(\'explore\')"]').classList.add('active');
+        } else if (page === 'notifications') {
+            document.getElementById('notificationsPage').classList.add('active');
+            document.querySelector('[onclick="navigateTo(\'notifications\')"]').classList.add('active');
+        } else if (page === 'bookmarks') {
+            document.getElementById('bookmarksPage').classList.add('active');
+            document.querySelector('[onclick="navigateTo(\'bookmarks\')"]').classList.add('active');
+        } else if (page === 'profile') {
+            document.getElementById('profilePage').classList.add('active');
+            document.querySelector('[onclick="navigateTo(\'profile\')"]').classList.add('active');
+            renderProfile();
+        }
+    }
+
+    // Tweet Functions
     function postTweet() {
-        const text = composerInput.value.trim();
+        const text = document.getElementById('composerInput').value.trim();
         if (!text) return;
 
-        const newTweet = {
-            id: tweets.length + 1,
-            author: 'أنت',
-            handle: '@your_handle',
-            avatar: 'أ',
-            verified: false,
+        const tweet = {
+            id: Date.now(),
+            author: currentUser.name,
+            handle: currentUser.handle,
+            avatar: currentUser.avatar,
             text: text,
-            image: null,
             timestamp: 'الآن',
             replies: 0,
             retweets: 0,
             likes: 0,
             liked: false,
-            retweeted: false
+            userEmail: currentUser.email
         };
 
-        tweets.unshift(newTweet);
-        composerInput.value = '';
+        tweets.unshift(tweet);
+        currentUser.tweets.push(tweet.id);
+        document.getElementById('composerInput').value = '';
         updatePostBtn();
+        saveData();
         renderTweets();
     }
 
+    function postTweetFromModal() {
+        const text = document.getElementById('modalComposerInput').value.trim();
+        if (!text) return;
+
+        const tweet = {
+            id: Date.now(),
+            author: currentUser.name,
+            handle: currentUser.handle,
+            avatar: currentUser.avatar,
+            text: text,
+            timestamp: 'الآن',
+            replies: 0,
+            retweets: 0,
+            likes: 0,
+            liked: false,
+            userEmail: currentUser.email
+        };
+
+        tweets.unshift(tweet);
+        currentUser.tweets.push(tweet.id);
+        document.getElementById('modalComposerInput').value = '';
+        saveData();
+        renderTweets();
+        closeModal('composeModal');
+    }
+
     function renderTweets() {
-        tweetsContainer.innerHTML = tweets.map(tweet => `
-            <div class="tweet" data-tweet-id="${tweet.id}">
+        const container = document.getElementById('tweetsContainer');
+        container.innerHTML = tweets.map(tweet => `
+            <div class="tweet">
                 <div class="tweet-container">
                     <div class="tweet-avatar">${tweet.avatar}</div>
                     <div class="tweet-content">
                         <div class="tweet-header">
                             <span class="tweet-author">${tweet.author}</span>
-                            ${tweet.verified ? '<span class="verified-badge">✓</span>' : ''}
                             <span class="tweet-handle">${tweet.handle}</span>
-                            <span class="tweet-time">·</span>
-                            <span class="tweet-time">${tweet.timestamp}</span>
+                            <span class="tweet-time">· ${tweet.timestamp}</span>
                         </div>
                         <div class="tweet-text">${escapeHtml(tweet.text)}</div>
-                        ${tweet.image ? `<img src="${tweet.image}" class="tweet-image" alt="">` : ''}
                         <div class="tweet-stats">
-                            <div class="tweet-stat">💬 <span>${tweet.replies}</span></div>
-                            <div class="tweet-stat">🔄 <span>${tweet.retweets}</span></div>
-                            <div class="tweet-stat">❤️ <span>${tweet.likes}</span></div>
+                            <div>💬 ${tweet.replies}</div>
+                            <div>🔄 ${tweet.retweets}</div>
+                            <div>❤️ ${tweet.likes}</div>
                         </div>
                         <div class="tweet-actions">
-                            <div class="tweet-action reply" onclick="replyTweet(${tweet.id})">
-                                <span>💬</span>
-                                <span>${tweet.replies}</span>
-                            </div>
-                            <div class="tweet-action retweet ${tweet.retweeted ? 'active' : ''}" onclick="retweetTweet(${tweet.id})">
-                                <span>🔄</span>
-                                <span>${tweet.retweets}</span>
-                            </div>
-                            <div class="tweet-action like ${tweet.liked ? 'active' : ''}" onclick="likeTweet(${tweet.id})">
-                                <span>❤️</span>
-                                <span>${tweet.likes}</span>
-                            </div>
-                            <div class="tweet-action share" onclick="shareTweet(${tweet.id})">
-                                <span>📤</span>
-                            </div>
+                            <div class="tweet-action" onclick="replyTweet(${tweet.id})">💬</div>
+                            <div class="tweet-action" onclick="retweetTweet(${tweet.id})">🔄</div>
+                            <div class="tweet-action like ${tweet.liked ? 'active' : ''}" onclick="likeTweet(${tweet.id})">❤️</div>
+                            <div class="tweet-action" onclick="shareTweet(${tweet.id})">📤</div>
                         </div>
                     </div>
                 </div>
@@ -1055,30 +1465,118 @@
         if (tweet) {
             tweet.liked = !tweet.liked;
             tweet.likes += tweet.liked ? 1 : -1;
+            saveData();
             renderTweets();
         }
     }
 
     function retweetTweet(id) {
-        const tweet = tweets.find(t => t.id === id);
-        if (tweet) {
-            tweet.retweeted = !tweet.retweeted;
-            tweet.retweets += tweet.retweeted ? 1 : -1;
-            renderTweets();
-        }
+        alert('تم إعادة النشر');
     }
 
     function replyTweet(id) {
-        const tweet = tweets.find(t => t.id === id);
-        if (tweet) {
-            composerInput.value = `@${tweet.handle} `;
-            composerInput.focus();
-            updatePostBtn();
-        }
+        document.getElementById('composerInput').focus();
     }
 
     function shareTweet(id) {
-        alert('تم نسخ رابط التغريدة');
+        alert('تم نسخ الرابط');
+    }
+
+    // Profile Functions
+    function renderProfile() {
+        document.getElementById('profileName').textContent = currentUser.name;
+        document.getElementById('profileHandle').textContent = currentUser.handle;
+        document.getElementById('profileBio').textContent = currentUser.bio || 'لا يوجد وصف';
+        document.getElementById('profileAvatar').textContent = currentUser.avatar;
+        document.getElementById('profileTweets').textContent = currentUser.tweets.length;
+
+        const userTweets = tweets.filter(t => t.userEmail === currentUser.email);
+        const container = document.getElementById('profileTweetsContainer');
+        container.innerHTML = userTweets.map(tweet => `
+            <div class="tweet">
+                <div class="tweet-container">
+                    <div class="tweet-avatar">${tweet.avatar}</div>
+                    <div class="tweet-content">
+                        <div class="tweet-header">
+                            <span class="tweet-author">${tweet.author}</span>
+                            <span class="tweet-handle">${tweet.handle}</span>
+                        </div>
+                        <div class="tweet-text">${escapeHtml(tweet.text)}</div>
+                        <div class="tweet-actions">
+                            <div class="tweet-action" onclick="likeTweet(${tweet.id})">❤️</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function openEditProfileModal() {
+        document.getElementById('editName').value = currentUser.name;
+        document.getElementById('editHandle').value = currentUser.handle;
+        document.getElementById('editBio').value = currentUser.bio;
+        openModal('editProfileModal');
+    }
+
+    function saveProfile() {
+        currentUser.name = document.getElementById('editName').value;
+        currentUser.handle = document.getElementById('editHandle').value;
+        currentUser.bio = document.getElementById('editBio').value;
+        users[currentUser.email] = currentUser;
+        saveData();
+        updateUI();
+        renderProfile();
+        closeModal('editProfileModal');
+    }
+
+    function uploadProfilePic() {
+        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
+    }
+
+    function uploadCover() {
+        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
+    }
+
+    function uploadImage() {
+        alert('سيتم إضافة رفع الصور في الإصدارات القادمة');
+    }
+
+    // Modal Functions
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function openComposeModal() {
+        document.getElementById('modalComposerInput').value = '';
+        openModal('composeModal');
+    }
+
+    // UI Functions
+    function updateUI() {
+        document.getElementById('sidebarName').textContent = currentUser.name;
+        document.getElementById('sidebarHandle').textContent = currentUser.handle;
+        document.getElementById('sidebarAvatar').textContent = currentUser.avatar;
+        document.getElementById('composerAvatar').textContent = currentUser.avatar;
+        document.getElementById('profileAvatar').textContent = currentUser.avatar;
+    }
+
+    function updatePostBtn() {
+        const btn = document.getElementById('postBtn');
+        btn.disabled = document.getElementById('composerInput').value.trim().length === 0;
+    }
+
+    function showAuth() {
+        document.getElementById('authPage').classList.add('active');
+        document.getElementById('appPage').classList.remove('active');
+    }
+
+    function showApp() {
+        document.getElementById('authPage').classList.remove('active');
+        document.getElementById('appPage').classList.add('active');
     }
 
     function toggleTheme() {
@@ -1087,11 +1585,11 @@
         
         if (isDark) {
             html.classList.remove('dark-mode');
-            themeToggle.textContent = '🌙 الوضع الليلي';
+            document.getElementById('themeToggle').textContent = '🌙 الوضع الليلي';
             localStorage.setItem('theme', 'light');
         } else {
             html.classList.add('dark-mode');
-            themeToggle.textContent = '☀️ الوضع الفاتح';
+            document.getElementById('themeToggle').textContent = '☀️ الوضع الفاتح';
             localStorage.setItem('theme', 'dark');
         }
     }
@@ -1100,7 +1598,36 @@
         const theme = localStorage.getItem('theme') || 'light';
         if (theme === 'dark') {
             document.documentElement.classList.add('dark-mode');
-            themeToggle.textContent = '☀️ الوضع الفاتح';
+            document.getElementById('themeToggle').textContent = '☀️ الوضع الفاتح';
+        }
+    }
+
+    function saveData() {
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('tweets', JSON.stringify(tweets));
+    }
+
+    function loadData() {
+        const savedUsers = localStorage.getItem('users');
+        const savedTweets = localStorage.getItem('tweets');
+        
+        if (savedUsers) users = JSON.parse(savedUsers);
+        if (savedTweets) tweets = JSON.parse(savedTweets);
+
+        // Sample data
+        if (Object.keys(users).length === 0) {
+            users = {
+                'test@example.com': {
+                    name: 'أحمد محمد',
+                    email: 'test@example.com',
+                    password: '123456',
+                    handle: '@ahmad_user',
+                    bio: 'مهتم بالعلوم الإسلامية',
+                    avatar: 'أ',
+                    tweets: []
+                }
+            };
+            saveData();
         }
     }
 
@@ -1115,7 +1642,14 @@
         return text.replace(/[&<>"']/g, m => map[m]);
     }
 
-    updatePostBtn();
+    // Close modals on background click
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
 </script>
 
 </body>
