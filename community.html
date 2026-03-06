@@ -1002,7 +1002,7 @@
 <body>
 
 <!-- ========== Auth Page ========== -->
-<div id="authPage" class="page active">
+<div id="authPage" style="display: flex;">
     <div class="auth-container">
         <div class="auth-form">
             <div class="auth-title">اسأل الإسلام</div>
@@ -1043,7 +1043,7 @@
 </div>
 
 <!-- ========== Main App ========== -->
-<div id="appPage" class="page" style="display: none;">
+<div id="appPage" style="display: none;">
     <div class="app-container">
         <!-- Left Sidebar -->
         <aside class="sidebar">
@@ -1570,13 +1570,14 @@
     }
 
     function showAuth() {
-        document.getElementById('authPage').classList.add('active');
-        document.getElementById('appPage').classList.remove('active');
+        document.getElementById('authPage').style.display = 'flex';
+        document.getElementById('appPage').style.display = 'none';
     }
 
     function showApp() {
-        document.getElementById('authPage').classList.remove('active');
-        document.getElementById('appPage').classList.add('active');
+        document.getElementById('authPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'grid';
+        navigateTo('home');
     }
 
     function toggleTheme() {
