@@ -838,75 +838,81 @@ let pageHistory = [];
 let viewingUserId = null;
 
 // ============================================================
-// SUPABASE INIT
+// SUPABASE INIT - آمن مع فول-باك تلقائي
 // ============================================================
-const supabaseUrl = 'https://wxfaeftyyocudfhhibofvc.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZmFlZnR5eW9jdWRmaGhpYm9mdmMiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc0NzA1NjkxMiwiZXhwIjoyMDYyNjMyOTEyfQ.placeholder';
-const _supabase = supabase.createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: localStorage
-  },
-  realtime: {
-    params: { eventsPerSecond: 10 }
+const SUPABASE_URL = 'https://wxfaeftyyocudfhhibofvc.supabase.co';
+// ضع مفتاح anon هنا من: Supabase Dashboard → Settings → API → anon public
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZmFlZnB5b2N1ZGZoaGJvZnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4Mzk5MTAsImV4cCI6MjA4ODQxNTkxMH0.uS802ZZ43bm761b_bfno3W5Il7Kd71CDSK55bCDIYFQ';
+
+let _supabase = null;
+try {
+  if (window.supabase && SUPABASE_ANON_KEY !== 'YOUR_ANON_KEY_HERE') {
+    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, storage:localStorage },
+      realtime: { params: { eventsPerSecond:10 } }
+    });
   }
-});
+} catch(e) { console.warn('Supabase init failed:', e); _supabase = null; }
+
+const USE_SUPABASE = !!_supabase;
 
 // ============================================================
 // INIT
 // ============================================================
 window.onload = async () => {
+  loadDB();
   loadTheme();
 
-  const { data: { session }, error } = await _supabase.auth.getSession();
-
-  if (session?.user) {
-    const { data: userData, error: userError } = await _supabase
-      .from('users')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-    if (!userError && userData) {
-      me = userData;
-      // sync local db for compatibility
-      db.users[userData.email] = userData;
-      // load tweets from supabase
-      await loadTweetsFromDB();
-      showApp();
-    } else {
-      document.getElementById('authPage').style.display = 'flex';
-    }
+  if (USE_SUPABASE) {
+    try {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (session?.user) {
+        const { data: userData, error: userError } = await _supabase
+          .from('users').select('*').eq('id', session.user.id).single();
+        if (!userError && userData) {
+          me = userData;
+          db.users[userData.email] = userData;
+          await loadTweetsFromDB();
+          showApp(); return;
+        }
+      }
+    } catch(e) { console.warn('Session check failed:', e); }
   } else {
-    document.getElementById('authPage').style.display = 'flex';
+    // فول-باك: تحقق من localStorage
+    let saved = null;
+    try { saved = localStorage.getItem('session'); } catch(e){}
+    if (saved && db.users[saved]) { me = db.users[saved]; showApp(); return; }
   }
+  document.getElementById('authPage').style.display = 'flex';
 };
 
-async function loadTweetsFromDB() {
-  const { data: tweets, error } = await _supabase
-    .from('tweets')
-    .select('*')
-    .order('ts', { ascending: false });
-  if (!error && tweets) {
-    db.tweets = tweets;
-    // load users for these tweets
-    const uids = [...new Set(tweets.map(t => t.uid))];
-    if (uids.length > 0) {
-      const { data: users } = await _supabase
-        .from('users')
-        .select('*')
-        .in('id', uids);
-      if (users) {
-        users.forEach(u => { db.users[u.email] = u; });
-      }
-    }
-  }
+function loadDB(){
+  try {
+    const raw = localStorage.getItem('isdb');
+    if(raw) db = JSON.parse(raw);
+  } catch(e){}
+  if(!db.notifications) db.notifications = [];
 }
 
 function saveDB(){
-  // no-op: data is persisted in Supabase
+  if (!USE_SUPABASE) {
+    try { localStorage.setItem('isdb', JSON.stringify(db)); } catch(e){}
+  }
+}
+
+async function loadTweetsFromDB() {
+  if (!USE_SUPABASE) return;
+  try {
+    const { data: tweets, error } = await _supabase.from('tweets').select('*').order('ts', { ascending: false });
+    if (!error && tweets) {
+      db.tweets = tweets;
+      const uids = [...new Set(tweets.map(t => t.uid))];
+      if (uids.length > 0) {
+        const { data: users } = await _supabase.from('users').select('*').in('id', uids);
+        if (users) users.forEach(u => { db.users[u.email] = u; });
+      }
+    }
+  } catch(e) { console.warn('loadTweetsFromDB failed:', e); }
 }
 function hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
 
@@ -924,33 +930,26 @@ async function doLogin(){
   const pass = v('li-pass');
   const errorDiv = document.getElementById('li-err');
 
-  if (!email || !pass) {
-    errorDiv.textContent = 'يرجى إدخال البريد وكلمة المرور';
-    return;
+  if (!email || !pass) { errorDiv.textContent = 'يرجى إدخال البريد وكلمة المرور'; return; }
+
+  if (USE_SUPABASE) {
+    try {
+      const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) { errorDiv.textContent = 'البريد أو كلمة المرور غير صحيحة'; return; }
+      const { data: userData, error: userError } = await _supabase
+        .from('users').select('*').eq('id', data.user.id).single();
+      if (userError) { errorDiv.textContent = 'حدث خطأ في تحميل بيانات المستخدم'; return; }
+      me = userData;
+      db.users[userData.email] = userData;
+      await loadTweetsFromDB();
+      showApp();
+    } catch(e) { errorDiv.textContent = 'حدث خطأ في الاتصال'; }
+  } else {
+    // فول-باك محلي
+    const u = db.users[email];
+    if (!u || u.pass !== hash(pass)) { errorDiv.textContent = 'البريد أو كلمة المرور غير صحيحة'; return; }
+    me = u; try{localStorage.setItem('session', email);}catch(e){} showApp();
   }
-
-  const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-
-  if (error) {
-    errorDiv.textContent = 'البريد أو كلمة المرور غير صحيحة';
-    return;
-  }
-
-  const { data: userData, error: userError } = await _supabase
-    .from('users')
-    .select('*')
-    .eq('id', data.user.id)
-    .single();
-
-  if (userError) {
-    errorDiv.textContent = 'حدث خطأ في تحميل بيانات المستخدم';
-    return;
-  }
-
-  me = userData;
-  db.users[userData.email] = userData;
-  await loadTweetsFromDB();
-  showApp();
 }
 
 async function doSignup(){
@@ -960,69 +959,39 @@ async function doSignup(){
   const pass = v('su-pass');
   const err = document.getElementById('su-err');
 
-  if (!name || !handle || !email || !pass) {
-    err.textContent = 'يرجى ملء جميع الحقول';
-    return;
+  if (!name || !handle || !email || !pass) { err.textContent = 'يرجى ملء جميع الحقول'; return; }
+
+  if (USE_SUPABASE) {
+    try {
+      const { data: existingUser } = await _supabase.from('users').select('handle').eq('handle', handle).maybeSingle();
+      if (existingUser) { err.textContent = 'اسم المستخدم محجوز'; return; }
+      const { data: authData, error: authError } = await _supabase.auth.signUp({ email, password: pass, options: { data: { name, handle } } });
+      if (authError) { err.textContent = authError.message; return; }
+      const colors = ['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
+      const { data: userData, error: userError } = await _supabase.from('users')
+        .insert([{ id: authData.user.id, email, name, handle, bio:'', avatar:null, color:colors[Math.floor(Math.random()*colors.length)], followers:[], following:[], bookmarks:[], muted:[], blocked:[] }])
+        .select().single();
+      if (userError) { err.textContent = 'حدث خطأ في إنشاء الحساب'; return; }
+      me = userData;
+      db.users[userData.email] = userData;
+      await loadTweetsFromDB();
+      showApp();
+    } catch(e) { err.textContent = 'حدث خطأ في الاتصال'; }
+  } else {
+    // فول-باك محلي
+    if (db.users[email]) { err.textContent = 'هذا البريد مسجل مسبقاً'; return; }
+    const handles = Object.values(db.users).map(u=>u.handle);
+    if (handles.includes(handle)) { err.textContent = 'اسم المستخدم محجوز'; return; }
+    const colors=['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
+    const uid='u_'+Date.now();
+    db.users[email]={id:uid,email,pass:hash(pass),name,handle,bio:'',avatar:null,color:colors[Math.floor(Math.random()*colors.length)],followers:[],following:[],bookmarks:[]};
+    me=db.users[email]; saveDB(); try{localStorage.setItem('session',email);}catch(e){} showApp();
   }
-
-  // التحقق من عدم تكرار اسم المستخدم
-  const { data: existingUser } = await _supabase
-    .from('users')
-    .select('handle')
-    .eq('handle', handle)
-    .maybeSingle();
-
-  if (existingUser) {
-    err.textContent = 'اسم المستخدم محجوز';
-    return;
-  }
-
-  // إنشاء حساب في Supabase Auth
-  const { data: authData, error: authError } = await _supabase.auth.signUp({
-    email,
-    password: pass,
-    options: { data: { name, handle } }
-  });
-
-  if (authError) {
-    err.textContent = authError.message;
-    return;
-  }
-
-  // إنشاء ملف المستخدم في جدول users
-  const colors = ['#1d9bf0', '#e91e8c', '#00ba7c', '#ff6b35', '#7c3aed'];
-  const { data: userData, error: userError } = await _supabase
-    .from('users')
-    .insert([{
-      id: authData.user.id,
-      email,
-      name,
-      handle,
-      bio: '',
-      avatar: null,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      followers: [],
-      following: [],
-      bookmarks: [],
-      muted: [],
-      blocked: []
-    }])
-    .select()
-    .single();
-
-  if (userError) {
-    err.textContent = 'حدث خطأ في إنشاء الحساب';
-    return;
-  }
-
-  me = userData;
-  db.users[userData.email] = userData;
-  await loadTweetsFromDB();
-  showApp();
 }
 
 async function doLogout(){
-  await _supabase.auth.signOut();
+  if (USE_SUPABASE) { try { await _supabase.auth.signOut(); } catch(e){} }
+  else { try{localStorage.removeItem('session');}catch(e){} }
   me = null;
   document.getElementById('appPage').style.display = 'none';
   document.getElementById('authPage').style.display = 'flex';
@@ -1221,7 +1190,7 @@ async function postFromModal(){
       if(!parent.replies) parent.replies=[];
       parent.replies.push(tw.id);
       // update parent replies in Supabase
-      await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', replyTo);
+      if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', replyTo); } catch(e){} } else saveDB();
       if(parent.uid !== me.id){ addNotif(parent.uid,'reply',tw.id,me.id); }
     }
   }
@@ -1238,13 +1207,14 @@ async function postFromModal(){
 
 async function createTweet(text, replyTo=null, img=null){
   const tw = {id:'t'+Date.now(), uid:me.id, text, ts:Date.now(), likes:[], retweets:[], replies:[], replyTo, img};
-  const { data, error } = await _supabase.from('tweets').insert([tw]).select().single();
-  if (!error && data) {
-    db.tweets.unshift(data);
-    return data;
+  if (USE_SUPABASE) {
+    try {
+      const { data, error } = await _supabase.from('tweets').insert([tw]).select().single();
+      if (!error && data) { db.tweets.unshift(data); saveDB(); return data; }
+    } catch(e){}
   }
-  // fallback local
   db.tweets.unshift(tw);
+  saveDB();
   return tw;
 }
 
@@ -1256,7 +1226,7 @@ async function postReply(parentId){
   if(parent){
     if(!parent.replies) parent.replies=[];
     parent.replies.push(tw.id);
-    await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', parentId);
+    if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', parentId); } catch(e){} } else saveDB();
     if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id);
   }
   renderTweetDetail(parentId);
@@ -1272,7 +1242,7 @@ async function doLike(id){
     tw.likes.push(me.id);
     if(tw.uid!==me.id) addNotif(tw.uid,'like',id,me.id);
   }
-  await _supabase.from('tweets').update({ likes: tw.likes }).eq('id', id);
+  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ likes: tw.likes }).eq('id', id); } catch(e){} } else saveDB();
   refreshTweetCard(id);
   updateNotifBadge();
 }
@@ -1287,7 +1257,7 @@ async function doRetweet(id){
     if(tw.uid!==me.id) addNotif(tw.uid,'retweet',id,me.id);
     toast('تمت إعادة النشر ✓');
   }
-  await _supabase.from('tweets').update({ retweets: tw.retweets }).eq('id', id);
+  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ retweets: tw.retweets }).eq('id', id); } catch(e){} } else saveDB();
   refreshTweetCard(id);
   updateNotifBadge();
 }
@@ -1298,7 +1268,7 @@ async function doBookmark(id){
   if(idx>=0){me.bookmarks.splice(idx,1);toast('تمت إزالته من المحفوظات');}
   else {me.bookmarks.push(id);toast('تمت إضافته للمحفوظات ✓');}
   db.users[me.email]=me;
-  await _supabase.from('users').update({ bookmarks: me.bookmarks }).eq('id', me.id);
+  if (USE_SUPABASE) { try { await _supabase.from('users').update({ bookmarks: me.bookmarks }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
   refreshTweetCard(id);
 }
 
@@ -1309,7 +1279,7 @@ async function deleteTweet(id){
   db.tweets.forEach(t=>{if(t.replies) t.replies=t.replies.filter(r=>r!==id);});
   if(me.bookmarks) me.bookmarks=me.bookmarks.filter(b=>b!==id);
   db.users[me.email]=me;
-  await _supabase.from('tweets').delete().eq('id', id);
+  if (USE_SUPABASE) { try { await _supabase.from('tweets').delete().eq('id', id); } catch(e){} } else saveDB();
   const el=document.getElementById('tw-'+id);
   if(el) el.remove();
   toast('تم حذف التغريدة');
@@ -1489,7 +1459,7 @@ async function saveProfile(){
   if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
   me.name=name; me.handle=handle; me.bio=bio;
   db.users[me.email]=me;
-  await _supabase.from('users').update({ name, handle, bio }).eq('id', me.id);
+  if (USE_SUPABASE) { try { await _supabase.from('users').update({ name, handle, bio }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
   closeModal('editModal');
   updateSidebar(); renderProfile(); toast('تم حفظ التغييرات ✓');
 }
@@ -1503,7 +1473,7 @@ function uploadAvatar(){
     r.onload=async ev=>{
       me.avatar=ev.target.result;
       db.users[me.email]=me;
-      await _supabase.from('users').update({ avatar: me.avatar }).eq('id', me.id);
+      if (USE_SUPABASE) { try { await _supabase.from('users').update({ avatar: me.avatar }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
       updateSidebar(); renderProfile(); toast('تم تحديث الصورة ✓');
     };
     r.readAsDataURL(f);
@@ -1533,8 +1503,7 @@ async function toggleFollow(userId){
   db.users[me.email]=me;
   const tEmail=Object.keys(db.users).find(k=>db.users[k].id===userId);
   if(tEmail) db.users[tEmail]=target;
-  await _supabase.from('users').update({ following: me.following }).eq('id', me.id);
-  await _supabase.from('users').update({ followers: target.followers }).eq('id', userId);
+  if (USE_SUPABASE) { try { await _supabase.from('users').update({ following: me.following }).eq('id', me.id); await _supabase.from('users').update({ followers: target.followers }).eq('id', userId); } catch(e){} } else saveDB();
   updateNotifBadge();
   renderProfile(userId);
   renderSuggestions();
@@ -1845,7 +1814,7 @@ async function saveEditTweet(){
   if(!tw) return;
   tw.text=text;
   tw.edited=true;
-  await _supabase.from('tweets').update({ text, edited: true }).eq('id', id);
+  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ text, edited: true }).eq('id', id); } catch(e){} } else saveDB();
   closeModal('editTweetModal');
   if(currentPage==='home') renderFeed();
   if(currentPage==='profile') renderProfile(viewingUserId);
@@ -1911,7 +1880,7 @@ async function toggleMute(userId){
   if(idx>=0){me.muted.splice(idx,1);toast('تم إلغاء الكتم');}
   else {me.muted.push(userId);toast('تم كتم المستخدم ✓');}
   db.users[me.email]=me;
-  await _supabase.from('users').update({ muted: me.muted }).eq('id', me.id);
+  if (USE_SUPABASE) { try { await _supabase.from('users').update({ muted: me.muted }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
   if(currentPage==='home') renderFeed();
 }
 async function toggleBlock(userId){
@@ -1924,7 +1893,7 @@ async function toggleBlock(userId){
     toast('تم حظر المستخدم ✓');
   }
   db.users[me.email]=me;
-  await _supabase.from('users').update({ blocked: me.blocked, following: me.following||[] }).eq('id', me.id);
+  if (USE_SUPABASE) { try { await _supabase.from('users').update({ blocked: me.blocked, following: me.following||[] }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
   if(currentPage==='home') renderFeed();
 }
 
