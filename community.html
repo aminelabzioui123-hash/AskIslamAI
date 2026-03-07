@@ -944,24 +944,35 @@ window.loginWithEmail = function() {
     });
 };
 
-// ── onAuthStateChanged: نقطة دخول موحّدة لكل الحالات ────────────
-// تعمل في 3 حالات: Redirect بعد Google، جلسة محفوظة، تسجيل بريد
-firebase.auth().onAuthStateChanged(async (user) => {
-  if (user && !me) {
-    await handleFirebaseUser(user);
-  } else if (!user && !me) {
-    document.getElementById('loadingPage').style.display = 'none';
-    document.getElementById('authPage').style.display = 'flex';
-  }
-});
-
-window.onload = () => {
+// ── الإعداد الرئيسي عند تحميل الصفحة ───────────────────────────
+window.onload = async () => {
   loadDB();
   loadTheme();
-  // معالجة أي خطأ في الـ Redirect
-  firebase.auth().getRedirectResult().catch(e => {
+
+  try {
+    // 1) تحقق أولاً من نتيجة الـ Redirect القادم من Google
+    const result = await firebase.auth().getRedirectResult();
+    if (result && result.user) {
+      // المستخدم رجع من Google — عالجه مباشرة
+      await handleFirebaseUser(result.user);
+      return;
+    }
+  } catch(e) {
+    console.error('getRedirectResult error:', e);
     if (e.code && e.code !== 'auth/credential-already-in-use') {
       toast('فشل تسجيل الدخول: ' + e.message);
+    }
+  }
+
+  // 2) بعد ما تأكدنا من الـ Redirect، نستمع لحالة الجلسة
+  firebase.auth().onAuthStateChanged(async (user) => {
+    if (user && !me) {
+      // جلسة محفوظة من زيارة سابقة
+      await handleFirebaseUser(user);
+    } else if (!user && !me) {
+      // لا يوجد مستخدم — أظهر صفحة الدخول
+      document.getElementById('loadingPage').style.display = 'none';
+      document.getElementById('authPage').style.display = 'flex';
     }
   });
 };
