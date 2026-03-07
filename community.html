@@ -916,40 +916,16 @@ async function handleFirebaseUser(user) {
   }
 }
 
-// ── تسجيل الدخول بـ Google Popup ────────────────────────────────
-window.loginWithGoogle = async function() {
-  const btn = event.currentTarget;
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
-    await handleFirebaseUser(result.user);
-  } catch(e) {
-    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-      toast('فشل تسجيل الدخول: ' + e.message);
-    }
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  }
+// ── تسجيل الدخول بـ Google ───────────────────────────────────────
+window.loginWithGoogle = function() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
 };
 
-// ── تسجيل الدخول بـ Facebook Popup ─────────────────────────────
-window.loginWithFacebook = async function() {
-  const btn = event.currentTarget;
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
-  try {
-    const provider = new firebase.auth.FacebookAuthProvider();
-    const result = await firebase.auth().signInWithPopup(provider);
-    await handleFirebaseUser(result.user);
-  } catch(e) {
-    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-      toast('فشل تسجيل الدخول: ' + e.message);
-    }
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  }
+// ── تسجيل الدخول بـ Facebook ────────────────────────────────────
+window.loginWithFacebook = function() {
+  const provider = new firebase.auth.FacebookAuthProvider();
+  firebase.auth().signInWithRedirect(provider);
 };
 
 // ── تسجيل الدخول بالبريد الإلكتروني ────────────────────────────
@@ -968,13 +944,12 @@ window.loginWithEmail = function() {
     });
 };
 
-// ── مراقبة حالة الجلسة (للمستخدم الذي سجّل دخوله سابقاً) ──────
+// ── onAuthStateChanged: نقطة دخول موحّدة لكل الحالات ────────────
+// تعمل في 3 حالات: Redirect بعد Google، جلسة محفوظة، تسجيل بريد
 firebase.auth().onAuthStateChanged(async (user) => {
   if (user && !me) {
-    // المستخدم لديه جلسة محفوظة من زيارة سابقة
     await handleFirebaseUser(user);
   } else if (!user && !me) {
-    // لا يوجد مستخدم — أظهر صفحة الدخول
     document.getElementById('loadingPage').style.display = 'none';
     document.getElementById('authPage').style.display = 'flex';
   }
@@ -983,6 +958,12 @@ firebase.auth().onAuthStateChanged(async (user) => {
 window.onload = () => {
   loadDB();
   loadTheme();
+  // معالجة أي خطأ في الـ Redirect
+  firebase.auth().getRedirectResult().catch(e => {
+    if (e.code && e.code !== 'auth/credential-already-in-use') {
+      toast('فشل تسجيل الدخول: ' + e.message);
+    }
+  });
 };
 
 function loadDB(){
