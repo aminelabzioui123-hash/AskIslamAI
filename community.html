@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1d9bf0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
+<meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>اسأل الإسلام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -916,16 +918,43 @@ async function handleFirebaseUser(user) {
   }
 }
 
-// ── تسجيل الدخول بـ Google ───────────────────────────────────────
-window.loginWithGoogle = function() {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
+// ── تسجيل الدخول بـ Google Popup ────────────────────────────────
+window.loginWithGoogle = async function() {
+  try {
+    document.getElementById('loadingPage').style.display = 'flex';
+    document.getElementById('authPage').style.display = 'none';
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await firebase.auth().signInWithPopup(provider);
+    await handleFirebaseUser(result.user);
+  } catch(e) {
+    document.getElementById('loadingPage').style.display = 'none';
+    document.getElementById('authPage').style.display = 'flex';
+    if (e.code === 'auth/popup-blocked') {
+      toast('المتصفح حجب النافذة — يرجى السماح بالنوافذ المنبثقة لهذا الموقع');
+    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      toast('خطأ في تسجيل الدخول: ' + e.message);
+    }
+  }
 };
 
-// ── تسجيل الدخول بـ Facebook ────────────────────────────────────
-window.loginWithFacebook = function() {
-  const provider = new firebase.auth.FacebookAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
+// ── تسجيل الدخول بـ Facebook Popup ─────────────────────────────
+window.loginWithFacebook = async function() {
+  try {
+    document.getElementById('loadingPage').style.display = 'flex';
+    document.getElementById('authPage').style.display = 'none';
+    const provider = new firebase.auth.FacebookAuthProvider();
+    const result = await firebase.auth().signInWithPopup(provider);
+    await handleFirebaseUser(result.user);
+  } catch(e) {
+    document.getElementById('loadingPage').style.display = 'none';
+    document.getElementById('authPage').style.display = 'flex';
+    if (e.code === 'auth/popup-blocked') {
+      toast('المتصفح حجب النافذة — يرجى السماح بالنوافذ المنبثقة لهذا الموقع');
+    } else if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      toast('خطأ في تسجيل الدخول: ' + e.message);
+    }
+  }
 };
 
 // ── تسجيل الدخول بالبريد الإلكتروني ────────────────────────────
@@ -944,37 +973,19 @@ window.loginWithEmail = function() {
     });
 };
 
-// ── الإعداد الرئيسي عند تحميل الصفحة ───────────────────────────
-window.onload = async () => {
+// ── مراقبة الجلسة المحفوظة فقط ──────────────────────────────────
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user && !me) {
+    await handleFirebaseUser(user);
+  } else if (!user && !me) {
+    document.getElementById('loadingPage').style.display = 'none';
+    document.getElementById('authPage').style.display = 'flex';
+  }
+});
+
+window.onload = () => {
   loadDB();
   loadTheme();
-
-  try {
-    // 1) تحقق أولاً من نتيجة الـ Redirect القادم من Google
-    const result = await firebase.auth().getRedirectResult();
-    if (result && result.user) {
-      // المستخدم رجع من Google — عالجه مباشرة
-      await handleFirebaseUser(result.user);
-      return;
-    }
-  } catch(e) {
-    console.error('getRedirectResult error:', e);
-    if (e.code && e.code !== 'auth/credential-already-in-use') {
-      toast('فشل تسجيل الدخول: ' + e.message);
-    }
-  }
-
-  // 2) بعد ما تأكدنا من الـ Redirect، نستمع لحالة الجلسة
-  firebase.auth().onAuthStateChanged(async (user) => {
-    if (user && !me) {
-      // جلسة محفوظة من زيارة سابقة
-      await handleFirebaseUser(user);
-    } else if (!user && !me) {
-      // لا يوجد مستخدم — أظهر صفحة الدخول
-      document.getElementById('loadingPage').style.display = 'none';
-      document.getElementById('authPage').style.display = 'flex';
-    }
-  });
 };
 
 function loadDB(){
