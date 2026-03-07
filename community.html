@@ -874,20 +874,12 @@ let viewingUserId = null;
 
 window.loginWithGoogle = function() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  firebase.auth().signInWithPopup(provider)
-    .catch(error => {
-      console.error('Google login error:', error);
-      toast('حدث خطأ في تسجيل الدخول عبر Google');
-    });
+  firebase.auth().signInWithRedirect(provider);
 };
 
 window.loginWithFacebook = function() {
   const provider = new firebase.auth.FacebookAuthProvider();
-  firebase.auth().signInWithPopup(provider)
-    .catch(error => {
-      console.error('Facebook login error:', error);
-      toast('حدث خطأ في تسجيل الدخول عبر Facebook');
-    });
+  firebase.auth().signInWithRedirect(provider);
 };
 
 window.loginWithEmail = function() {
@@ -906,44 +898,59 @@ window.loginWithEmail = function() {
 };
 
 firebase.auth().onAuthStateChanged(async (user) => {
+  console.log('onAuthStateChanged triggered', user);
   if (user) {
-    const userRef = dbFirestore.collection('users').doc(user.uid);
-    const doc = await userRef.get();
-    if (!doc.exists) {
-      const handle = (user.email || user.uid).split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
-      let finalHandle = handle, counter = 1;
-      while (true) {
-        const snapshot = await dbFirestore.collection('users').where('handle', '==', finalHandle).get();
-        if (snapshot.empty) break;
-        finalHandle = handle + counter++;
+    try {
+      const userRef = dbFirestore.collection('users').doc(user.uid);
+      const doc = await userRef.get();
+      if (!doc.exists) {
+        const handle = (user.email || user.uid).split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+        let finalHandle = handle, counter = 1;
+        while (true) {
+          const snapshot = await dbFirestore.collection('users').where('handle', '==', finalHandle).get();
+          if (snapshot.empty) break;
+          finalHandle = handle + counter++;
+        }
+        const colors = ['#1d9bf0', '#e91e8c', '#00ba7c', '#ff6b35', '#7c3aed'];
+        const newUser = {
+          id: user.uid,
+          email: user.email || user.uid + '@firebase.user',
+          name: user.displayName || (user.email || 'مستخدم').split('@')[0],
+          handle: finalHandle,
+          bio: '',
+          avatar: user.photoURL || null,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          followers: [], following: [], bookmarks: [], muted: [], blocked: []
+        };
+        await userRef.set(newUser);
+        me = newUser;
+      } else {
+        me = doc.data();
       }
-      const colors = ['#1d9bf0', '#e91e8c', '#00ba7c', '#ff6b35', '#7c3aed'];
-      const newUser = {
-        id: user.uid,
-        email: user.email || user.uid + '@firebase.user',
-        name: user.displayName || (user.email || 'مستخدم').split('@')[0],
-        handle: finalHandle,
-        bio: '',
-        avatar: user.photoURL || null,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        followers: [], following: [], bookmarks: [], muted: [], blocked: []
-      };
-      await userRef.set(newUser);
-      me = newUser;
-    } else {
-      me = doc.data();
+      db.users[me.email] = me;
+      console.log('User ready, calling showApp', me.handle);
+      await loadTweetsFromFirestore();
+      showApp();
+    } catch(e) {
+      console.error('onAuthStateChanged error:', e);
+      toast('حدث خطأ: ' + e.message);
     }
-    db.users[me.email] = me;
-    await loadTweetsFromFirestore();
-    showApp();
   } else {
     document.getElementById('authPage').style.display = 'flex';
+    document.getElementById('appPage').style.display = 'none';
   }
 });
 
 window.onload = async () => {
   loadDB();
   loadTheme();
+  // معالجة نتيجة تسجيل الدخول بعد الإعادة
+  try {
+    await firebase.auth().getRedirectResult();
+  } catch(e) {
+    console.error('getRedirectResult error:', e);
+    toast('فشل تسجيل الدخول: ' + e.message);
+  }
 };
 
 function loadDB(){
@@ -1193,9 +1200,11 @@ function postFromModal(){
 
 // جلب التغريدات من Firestore
 async function loadTweetsFromFirestore() {
+  console.log('Loading tweets...');
   try {
     const snapshot = await dbFirestore.collection('tweets').orderBy('ts', 'desc').get();
     db.tweets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    console.log('Tweets loaded:', db.tweets.length);
     // جلب بيانات المستخدمين
     const uids = [...new Set(db.tweets.map(t => t.uid))];
     for (const uid of uids) {
@@ -1207,7 +1216,7 @@ async function loadTweetsFromFirestore() {
       }
     }
   } catch (e) {
-    console.warn('Error loading tweets', e);
+    console.error('Error loading tweets', e);
     db.tweets = [];
   }
 }
