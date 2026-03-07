@@ -955,21 +955,8 @@ window.onload = async () => {
 
 function loadDB(){
   const raw = localStorage.getItem('isdb');
-  if(raw) db = JSON.parse(raw);
-  // seed demo user + tweets
-  if(!db.users['test@test.com']){
-    const uid = 'u_demo';
-    db.users['test@test.com'] = {id:uid,email:'test@test.com',pass:hash('123456'),name:'أحمد محمد',handle:'ahmed_m',bio:'مهتم بالعلوم الإسلامية 📖',avatar:null,color:'#1d9bf0',followers:[],following:[],bookmarks:[]};
-    const uid2 = 'u_fatima';
-    db.users['fatima@test.com'] = {id:uid2,email:'fatima@test.com',pass:hash('123456'),name:'فاطمة علي',handle:'fatima_ali',bio:'طالبة علم شرعي',avatar:null,color:'#e91e8c',followers:[],following:[],bookmarks:[]};
-    db.tweets = [
-      {id:'t1',uid:uid2,text:'بسم الله الرحمن الرحيم\nأسأل الله أن يرزقنا العلم النافع والعمل الصالح 🤲',ts:Date.now()-3600000*2,likes:[],retweets:[],replies:['t3'],img:null},
-      {id:'t2',uid:uid,text:'السلام عليكم! ما حكم قراءة القرآن من الهاتف بدون وضوء؟\n#فقه_إسلامي #القرآن',ts:Date.now()-3600000,likes:[uid2],retweets:[],replies:[],img:null},
-      {id:'t3',uid:uid,text:'جزاك الله خيراً أختي فاطمة 🌹',ts:Date.now()-3600000*1.5,likes:[],retweets:[],replies:[],replyTo:'t1',img:null},
-    ];
-    if(!db.notifications) db.notifications = [];
-    saveDB();
-  }
+  if(raw) try{ const parsed = JSON.parse(raw); db.notifications = parsed.notifications || []; }catch(e){}
+  // Note: users and tweets are loaded from Firestore, not from localStorage
   if(!db.notifications) db.notifications = [];
 }
 
@@ -1156,30 +1143,36 @@ function renderTweetDetail(id){
 // ============================================================
 // TWEET ACTIONS
 // ============================================================
-function postTweet(){
+async function postTweet(){
   const text = v('composerTxt').trim();
   if(!text && !pendingImg.composer) return;
-  createTweet(text, null, pendingImg.composer);
+  const btn = document.getElementById('postBtn');
+  btn.disabled = true;
+  const tw = await createTweet(text, null, pendingImg.composer);
+  if(!tw) return;
   sv('composerTxt','');
   pendingImg.composer=null;
   document.getElementById('composerImgPreview').innerHTML='';
-  document.getElementById('postBtn').disabled=true;
   document.getElementById('charCount').textContent=MAX_CHARS;
   document.getElementById('charCount').className='char-count';
   renderFeed();
   toast('تم النشر بنجاح ✓');
 }
 
-function postFromModal(){
+async function postFromModal(){
   const text = v('modalTxt').trim();
   const replyTo = v('replyToId');
   if(!text && !pendingImg.modal) return;
-  const tw = createTweet(text, replyTo||null, pendingImg.modal);
+  document.getElementById('modalPostBtn').disabled = true;
+  const tw = await createTweet(text, replyTo||null, pendingImg.modal);
+  if(!tw) return;
   if(replyTo){
     const parent = getTweetById(replyTo);
     if(parent){
       if(!parent.replies) parent.replies=[];
       parent.replies.push(tw.id);
+      // update parent replies in Firestore
+      try{ await dbFirestore.collection('tweets').doc(replyTo).update({replies: parent.replies}); }catch(e){}
       // notification
       if(parent.uid !== me.id){
         addNotif(parent.uid,'reply',tw.id,me.id);
@@ -1189,7 +1182,6 @@ function postFromModal(){
   sv('modalTxt',''); sv('replyToId','');
   pendingImg.modal=null;
   document.getElementById('modalImgPreview').innerHTML='';
-  document.getElementById('modalPostBtn').disabled=true;
   document.getElementById('modalCharCount').textContent=MAX_CHARS;
   closeModal('composeModal');
   saveDB();
@@ -1234,14 +1226,17 @@ async function createTweet(text, replyTo=null, img=null){
   }
 }
 
-function postReply(parentId){
+async function postReply(parentId){
   const text=v('replyTxt').trim();
   if(!text) return;
-  const tw=createTweet(text,parentId,null);
+  document.getElementById('replyPostBtn').disabled=true;
+  const tw=await createTweet(text,parentId,null);
+  if(!tw) return;
   const parent=getTweetById(parentId);
   if(parent){
     if(!parent.replies) parent.replies=[];
     parent.replies.push(tw.id);
+    try{ await dbFirestore.collection('tweets').doc(parentId).update({replies: parent.replies}); }catch(e){}
     if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id);
     saveDB();
   }
@@ -1471,7 +1466,7 @@ function openEditProfile(){
   openModal('editModal');
 }
 
-function saveProfile(){
+async function saveProfile(){
   const name=v('ed-name').trim();
   const handle=v('ed-handle').trim().replace(/\s+/g,'_').toLowerCase();
   const bio=v('ed-bio').trim();
@@ -1479,7 +1474,9 @@ function saveProfile(){
   const taken=Object.values(db.users).filter(u=>u.id!==me.id).map(u=>u.handle);
   if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
   me.name=name; me.handle=handle; me.bio=bio;
-  db.users[me.email]=me; saveDB(); closeModal('editModal');
+  db.users[me.email]=me;
+  try{ await dbFirestore.collection('users').doc(me.id).update({name, handle, bio}); }catch(e){}
+  saveDB(); closeModal('editModal');
   updateSidebar(); renderProfile(); toast('تم حفظ التغييرات ✓');
 }
 
@@ -1489,7 +1486,12 @@ function uploadAvatar(){
   input.onchange=e=>{
     const f=e.target.files[0];
     const r=new FileReader();
-    r.onload=ev=>{me.avatar=ev.target.result;db.users[me.email]=me;saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة ✓');};
+    r.onload=async ev=>{
+      me.avatar=ev.target.result;
+      db.users[me.email]=me;
+      try{ await dbFirestore.collection('users').doc(me.id).update({avatar: me.avatar}); }catch(e){}
+      saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة ✓');
+    };
     r.readAsDataURL(f);
   };
   input.click();
@@ -1498,7 +1500,7 @@ function uploadAvatar(){
 // ============================================================
 // FOLLOW
 // ============================================================
-function toggleFollow(userId){
+async function toggleFollow(userId){
   const target=getUserById(userId);
   if(!target) return;
   if(!me.following) me.following=[];
@@ -1515,9 +1517,13 @@ function toggleFollow(userId){
     toast('تمت المتابعة ✓');
   }
   db.users[me.email]=me;
-  // save target user
   const tEmail=Object.keys(db.users).find(k=>db.users[k].id===userId);
   if(tEmail) db.users[tEmail]=target;
+  // sync to Firestore
+  try{
+    await dbFirestore.collection('users').doc(me.id).update({following: me.following});
+    await dbFirestore.collection('users').doc(userId).update({followers: target.followers});
+  }catch(e){}
   saveDB(); updateNotifBadge();
   renderProfile(userId);
   renderSuggestions();
