@@ -1073,11 +1073,39 @@ async function doLogin(){
   if(USE_SB){
     try{
       const {data,error}=await _sb.auth.signInWithPassword({email,password:pass});
-      if(error){err.textContent='البريد أو كلمة المرور غير صحيحة';return;}
-      const {data:ud}=await _sb.from('users').select('*').eq('id',data.user.id).single();
-      if(!ud){err.textContent='حدث خطأ في تحميل بيانات المستخدم';return;}
+      if(error){
+        console.error("Auth error:", error);
+        if(error.message.includes("Email not confirmed") || error.message.includes("not confirmed"))
+          err.textContent="⚠️ يرجى تأكيد بريدك الإلكتروني — تحقق من صندوق الوارد";
+        else if(error.message.includes("Invalid login"))
+          err.textContent="البريد أو كلمة المرور غير صحيحة";
+        else
+          err.textContent="خطأ: " + error.message;
+        return;
+      }
+      // نجيب المستخدم من جدول users
+      let {data:ud, error:ue} = await _sb.from("users").select("*").eq("id",data.user.id).maybeSingle();
+      // إذا ماكاينش في جدول users، نزيدوه تلقائياً
+      if(!ud){
+        const authUser = data.user;
+        const emailHandle = authUser.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g,"_").toLowerCase();
+        const colors=["#1d9bf0","#e91e8c","#00ba7c","#ff6b35","#7c3aed"];
+        const {data:newUd, error:ie} = await _sb.from("users").insert([{
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.user_metadata?.full_name || authUser.email.split("@")[0],
+          handle: emailHandle,
+          bio: "",
+          avatar: null,
+          color: colors[Math.floor(Math.random()*colors.length)],
+          followers:[], following:[], bookmarks:[], muted:[], blocked:[]
+        }]).select().single();
+        if(ie){ console.error("Insert error:",ie); err.textContent="خطأ في إنشاء ملف المستخدم: "+ie.message; return; }
+        ud = newUd;
+      }
+      if(!ud){ err.textContent="خطأ غير متوقع في تحميل البيانات"; return; }
       me=ud; db.users[ud.email]=ud; await loadTweetsFromDB(); showApp();
-    }catch(e){err.textContent='خطأ في الاتصال: '+e.message;}
+    }catch(e){console.error(e);err.textContent="خطأ في الاتصال: "+e.message;}
   }else{
     const u=db.users[email];
     if(!u||u.pass!==hash(pass)){err.textContent='البريد أو كلمة المرور غير صحيحة';return;}
@@ -1101,8 +1129,8 @@ async function doSignup(){
       const colors=['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
       const {data:ud,error:ue}=await _sb.from('users').insert([{id:auth.user.id,email,name,handle,bio:'',avatar:null,color:colors[Math.floor(Math.random()*colors.length)],followers:[],following:[],bookmarks:[],muted:[],blocked:[]}]).select().single();
       if(ue){err.textContent='خطأ في إنشاء الحساب: '+ue.message;return;}
-      me=ud; db.users[ud.email]=ud; showApp();
-    }catch(e){err.textContent='خطأ في الاتصال';}
+      me=ud; db.users[ud.email]=ud; await loadTweetsFromDB(); showApp();
+    }catch(e){console.error(e);err.textContent='خطأ في الاتصال: '+e.message;}
   }else{
     if(db.users[email]){err.textContent='هذا البريد مسجل مسبقاً';return;}
     const handles=Object.values(db.users).map(u=>u.handle);
