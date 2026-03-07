@@ -948,12 +948,11 @@ async function loginWithGoogle() {
     toast('خاصية تسجيل الدخول عبر Google تحتاج إلى اتصال بـ Supabase');
     return;
   }
-  const siteUrl = 'https://askislamai.com';
   try {
     const { data, error } = await _sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: siteUrl + '/community.html'
+        redirectTo: 'https://askislamai.com/community'
       }
     });
     if (error) {
