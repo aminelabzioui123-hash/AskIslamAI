@@ -481,7 +481,6 @@ input[type=file]{display:none;}
 #reportModal .dditem{border-bottom:1px solid var(--border);width:100%;justify-content:flex-start;}
 #editTweetModal .form-g textarea{min-height:100px;}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -501,11 +500,11 @@ input[type=file]{display:none;}
       <div class="form-g"><label>كلمة المرور</label><input id="li-pass" type="password" placeholder="••••••" autocomplete="current-password"></div>
       <div class="err" id="li-err"></div>
       <button class="form-submit" style="margin-top:0.75rem" onclick="doLogin()">دخول</button>
-
+      <div style="margin-top:0.75rem;font-size:0.82rem;color:var(--txt2);text-align:center">حساب تجريبي: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cfbbaabcbb8fbbaabcbbe1aca0a2">[email&#160;protected]</a> / 123456</div>
     </div>
     <div id="signupForm" style="display:none">
       <div class="form-g"><label>الاسم الكامل</label><input id="su-name" type="text" placeholder="أحمد محمد" autocomplete="name"></div>
-      <div class="form-g"><label>اسم المستخدم</label><input id="su-handle" type="text" placeholder="اسم_المستخدم"></div>
+      <div class="form-g"><label>اسم المستخدم</label><input id="su-handle" type="text" placeholder="ahmed_m"></div>
       <div class="form-g"><label>البريد الإلكتروني</label><input id="su-email" type="email" placeholder="example@mail.com" autocomplete="email"></div>
       <div class="form-g"><label>كلمة المرور</label><input id="su-pass" type="password" placeholder="••••••" autocomplete="new-password"></div>
       <div class="err" id="su-err"></div>
@@ -825,7 +824,10 @@ input[type=file]{display:none;}
 <!-- TOAST -->
 <div class="toast-wrap" id="toastWrap"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
 
 // ============================================================
 // STATE
@@ -839,81 +841,75 @@ let pageHistory = [];
 let viewingUserId = null;
 
 // ============================================================
-// SUPABASE INIT - آمن مع فول-باك تلقائي
-// ============================================================
-const SUPABASE_URL = 'https://wxfaeftyyocudfhhibofvc.supabase.co';
-// ضع مفتاح anon هنا من: Supabase Dashboard → Settings → API → anon public
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZmFlZnB5b2N1ZGZoaGJvZnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4Mzk5MTAsImV4cCI6MjA4ODQxNTkxMH0.uS802ZZ43bm761b_bfno3W5Il7Kd71CDSK55bCDIYFQ';
-
-let _supabase = null;
-try {
-  if (window.supabase && SUPABASE_ANON_KEY !== 'YOUR_ANON_KEY_HERE') {
-    _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, storage:localStorage },
-      realtime: { params: { eventsPerSecond:10 } }
-    });
-  }
-} catch(e) { console.warn('Supabase init failed:', e); _supabase = null; }
-
-const USE_SUPABASE = !!_supabase;
-
-// ============================================================
 // INIT
 // ============================================================
+// === SUPABASE ===
+const SUPABASE_URL = 'https://wxfaeftyyocudfhhibofvc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZmFlZnB5b2N1ZGZoaGJvZnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4Mzk5MTAsImV4cCI6MjA4ODQxNTkxMH0.uS802ZZ43bm761b_bfno3W5Il7Kd71CDSK55bCDIYFQ';
+let _sb = null;
+try {
+  if(window.supabase) _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth:{persistSession:true,autoRefreshToken:true,storage:localStorage}
+  });
+} catch(e) { console.warn('Supabase init error',e); }
+const USE_SB = !!_sb;
+
+async function loadTweetsFromDB(){
+  if(!USE_SB) return;
+  try{
+    const {data:tweets} = await _sb.from('tweets').select('*').order('ts',{ascending:false});
+    if(tweets){
+      db.tweets = tweets;
+      const uids=[...new Set(tweets.map(t=>t.uid))];
+      if(uids.length>0){
+        const {data:users} = await _sb.from('users').select('*').in('id',uids);
+        if(users) users.forEach(u=>{ db.users[u.email]=u; });
+      }
+    }
+  }catch(e){ console.warn('loadTweetsFromDB',e); }
+}
+
 window.onload = async () => {
   loadDB();
   loadTheme();
-
-  if (USE_SUPABASE) {
-    try {
-      const { data: { session } } = await _supabase.auth.getSession();
-      if (session?.user) {
-        const { data: userData, error: userError } = await _supabase
-          .from('users').select('*').eq('id', session.user.id).single();
-        if (!userError && userData) {
-          me = userData;
-          db.users[userData.email] = userData;
-          await loadTweetsFromDB();
-          showApp(); return;
-        }
+  if(USE_SB){
+    try{
+      const {data:{session}} = await _sb.auth.getSession();
+      if(session?.user){
+        const {data:ud} = await _sb.from('users').select('*').eq('id',session.user.id).single();
+        if(ud){me=ud;db.users[ud.email]=ud;await loadTweetsFromDB();showApp();return;}
       }
-    } catch(e) { console.warn('Session check failed:', e); }
+    }catch(e){console.warn('session check',e);}
   } else {
-    // فول-باك: تحقق من localStorage
     let saved = null;
-    try { saved = localStorage.getItem('session'); } catch(e){}
-    if (saved && db.users[saved]) { me = db.users[saved]; showApp(); return; }
+    try{ saved = localStorage.getItem('session'); }catch(e){}
+    if(saved && db.users[saved]){me=db.users[saved];showApp();return;}
   }
-  document.getElementById('authPage').style.display = 'flex';
+  document.getElementById('authPage').style.display='flex';
 };
 
 function loadDB(){
-  try {
-    const raw = localStorage.getItem('isdb');
-    if(raw) db = JSON.parse(raw);
-  } catch(e){}
+  const raw = localStorage.getItem('isdb');
+  if(raw) db = JSON.parse(raw);
+  // seed demo user + tweets
+  if(!db.users['test@test.com']){
+    const uid = 'u_demo';
+    db.users['test@test.com'] = {id:uid,email:'test@test.com',pass:hash('123456'),name:'أحمد محمد',handle:'ahmed_m',bio:'مهتم بالعلوم الإسلامية 📖',avatar:null,color:'#1d9bf0',followers:[],following:[],bookmarks:[]};
+    const uid2 = 'u_fatima';
+    db.users['fatima@test.com'] = {id:uid2,email:'fatima@test.com',pass:hash('123456'),name:'فاطمة علي',handle:'fatima_ali',bio:'طالبة علم شرعي',avatar:null,color:'#e91e8c',followers:[],following:[],bookmarks:[]};
+    db.tweets = [
+      {id:'t1',uid:uid2,text:'بسم الله الرحمن الرحيم\nأسأل الله أن يرزقنا العلم النافع والعمل الصالح 🤲',ts:Date.now()-3600000*2,likes:[],retweets:[],replies:['t3'],img:null},
+      {id:'t2',uid:uid,text:'السلام عليكم! ما حكم قراءة القرآن من الهاتف بدون وضوء؟\n#فقه_إسلامي #القرآن',ts:Date.now()-3600000,likes:[uid2],retweets:[],replies:[],img:null},
+      {id:'t3',uid:uid,text:'جزاك الله خيراً أختي فاطمة 🌹',ts:Date.now()-3600000*1.5,likes:[],retweets:[],replies:[],replyTo:'t1',img:null},
+    ];
+    if(!db.notifications) db.notifications = [];
+    saveDB();
+  }
   if(!db.notifications) db.notifications = [];
 }
 
 function saveDB(){
-  if (!USE_SUPABASE) {
-    try { localStorage.setItem('isdb', JSON.stringify(db)); } catch(e){}
-  }
-}
-
-async function loadTweetsFromDB() {
-  if (!USE_SUPABASE) return;
-  try {
-    const { data: tweets, error } = await _supabase.from('tweets').select('*').order('ts', { ascending: false });
-    if (!error && tweets) {
-      db.tweets = tweets;
-      const uids = [...new Set(tweets.map(t => t.uid))];
-      if (uids.length > 0) {
-        const { data: users } = await _supabase.from('users').select('*').in('id', uids);
-        if (users) users.forEach(u => { db.users[u.email] = u; });
-      }
-    }
-  } catch(e) { console.warn('loadTweetsFromDB failed:', e); }
+  try{ localStorage.setItem('isdb',JSON.stringify(db)); }catch(e){}
 }
 function hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
 
@@ -927,62 +923,47 @@ function authTab(t){
 }
 
 async function doLogin(){
-  const email = v('li-email').trim().toLowerCase();
-  const pass = v('li-pass');
-  const errorDiv = document.getElementById('li-err');
-
-  if (!email || !pass) { errorDiv.textContent = 'يرجى إدخال البريد وكلمة المرور'; return; }
-
-  if (USE_SUPABASE) {
-    try {
-      const { data, error } = await _supabase.auth.signInWithPassword({ email, password: pass });
-      if (error) { errorDiv.textContent = 'البريد أو كلمة المرور غير صحيحة'; return; }
-      const { data: userData, error: userError } = await _supabase
-        .from('users').select('*').eq('id', data.user.id).single();
-      if (userError) { errorDiv.textContent = 'حدث خطأ في تحميل بيانات المستخدم'; return; }
-      me = userData;
-      db.users[userData.email] = userData;
-      await loadTweetsFromDB();
-      showApp();
-    } catch(e) { errorDiv.textContent = 'حدث خطأ في الاتصال'; }
-  } else {
-    // فول-باك محلي
-    const u = db.users[email];
-    if (!u || u.pass !== hash(pass)) { errorDiv.textContent = 'البريد أو كلمة المرور غير صحيحة'; return; }
-    me = u; try{localStorage.setItem('session', email);}catch(e){} showApp();
+  const email=v('li-email').trim().toLowerCase();
+  const pass=v('li-pass');
+  const err=document.getElementById('li-err');
+  if(!email||!pass){err.textContent='يرجى إدخال البريد وكلمة المرور';return;}
+  if(USE_SB){
+    try{
+      const {data,error}=await _sb.auth.signInWithPassword({email,password:pass});
+      if(error){err.textContent='البريد أو كلمة المرور غير صحيحة';return;}
+      const {data:ud}=await _sb.from('users').select('*').eq('id',data.user.id).single();
+      if(!ud){err.textContent='حدث خطأ في تحميل بيانات المستخدم';return;}
+      me=ud; db.users[ud.email]=ud; await loadTweetsFromDB(); showApp();
+    }catch(e){err.textContent='خطأ في الاتصال: '+e.message;}
+  }else{
+    const u=db.users[email];
+    if(!u||u.pass!==hash(pass)){err.textContent='البريد أو كلمة المرور غير صحيحة';return;}
+    me=u; try{localStorage.setItem('session',email);}catch(e){} showApp();
   }
 }
 
 async function doSignup(){
-  const name = v('su-name').trim();
-  const handle = v('su-handle').trim().replace(/\s+/g,'_').toLowerCase();
-  const email = v('su-email').trim().toLowerCase();
-  const pass = v('su-pass');
-  const err = document.getElementById('su-err');
-
-  if (!name || !handle || !email || !pass) { err.textContent = 'يرجى ملء جميع الحقول'; return; }
-
-  if (USE_SUPABASE) {
-    try {
-      const { data: existingUser } = await _supabase.from('users').select('handle').eq('handle', handle).maybeSingle();
-      if (existingUser) { err.textContent = 'اسم المستخدم محجوز'; return; }
-      const { data: authData, error: authError } = await _supabase.auth.signUp({ email, password: pass, options: { data: { name, handle } } });
-      if (authError) { err.textContent = authError.message; return; }
-      const colors = ['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
-      const { data: userData, error: userError } = await _supabase.from('users')
-        .insert([{ id: authData.user.id, email, name, handle, bio:'', avatar:null, color:colors[Math.floor(Math.random()*colors.length)], followers:[], following:[], bookmarks:[], muted:[], blocked:[] }])
-        .select().single();
-      if (userError) { err.textContent = 'حدث خطأ في إنشاء الحساب'; return; }
-      me = userData;
-      db.users[userData.email] = userData;
-      await loadTweetsFromDB();
-      showApp();
-    } catch(e) { err.textContent = 'حدث خطأ في الاتصال'; }
-  } else {
-    // فول-باك محلي
-    if (db.users[email]) { err.textContent = 'هذا البريد مسجل مسبقاً'; return; }
-    const handles = Object.values(db.users).map(u=>u.handle);
-    if (handles.includes(handle)) { err.textContent = 'اسم المستخدم محجوز'; return; }
+  const name=v('su-name').trim();
+  const handle=v('su-handle').trim().replace(/\s+/g,'_').toLowerCase();
+  const email=v('su-email').trim().toLowerCase();
+  const pass=v('su-pass');
+  const err=document.getElementById('su-err');
+  if(!name||!handle||!email||!pass){err.textContent='يرجى ملء جميع الحقول';return;}
+  if(USE_SB){
+    try{
+      const {data:ex}=await _sb.from('users').select('handle').eq('handle',handle).maybeSingle();
+      if(ex){err.textContent='اسم المستخدم محجوز';return;}
+      const {data:auth,error:ae}=await _sb.auth.signUp({email,password:pass,options:{data:{name,handle}}});
+      if(ae){err.textContent=ae.message;return;}
+      const colors=['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
+      const {data:ud,error:ue}=await _sb.from('users').insert([{id:auth.user.id,email,name,handle,bio:'',avatar:null,color:colors[Math.floor(Math.random()*colors.length)],followers:[],following:[],bookmarks:[],muted:[],blocked:[]}]).select().single();
+      if(ue){err.textContent='خطأ في إنشاء الحساب: '+ue.message;return;}
+      me=ud; db.users[ud.email]=ud; showApp();
+    }catch(e){err.textContent='خطأ في الاتصال';}
+  }else{
+    if(db.users[email]){err.textContent='هذا البريد مسجل مسبقاً';return;}
+    const handles=Object.values(db.users).map(u=>u.handle);
+    if(handles.includes(handle)){err.textContent='اسم المستخدم محجوز';return;}
     const colors=['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
     const uid='u_'+Date.now();
     db.users[email]={id:uid,email,pass:hash(pass),name,handle,bio:'',avatar:null,color:colors[Math.floor(Math.random()*colors.length)],followers:[],following:[],bookmarks:[]};
@@ -991,11 +972,11 @@ async function doSignup(){
 }
 
 async function doLogout(){
-  if (USE_SUPABASE) { try { await _supabase.auth.signOut(); } catch(e){} }
-  else { try{localStorage.removeItem('session');}catch(e){} }
-  me = null;
-  document.getElementById('appPage').style.display = 'none';
-  document.getElementById('authPage').style.display = 'flex';
+  if(USE_SB){try{await _sb.auth.signOut();}catch(e){}}
+  else{try{localStorage.removeItem('session');}catch(e){}}
+  me=null;
+  document.getElementById('appPage').style.display='none';
+  document.getElementById('authPage').style.display='flex';
   sv('li-email',''); sv('li-pass','');
 }
 
@@ -1166,10 +1147,10 @@ function renderTweetDetail(id){
 // ============================================================
 // TWEET ACTIONS
 // ============================================================
-async function postTweet(){
+function postTweet(){
   const text = v('composerTxt').trim();
   if(!text && !pendingImg.composer) return;
-  await createTweet(text, null, pendingImg.composer);
+  createTweet(text, null, pendingImg.composer);
   sv('composerTxt','');
   pendingImg.composer=null;
   document.getElementById('composerImgPreview').innerHTML='';
@@ -1180,19 +1161,20 @@ async function postTweet(){
   toast('تم النشر بنجاح ✓');
 }
 
-async function postFromModal(){
+function postFromModal(){
   const text = v('modalTxt').trim();
   const replyTo = v('replyToId');
   if(!text && !pendingImg.modal) return;
-  const tw = await createTweet(text, replyTo||null, pendingImg.modal);
+  const tw = createTweet(text, replyTo||null, pendingImg.modal);
   if(replyTo){
     const parent = getTweetById(replyTo);
     if(parent){
       if(!parent.replies) parent.replies=[];
       parent.replies.push(tw.id);
-      // update parent replies in Supabase
-      if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', replyTo); } catch(e){} } else saveDB();
-      if(parent.uid !== me.id){ addNotif(parent.uid,'reply',tw.id,me.id); }
+      // notification
+      if(parent.uid !== me.id){
+        addNotif(parent.uid,'reply',tw.id,me.id);
+      }
     }
   }
   sv('modalTxt',''); sv('replyToId','');
@@ -1201,34 +1183,33 @@ async function postFromModal(){
   document.getElementById('modalPostBtn').disabled=true;
   document.getElementById('modalCharCount').textContent=MAX_CHARS;
   closeModal('composeModal');
+  saveDB();
   if(currentPage==='home') renderFeed();
   if(currentPage==='tweet') renderTweetDetail(replyTo||tw.id);
   toast(replyTo?'تم إرسال الرد ✓':'تم النشر ✓');
 }
 
 async function createTweet(text, replyTo=null, img=null){
-  const tw = {id:'t'+Date.now(), uid:me.id, text, ts:Date.now(), likes:[], retweets:[], replies:[], replyTo, img};
-  if (USE_SUPABASE) {
-    try {
-      const { data, error } = await _supabase.from('tweets').insert([tw]).select().single();
-      if (!error && data) { db.tweets.unshift(data); saveDB(); return data; }
-    } catch(e){}
+  const tw={id:'t'+Date.now(),uid:me.id,text,ts:Date.now(),likes:[],retweets:[],replies:[],replyTo,img,edited:false};
+  if(USE_SB){
+    try{
+      const {data,error}=await _sb.from('tweets').insert([tw]).select().single();
+      if(!error&&data){db.tweets.unshift(data);return data;}
+    }catch(e){console.warn('createTweet sb error',e);}
   }
-  db.tweets.unshift(tw);
-  saveDB();
-  return tw;
+  db.tweets.unshift(tw); saveDB(); return tw;
 }
 
-async function postReply(parentId){
+function postReply(parentId){
   const text=v('replyTxt').trim();
   if(!text) return;
-  const tw = await createTweet(text,parentId,null);
+  const tw=createTweet(text,parentId,null);
   const parent=getTweetById(parentId);
   if(parent){
     if(!parent.replies) parent.replies=[];
     parent.replies.push(tw.id);
-    if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ replies: parent.replies }).eq('id', parentId); } catch(e){} } else saveDB();
     if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id);
+    saveDB();
   }
   renderTweetDetail(parentId);
   toast('تم إرسال الرد ✓');
@@ -1243,7 +1224,8 @@ async function doLike(id){
     tw.likes.push(me.id);
     if(tw.uid!==me.id) addNotif(tw.uid,'like',id,me.id);
   }
-  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ likes: tw.likes }).eq('id', id); } catch(e){} } else saveDB();
+  if(USE_SB){try{await _sb.from('tweets').update({likes:tw.likes}).eq('id',id);}catch(e){}}
+  else saveDB();
   refreshTweetCard(id);
   updateNotifBadge();
 }
@@ -1258,33 +1240,34 @@ async function doRetweet(id){
     if(tw.uid!==me.id) addNotif(tw.uid,'retweet',id,me.id);
     toast('تمت إعادة النشر ✓');
   }
-  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ retweets: tw.retweets }).eq('id', id); } catch(e){} } else saveDB();
+  if(USE_SB){try{await _sb.from('tweets').update({retweets:tw.retweets}).eq('id',id);}catch(e){}}
+  else saveDB();
   refreshTweetCard(id);
   updateNotifBadge();
 }
 
-async function doBookmark(id){
+function doBookmark(id){
   if(!me.bookmarks) me.bookmarks=[];
   const idx=me.bookmarks.indexOf(id);
   if(idx>=0){me.bookmarks.splice(idx,1);toast('تمت إزالته من المحفوظات');}
   else {me.bookmarks.push(id);toast('تمت إضافته للمحفوظات ✓');}
-  db.users[me.email]=me;
-  if (USE_SUPABASE) { try { await _supabase.from('users').update({ bookmarks: me.bookmarks }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
+  db.users[me.email]=me; saveDB();
   refreshTweetCard(id);
 }
 
-async function deleteTweet(id){
+function deleteTweet(id){
   if(!confirm('هل أنت متأكد من حذف هذه التغريدة؟')) return;
   const idx=db.tweets.findIndex(t=>t.id===id);
   if(idx>=0) db.tweets.splice(idx,1);
+  // remove from parent replies
   db.tweets.forEach(t=>{if(t.replies) t.replies=t.replies.filter(r=>r!==id);});
   if(me.bookmarks) me.bookmarks=me.bookmarks.filter(b=>b!==id);
-  db.users[me.email]=me;
-  if (USE_SUPABASE) { try { await _supabase.from('tweets').delete().eq('id', id); } catch(e){} } else saveDB();
+  db.users[me.email]=me; saveDB();
   const el=document.getElementById('tw-'+id);
   if(el) el.remove();
   toast('تم حذف التغريدة');
   if(currentPage==='tweet') goBack();
+  if(USE_SB){try{_sb.from('tweets').delete().eq('id',id);}catch(e){}}
 }
 
 function refreshTweetCard(id){
@@ -1451,7 +1434,7 @@ function openEditProfile(){
   openModal('editModal');
 }
 
-async function saveProfile(){
+function saveProfile(){
   const name=v('ed-name').trim();
   const handle=v('ed-handle').trim().replace(/\s+/g,'_').toLowerCase();
   const bio=v('ed-bio').trim();
@@ -1459,9 +1442,7 @@ async function saveProfile(){
   const taken=Object.values(db.users).filter(u=>u.id!==me.id).map(u=>u.handle);
   if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
   me.name=name; me.handle=handle; me.bio=bio;
-  db.users[me.email]=me;
-  if (USE_SUPABASE) { try { await _supabase.from('users').update({ name, handle, bio }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
-  closeModal('editModal');
+  db.users[me.email]=me; saveDB(); closeModal('editModal');
   updateSidebar(); renderProfile(); toast('تم حفظ التغييرات ✓');
 }
 
@@ -1471,12 +1452,7 @@ function uploadAvatar(){
   input.onchange=e=>{
     const f=e.target.files[0];
     const r=new FileReader();
-    r.onload=async ev=>{
-      me.avatar=ev.target.result;
-      db.users[me.email]=me;
-      if (USE_SUPABASE) { try { await _supabase.from('users').update({ avatar: me.avatar }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
-      updateSidebar(); renderProfile(); toast('تم تحديث الصورة ✓');
-    };
+    r.onload=ev=>{me.avatar=ev.target.result;db.users[me.email]=me;saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة ✓');};
     r.readAsDataURL(f);
   };
   input.click();
@@ -1485,7 +1461,7 @@ function uploadAvatar(){
 // ============================================================
 // FOLLOW
 // ============================================================
-async function toggleFollow(userId){
+function toggleFollow(userId){
   const target=getUserById(userId);
   if(!target) return;
   if(!me.following) me.following=[];
@@ -1502,10 +1478,10 @@ async function toggleFollow(userId){
     toast('تمت المتابعة ✓');
   }
   db.users[me.email]=me;
+  // save target user
   const tEmail=Object.keys(db.users).find(k=>db.users[k].id===userId);
   if(tEmail) db.users[tEmail]=target;
-  if (USE_SUPABASE) { try { await _supabase.from('users').update({ following: me.following }).eq('id', me.id); await _supabase.from('users').update({ followers: target.followers }).eq('id', userId); } catch(e){} } else saveDB();
-  updateNotifBadge();
+  saveDB(); updateNotifBadge();
   renderProfile(userId);
   renderSuggestions();
 }
@@ -1528,6 +1504,7 @@ function renderBookmarks(){
 function addNotif(toUserId, type, tweetId, fromUserId){
   if(!db.notifications) db.notifications=[];
   db.notifications.push({id:'n'+Date.now(),to:toUserId,type,tweetId,from:fromUserId,ts:Date.now(),read:false});
+  saveDB();
 }
 
 function updateNotifBadge(){
@@ -1542,7 +1519,7 @@ function renderNotifications(){
   const mine=db.notifications.filter(n=>n.to===me.id).sort((a,b)=>b.ts-a.ts);
   // mark read
   mine.forEach(n=>n.read=true);
-  updateNotifBadge();
+  saveDB(); updateNotifBadge();
   if(!mine.length){
     document.getElementById('notifContainer').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>لا توجد إشعارات</p></div>`;
     return;
@@ -1807,7 +1784,7 @@ function openEditTweet(id){
   document.getElementById('editTweetId').value=id;
   openModal('editTweetModal');
 }
-async function saveEditTweet(){
+function saveEditTweet(){
   const id=document.getElementById('editTweetId').value;
   const text=document.getElementById('editTweetTxt').value.trim();
   if(!text) return;
@@ -1815,7 +1792,7 @@ async function saveEditTweet(){
   if(!tw) return;
   tw.text=text;
   tw.edited=true;
-  if (USE_SUPABASE) { try { await _supabase.from('tweets').update({ text, edited: true }).eq('id', id); } catch(e){} } else saveDB();
+  saveDB();
   closeModal('editTweetModal');
   if(currentPage==='home') renderFeed();
   if(currentPage==='profile') renderProfile(viewingUserId);
@@ -1875,26 +1852,25 @@ function submitReport(reason){
 // ============================================================
 // MUTE / BLOCK
 // ============================================================
-async function toggleMute(userId){
+function toggleMute(userId){
   if(!me.muted) me.muted=[];
   const idx=me.muted.indexOf(userId);
   if(idx>=0){me.muted.splice(idx,1);toast('تم إلغاء الكتم');}
   else {me.muted.push(userId);toast('تم كتم المستخدم ✓');}
-  db.users[me.email]=me;
-  if (USE_SUPABASE) { try { await _supabase.from('users').update({ muted: me.muted }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
+  db.users[me.email]=me; saveDB();
   if(currentPage==='home') renderFeed();
 }
-async function toggleBlock(userId){
+function toggleBlock(userId){
   if(!me.blocked) me.blocked=[];
   const idx=me.blocked.indexOf(userId);
   if(idx>=0){me.blocked.splice(idx,1);toast('تم إلغاء الحظر');}
   else {
     me.blocked.push(userId);
+    // also unfollow
     if(me.following) me.following=me.following.filter(f=>f!==userId);
     toast('تم حظر المستخدم ✓');
   }
-  db.users[me.email]=me;
-  if (USE_SUPABASE) { try { await _supabase.from('users').update({ blocked: me.blocked, following: me.following||[] }).eq('id', me.id); } catch(e){} } else { db.users[me.email]=me; saveDB(); }
+  db.users[me.email]=me; saveDB();
   if(currentPage==='home') renderFeed();
 }
 
@@ -2056,4 +2032,11 @@ function closeDrawer(){
   feedEl.addEventListener('touchend',()=>{
     if(pulling){
       pulling=false; startY=0;
-      if(currentPage==='home') r
+      if(currentPage==='home'){renderFeed();if(USE_SB)loadTweetsFromDB();}
+    }
+    if(indicator) indicator.classList.remove('visible');
+  });
+});
+</script>
+</body>
+</html>
