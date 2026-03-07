@@ -9,7 +9,10 @@
 <title>اسأل الإسلام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js"></script>
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <style>
 :root{
   --bg:#fff;--bg2:#f7f9fa;--bg3:#eff3f4;
@@ -513,8 +516,8 @@ input[type=file]{display:none;}
       <div style="flex:1;height:1px;background:var(--border)"></div>
     </div>
 
-    <!-- بريد إلكتروني عبر Clerk -->
-    <button onclick="loginWithClerk()" style="width:100%;padding:0.75rem 1rem;background:var(--accent);border:none;border-radius:30px;display:flex;align-items:center;justify-content:center;gap:0.75rem;cursor:pointer;font-family:inherit;color:#fff;font-size:0.97rem;font-weight:600;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+    <!-- بريد إلكتروني -->
+    <button onclick="loginWithEmail()" style="width:100%;padding:0.75rem 1rem;background:var(--accent);border:none;border-radius:30px;display:flex;align-items:center;justify-content:center;gap:0.75rem;cursor:pointer;font-family:inherit;color:#fff;font-size:0.97rem;font-weight:600;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
       <span>المتابعة بالبريد الإلكتروني</span>
     </button>
@@ -837,9 +840,22 @@ input[type=file]{display:none;}
 <div class="toast-wrap" id="toastWrap"></div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 
+// ============================================================
+// Firebase Init
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyBf1ImP5YtSHf9ZnGd71n-QoX0Ao_WcJk0",
+  authDomain: "askislam-e9803.firebaseapp.com",
+  projectId: "askislam-e9803",
+  storageBucket: "askislam-e9803.firebasestorage.app",
+  messagingSenderId: "707749928558",
+  appId: "1:707749928558:web:d47d6968baca2c7436907f",
+  measurementId: "G-WT3XWTMCJH"
+};
+firebase.initializeApp(firebaseConfig);
+const dbFirestore = firebase.firestore();
 
 // ============================================================
 // STATE
@@ -853,127 +869,81 @@ let pageHistory = [];
 let viewingUserId = null;
 
 // ============================================================
-// INIT
+// Firebase Authentication
 // ============================================================
-// === SUPABASE ===
-const SUPABASE_URL = 'https://wxfaefpyocudfhhbofvc.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4ZmFlZnB5b2N1ZGZoaGJvZnZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4Mzk5MTAsImV4cCI6MjA4ODQxNTkxMH0.uS802ZZ43bm761b_bfno3W5Il7Kd71CDSK55bCDIYFQ';
-let _sb = null;
-try {
-  if(window.supabase) _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth:{persistSession:true,autoRefreshToken:true,storage:localStorage}
-  });
-} catch(e) { console.warn('Supabase init error',e); }
-const USE_SB = !!_sb;
 
-async function loadTweetsFromDB(){
-  if(!USE_SB) return;
-  try{
-    const {data:tweets} = await _sb.from('tweets').select('*').order('ts',{ascending:false});
-    if(tweets){
-      db.tweets = tweets;
-      const uids=[...new Set(tweets.map(t=>t.uid))];
-      if(uids.length>0){
-        const {data:users} = await _sb.from('users').select('*').in('id',uids);
-        if(users) users.forEach(u=>{ db.users[u.email]=u; });
-      }
-    }
-  }catch(e){ console.warn('loadTweetsFromDB',e); }
-}
-
-// ============================================================
-// Clerk Integration
-// ============================================================
-const CLERK_PUBLISHABLE_KEY = 'pk_test_aHVtYW5lLWVsZXBoYW50LTYzLmNsZXJrLmFjY291bnRzLmRldiQ'; // ← ضع مفتاحك هنا
-
-let clerk = null;
-
-async function initClerk() {
-  try {
-    clerk = await window.Clerk?.load({
-      publishableKey: CLERK_PUBLISHABLE_KEY,
-      afterSignInUrl: window.location.href,
-      afterSignUpUrl: window.location.href
+window.loginWithGoogle = function() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .catch(error => {
+      console.error('Google login error:', error);
+      toast('حدث خطأ في تسجيل الدخول عبر Google');
     });
-    if (clerk?.user) {
-      await handleClerkUser(clerk.user);
-    }
-  } catch (e) {
-    console.error('Clerk init error:', e);
-  }
-}
+};
 
-async function handleClerkUser(user) {
-  try {
-    if (!USE_SB) {
-      // وضع محلي بدون Supabase
-      const email = user.primaryEmailAddress?.emailAddress || user.id + '@clerk.user';
-      if (!db.users[email]) {
-        db.users[email] = {
-          id: user.id,
-          email: email,
-          name: user.fullName || 'مستخدم',
-          handle: user.username || 'user_' + user.id.slice(0,5),
-          bio: '',
-          avatar: user.imageUrl,
-          color: '#1d9bf0',
-          followers: [], following: [], bookmarks: [], muted: [], blocked: []
-        };
-        saveDB();
+window.loginWithFacebook = function() {
+  const provider = new firebase.auth.FacebookAuthProvider();
+  firebase.auth().signInWithPopup(provider)
+    .catch(error => {
+      console.error('Facebook login error:', error);
+      toast('حدث خطأ في تسجيل الدخول عبر Facebook');
+    });
+};
+
+window.loginWithEmail = function() {
+  const email = prompt('أدخل بريدك الإلكتروني:');
+  const password = prompt('أدخل كلمة المرور:');
+  if (!email || !password) return;
+  firebase.auth().signInWithEmailAndPassword(email, password)
+    .catch(error => {
+      if (error.code === 'auth/user-not-found') {
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+          .catch(err => toast(err.message));
+      } else {
+        toast(error.message);
       }
-      me = db.users[email];
-      await loadTweetsFromDB();
-      showApp();
-      return;
-    }
+    });
+};
 
-    // مع Supabase
-    const { data: existingUser } = await _sb
-      .from('users').select('*').eq('id', user.id).maybeSingle();
-
-    if (!existingUser) {
-      const email = user.primaryEmailAddress?.emailAddress || '';
-      let handle = user.username || email.split('@')[0].replace(/[^a-zA-Z0-9_]/g,'_').toLowerCase() || 'user_' + user.id.slice(0,5);
+firebase.auth().onAuthStateChanged(async (user) => {
+  if (user) {
+    const userRef = dbFirestore.collection('users').doc(user.uid);
+    const doc = await userRef.get();
+    if (!doc.exists) {
+      const handle = (user.email || user.uid).split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
       let finalHandle = handle, counter = 1;
       while (true) {
-        const { data: ex } = await _sb.from('users').select('handle').eq('handle', finalHandle).maybeSingle();
-        if (!ex) break;
+        const snapshot = await dbFirestore.collection('users').where('handle', '==', finalHandle).get();
+        if (snapshot.empty) break;
         finalHandle = handle + counter++;
       }
-      const colors = ['#1d9bf0','#e91e8c','#00ba7c','#ff6b35','#7c3aed'];
-      await _sb.from('users').insert([{
-        id: user.id, email, name: user.fullName || 'مستخدم',
-        handle: finalHandle, bio: '',
-        avatar: user.imageUrl || null,
-        color: colors[Math.floor(Math.random()*colors.length)],
-        followers:[], following:[], bookmarks:[], muted:[], blocked:[]
-      }]);
+      const colors = ['#1d9bf0', '#e91e8c', '#00ba7c', '#ff6b35', '#7c3aed'];
+      const newUser = {
+        id: user.uid,
+        email: user.email || user.uid + '@firebase.user',
+        name: user.displayName || (user.email || 'مستخدم').split('@')[0],
+        handle: finalHandle,
+        bio: '',
+        avatar: user.photoURL || null,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        followers: [], following: [], bookmarks: [], muted: [], blocked: []
+      };
+      await userRef.set(newUser);
+      me = newUser;
+    } else {
+      me = doc.data();
     }
-
-    const { data: userData } = await _sb.from('users').select('*').eq('id', user.id).single();
-    if (userData) {
-      me = userData;
-      db.users[userData.email] = userData;
-      await loadTweetsFromDB();
-      showApp();
-    }
-  } catch (e) {
-    console.error('handleClerkUser error:', e);
-    toast('حدث خطأ في تسجيل الدخول');
+    db.users[me.email] = me;
+    await loadTweetsFromFirestore();
+    showApp();
+  } else {
+    document.getElementById('authPage').style.display = 'flex';
   }
-}
-
-function loginWithClerk() {
-  if (!clerk) { toast('جارٍ التحميل...'); return; }
-  clerk.openSignIn();
-}
+});
 
 window.onload = async () => {
   loadDB();
   loadTheme();
-  await initClerk();
-  if (clerk?.user) return; // تم التعامل مع المستخدم في initClerk
-  document.getElementById('authPage').style.display = 'flex';
 };
 
 function loadDB(){
@@ -1002,30 +972,12 @@ function saveDB(){
 function hash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
 
 // ============================================================
-// AUTH — Clerk فقط
+// AUTH
 // ============================================================
 
-function loginWithGoogle() {
-  if (!clerk) { toast('جارٍ التحميل...'); return; }
-  clerk.authenticateWithRedirect({
-    strategy: 'oauth_google',
-    redirectUrl: window.location.href,
-    redirectUrlComplete: window.location.href
-  });
-}
-
-function loginWithFacebook() {
-  if (!clerk) { toast('جارٍ التحميل...'); return; }
-  clerk.authenticateWithRedirect({
-    strategy: 'oauth_facebook',
-    redirectUrl: window.location.href,
-    redirectUrlComplete: window.location.href
-  });
-}
-
 async function doLogout(){
-  if(clerk?.user){ try{ await clerk.signOut(); }catch(e){} }
-  me=null;
+  try{ await firebase.auth().signOut(); }catch(e){}
+  me = null;
   document.getElementById('appPage').style.display='none';
   document.getElementById('authPage').style.display='flex';
 }
@@ -1239,15 +1191,38 @@ function postFromModal(){
   toast(replyTo?'تم إرسال الرد ✓':'تم النشر ✓');
 }
 
+// جلب التغريدات من Firestore
+async function loadTweetsFromFirestore() {
+  try {
+    const snapshot = await dbFirestore.collection('tweets').orderBy('ts', 'desc').get();
+    db.tweets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // جلب بيانات المستخدمين
+    const uids = [...new Set(db.tweets.map(t => t.uid))];
+    for (const uid of uids) {
+      if (!Object.values(db.users).find(u => u.id === uid)) {
+        try {
+          const udoc = await dbFirestore.collection('users').doc(uid).get();
+          if (udoc.exists) { const u = udoc.data(); db.users[u.email] = u; }
+        } catch(e) {}
+      }
+    }
+  } catch (e) {
+    console.warn('Error loading tweets', e);
+    db.tweets = [];
+  }
+}
+
 async function createTweet(text, replyTo=null, img=null){
   const tw={id:'t'+Date.now(),uid:me.id,text,ts:Date.now(),likes:[],retweets:[],replies:[],replyTo,img,edited:false};
-  if(USE_SB){
-    try{
-      const {data,error}=await _sb.from('tweets').insert([tw]).select().single();
-      if(!error&&data){db.tweets.unshift(data);return data;}
-    }catch(e){console.warn('createTweet sb error',e);}
+  try{
+    await dbFirestore.collection('tweets').doc(tw.id).set(tw);
+    db.tweets.unshift(tw);
+    return tw;
+  }catch(e){
+    console.error('createTweet error',e);
+    toast('حدث خطأ في نشر التغريدة');
+    return null;
   }
-  db.tweets.unshift(tw); saveDB(); return tw;
 }
 
 function postReply(parentId){
@@ -1274,8 +1249,7 @@ async function doLike(id){
     tw.likes.push(me.id);
     if(tw.uid!==me.id) addNotif(tw.uid,'like',id,me.id);
   }
-  if(USE_SB){try{await _sb.from('tweets').update({likes:tw.likes}).eq('id',id);}catch(e){}}
-  else saveDB();
+  try{ await dbFirestore.collection('tweets').doc(id).update({likes:tw.likes}); }catch(e){}
   refreshTweetCard(id);
   updateNotifBadge();
 }
@@ -1290,34 +1264,38 @@ async function doRetweet(id){
     if(tw.uid!==me.id) addNotif(tw.uid,'retweet',id,me.id);
     toast('تمت إعادة النشر ✓');
   }
-  if(USE_SB){try{await _sb.from('tweets').update({retweets:tw.retweets}).eq('id',id);}catch(e){}}
-  else saveDB();
+  try{ await dbFirestore.collection('tweets').doc(id).update({retweets:tw.retweets}); }catch(e){}
   refreshTweetCard(id);
   updateNotifBadge();
 }
 
-function doBookmark(id){
+async function doBookmark(id){
   if(!me.bookmarks) me.bookmarks=[];
   const idx=me.bookmarks.indexOf(id);
   if(idx>=0){me.bookmarks.splice(idx,1);toast('تمت إزالته من المحفوظات');}
   else {me.bookmarks.push(id);toast('تمت إضافته للمحفوظات ✓');}
-  db.users[me.email]=me; saveDB();
+  db.users[me.email]=me;
+  try{ await dbFirestore.collection('users').doc(me.id).update({bookmarks:me.bookmarks}); }catch(e){}
   refreshTweetCard(id);
 }
 
-function deleteTweet(id){
+async function deleteTweet(id){
   if(!confirm('هل أنت متأكد من حذف هذه التغريدة؟')) return;
-  const idx=db.tweets.findIndex(t=>t.id===id);
-  if(idx>=0) db.tweets.splice(idx,1);
-  // remove from parent replies
-  db.tweets.forEach(t=>{if(t.replies) t.replies=t.replies.filter(r=>r!==id);});
-  if(me.bookmarks) me.bookmarks=me.bookmarks.filter(b=>b!==id);
-  db.users[me.email]=me; saveDB();
-  const el=document.getElementById('tw-'+id);
-  if(el) el.remove();
-  toast('تم حذف التغريدة');
-  if(currentPage==='tweet') goBack();
-  if(USE_SB){try{_sb.from('tweets').delete().eq('id',id);}catch(e){}}
+  try{
+    await dbFirestore.collection('tweets').doc(id).delete();
+    const idx=db.tweets.findIndex(t=>t.id===id);
+    if(idx>=0) db.tweets.splice(idx,1);
+    db.tweets.forEach(t=>{if(t.replies) t.replies=t.replies.filter(r=>r!==id);});
+    if(me.bookmarks){ me.bookmarks=me.bookmarks.filter(b=>b!==id); dbFirestore.collection('users').doc(me.id).update({bookmarks:me.bookmarks}); }
+    db.users[me.email]=me;
+    const el=document.getElementById('tw-'+id);
+    if(el) el.remove();
+    toast('تم حذف التغريدة');
+    if(currentPage==='tweet') goBack();
+  }catch(e){
+    console.error('deleteTweet error',e);
+    toast('حدث خطأ في الحذف');
+  }
 }
 
 function refreshTweetCard(id){
@@ -2082,7 +2060,7 @@ function closeDrawer(){
   feedEl.addEventListener('touchend',()=>{
     if(pulling){
       pulling=false; startY=0;
-      if(currentPage==='home'){renderFeed();if(USE_SB)loadTweetsFromDB();}
+      if(currentPage==='home'){renderFeed();loadTweetsFromFirestore().then(()=>renderFeed());}
     }
     if(indicator) indicator.classList.remove('visible');
   });
