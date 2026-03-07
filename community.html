@@ -63,11 +63,24 @@ body{
   .logo{justify-content:center;padding:0.75rem 0;}
 }
 @media(max-width:640px){
-  .app{grid-template-columns:1fr;height:auto;min-height:100dvh;}
+  .app{
+    display:block;
+    height:100dvh;
+    overflow:hidden;
+  }
   .sidebar{display:none;}
   .rside{display:none;}
-  .feed{height:auto;min-height:100dvh;border:none !important;}
-  body{padding-bottom:calc(var(--nav-h) + var(--safe-bottom));}
+  .feed{
+    height:calc(100dvh - var(--nav-h) - var(--safe-bottom));
+    border:none !important;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    position:relative;
+  }
+  body{padding-bottom:0;}
+  .mobile-logo{display:flex !important;}
 }
 @media(orientation:landscape) and (max-height:500px){
   .mobile-nav{display:none !important;}
@@ -152,7 +165,7 @@ body{
   border-right:1px solid var(--border);
   border-left:1px solid var(--border);
   height:100vh;height:100dvh;
-  overflow-y:auto;display:flex;flex-direction:column;
+  overflow-y:auto;
   scroll-behavior:smooth;
 }
 .feed-top{
@@ -183,6 +196,22 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
   transition:background 0.15s;
 }
 .back-btn:hover{background:var(--bg3);}
+
+/* ── MOBILE FEED TOP ── */
+@media(max-width:640px){
+  .feed-top{
+    padding:0.65rem 0.75rem;
+    min-height:52px;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  .feed-top h2{font-size:1rem;}
+  .composer{padding:0.7rem 0.85rem;}
+  .composer textarea{font-size:1rem;min-height:50px;}
+  /* إظهار الترند فقط في Explore على الموبايل */
+  #pg-explore #mobileTrends{display:block;}
+}
 
 /* ── PAGE ── */
 .page{display:none;}
@@ -397,36 +426,41 @@ html.dark .toast{background:#e7e9ea;color:#000;}
 .mobile-nav{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
-  background:rgba(255,255,255,0.94);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(255,255,255,0.96);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--border);
   z-index:150;
   padding-bottom:var(--safe-bottom);
   height:calc(var(--nav-h) + var(--safe-bottom));
 }
-html.dark .mobile-nav{background:rgba(0,0,0,0.94);}
+html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
 .mobile-nav-inner{
   display:flex;justify-content:space-around;align-items:center;
-  height:var(--nav-h);padding:0 0.25rem;
+  height:var(--nav-h);
+  padding:0;
+  width:100%;
 }
 @media(max-width:640px){.mobile-nav{display:block;}}
 .mnav-btn{
   background:none;border:none;cursor:pointer;color:var(--txt2);
-  padding:0.45rem 0.65rem;border-radius:14px;
-  display:flex;flex-direction:column;align-items:center;
-  font-size:0.6rem;font-family:inherit;
+  padding:0.5rem 0.75rem;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:0;font-family:inherit;
   transition:color 0.15s,background 0.15s;
-  min-width:52px;min-height:48px;justify-content:center;
+  flex:1;min-height:var(--nav-h);
+  -webkit-tap-highlight-color:transparent;
 }
-.mnav-btn svg{width:24px;height:24px;}
+.mnav-btn svg{width:26px;height:26px;flex-shrink:0;}
 .mnav-btn.active{color:var(--accent);}
+.mnav-btn.active svg{stroke-width:3;}
 .mnav-fab{
   background:var(--accent);color:#fff !important;
-  border-radius:50%;width:50px;height:50px;min-width:50px;min-height:50px;
+  border-radius:50%;width:52px;height:52px;min-width:52px;min-height:52px;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 14px rgba(29,155,240,0.45);
+  box-shadow:0 4px 16px rgba(29,155,240,0.5);
   transition:transform 0.15s,background 0.15s;
-  padding:0;
+  padding:0;flex:unset;
+  margin-top:-10px;
 }
 .mnav-fab:hover{background:var(--accent2) !important;}
 .mnav-fab:active{transform:scale(0.93);}
@@ -702,7 +736,7 @@ input[type=file]{display:none;}
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--txt2)" stroke-width="2.5" stroke-linecap="square"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" placeholder="ابحث..." oninput="sideSearch(this.value)">
       </div>
-      <div class="card" id="trendsCard">
+      <div class="card" id="trendsCard" style="display:none">
         <div class="card-title">الترندات الآن</div>
         <div id="trendsContent"></div>
       </div>
@@ -1058,9 +1092,17 @@ function nav(page, userId=null){
   document.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
   const mnb=document.getElementById('mnav-'+page);
   if(mnb) mnb.classList.add('active');
+  // scroll to top عند كل تنقل
+  const feedEl=document.getElementById('feedCol');
+  if(feedEl) feedEl.scrollTo({top:0,behavior:'instant'});
 
   if(page==='home') renderFeed();
-  if(page==='explore'){ renderExploreTrends(); document.getElementById('searchResults').innerHTML=''; }
+  if(page==='explore'){
+    renderExploreTrends();
+    document.getElementById('searchResults').innerHTML='';
+    const si=document.getElementById('exploreSearch');
+    if(si) si.value='';
+  }
   if(page==='notifications') renderNotifications();
   if(page==='bookmarks') renderBookmarks();
   if(page==='profile'){
@@ -1640,24 +1682,22 @@ function getTrends(){
 }
 
 function renderTrends(){
-  const trends=getTrends();
-  const staticTrends=[['#القرآن_الكريم',245300],['#الفقه_الإسلامي',189200],['#السيرة_النبوية',156800],['#العقيدة',132500]];
-  const all=[...trends.map(([t,n])=>[t,n]),...staticTrends].slice(0,5);
-  document.getElementById('trendsContent').innerHTML=all.map(([tag,num])=>
-    `<div class="trend" onclick="searchByTag('${tag}')">
-      <div class="trend-cat">ترند</div>
-      <div class="trend-tag">${esc(tag)}</div>
-      <div class="trend-num">${fmtNum(num)} تغريدة</div>
-    </div>`).join('');
+  // الترند يظهر فقط في صفحة الاستكشاف
 }
 
 function renderExploreTrends(){
   const trends=getTrends();
   const staticTrends=[['#القرآن_الكريم',245300],['#الفقه_الإسلامي',189200],['#السيرة_النبوية',156800],['#العقيدة',132500],['#رمضان',98700],['#الصلاة',75300]];
   const all=[...trends.map(([t,n])=>[t,n]),...staticTrends].slice(0,8);
-  document.getElementById('exploreTrends').innerHTML=`<div class="card" style="margin:0.75rem 1rem"><div class="card-title">مواضيع رائجة</div>`
-    +all.map(([tag,num])=>`<div class="trend" onclick="searchByTag('${tag}')">`+
-      `<div class="trend-cat">ترند</div><div class="trend-tag">${esc(tag)}</div><div class="trend-num">${fmtNum(num)} تغريدة</div></div>`).join('')
+  const el=document.getElementById('exploreTrends');
+  el.style.display='block';
+  el.innerHTML=`<div class="card" style="margin:0.75rem 1rem">
+    <div class="card-title">مواضيع رائجة</div>`
+    +all.map(([tag,num])=>`<div class="trend" onclick="searchByTag('${tag}')">
+      <div class="trend-cat">ترند</div>
+      <div class="trend-tag">${esc(tag)}</div>
+      <div class="trend-num">${fmtNum(num)} تغريدة</div>
+    </div>`).join('')
     +`</div>`;
 }
 
@@ -1685,7 +1725,8 @@ function searchByTag(tag){
 
 function doSearch(q){
   q=q.trim().toLowerCase();
-  document.getElementById('exploreTrends').style.display=q?'none':'block';
+  const trendsEl=document.getElementById('exploreTrends');
+  trendsEl.style.display=q?'none':'block';
   if(!q){document.getElementById('searchResults').innerHTML='';return;}
   // tweets
   const tweetMatches=db.tweets.filter(t=>t.text.toLowerCase().includes(q)).sort((a,b)=>b.ts-a.ts);
