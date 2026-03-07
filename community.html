@@ -881,8 +881,8 @@ window.onload = async () => {
       const {data:{session}} = await _sb.auth.getSession();
       if(session?.user){
         // نشوفو واش جاي من Google callback
-        if (window.location.pathname.includes('/community.html') && 
-             window.location.search.includes('provider=google')) {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('provider') || window.location.hash.includes('access_token')) {
           await handleGoogleCallback();
         } else {
           // لا، جاي بشكل عادي
@@ -952,7 +952,7 @@ async function loginWithGoogle() {
     const { data, error } = await _sb.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://askislamai.com/community'
+        redirectTo: window.location.origin + window.location.pathname
       }
     });
     if (error) {
@@ -967,41 +967,101 @@ async function loginWithGoogle() {
 
 async function handleGoogleCallback() {
   try {
-    const { data: { session } } = await _sb.auth.getSession();
-    if (session?.user) {
-      const { data: ud, error } = await _sb.from('users').select('*').eq('id', session.user.id).single();
-      if (ud) {
-        me = ud;
-        db.users[ud.email] = ud;
-        await loadTweetsFromDB();
-        showApp();
-      } else {
-        // إذا كان المستخدم جديداً، يمكن توجيهه لإنشاء بروفايل أو التعامل معه هنا
-        toast('تم تسجيل الدخول، يرجى استكمال بياناتك');
-        // مثال: إنشاء سجل مستخدم افتراضي
-        const newUser = {
-          id: session.user.id,
-          email: session.user.email,
-          name: session.user.user_metadata.full_name || 'مستخدم Google',
-          handle: session.user.email.split('@')[0] + '_' + Math.floor(Math.random()*1000),
+    const { data: { user }, error } = await _sb.auth.getUser();
+    
+    if (error || !user) {
+      console.error('Error getting user:', error);
+      return;
+    }
+    
+    // نشوفو واش المستخدم كاين فـ جدول users
+    const { data: existingUser, error: checkError } = await _sb
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
+    
+    if (checkError) {
+      console.error('Error checking user:', checkError);
+      return;
+    }
+    
+    // إذا ماكاينش، نزيدوه
+    if (!existingUser) {
+      const name = user.user_metadata?.full_name || 'مستخدم Google';
+      const email = user.email;
+      
+      // نصنعو اسم مستخدم من البريد
+      let handle = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+      
+      // نتأكدو أن ماكاينش نفس الاسم
+      let finalHandle = handle;
+      let counter = 1;
+      while (true) {
+        const { data: existing } = await _sb
+          .from('users')
+          .select('handle')
+          .eq('handle', finalHandle)
+          .maybeSingle();
+        
+        if (!existing) break;
+        finalHandle = handle + counter;
+        counter++;
+      }
+      
+      const colors = ['#1d9bf0', '#e91e8c', '#00ba7c', '#ff6b35', '#7c3aed'];
+      
+      const { error: insertError } = await _sb
+        .from('users')
+        .insert([{
+          id: user.id,
+          email: email,
+          name: name,
+          handle: finalHandle,
           bio: '',
-          avatar: session.user.user_metadata.avatar_url || null,
-          color: '#1d9bf0',
+          avatar: null,
+          color: colors[Math.floor(Math.random() * colors.length)],
           followers: [],
           following: [],
-          bookmarks: []
-        };
-        const { error: insErr } = await _sb.from('users').insert([newUser]);
-        if (!insErr) {
-          me = newUser;
-          db.users[newUser.email] = newUser;
-          await loadTweetsFromDB();
-          showApp();
-        }
+          bookmarks: [],
+          muted: [],
+          blocked: []
+        }]);
+      
+      if (insertError) {
+        console.error('Error inserting user:', insertError);
+        toast('حدث خطأ في إنشاء الحساب');
+        return;
       }
+      
+      console.log('User created successfully');
     }
+    
+    // نجيبو المستخدم من جدول users
+    const { data: userData, error: userError } = await _sb
+      .from('users')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    
+    if (userError) {
+      console.error('Error fetching user data:', userError);
+      return;
+    }
+    
+    // حفظ المستخدم وعرض التطبيق
+    me = userData;
+    db.users[userData.email] = userData;
+    await loadTweetsFromDB();
+    // تنظيف الـ URL من params الـ OAuth
+    if (window.history?.replaceState) {
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    showApp();
+    
   } catch (e) {
-    console.error('Callback error:', e);
+    console.error('Error in handleGoogleCallback:', e);
+    toast('حدث خطأ في معالجة تسجيل الدخول');
   }
 }
 
