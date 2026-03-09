@@ -50,7 +50,7 @@ body{
   grid-template-columns:var(--sidebar-w) 1fr var(--rside-w);
   height:100vh;height:100dvh;
 }
-@media(max-width:1024px){
+@media(max-width:1100px){
   .app{grid-template-columns:70px 1fr;}
   .rside{display:none;}
   .nav-label{display:none;}
@@ -62,20 +62,16 @@ body{
   .logo span{display:none;}
   .logo{justify-content:center;padding:0.75rem 0;}
 }
-@media(max-width:768px){
+@media(max-width:640px){
   .app{
-    display:flex;
-    flex-direction:column;
+    display:block;
     height:100dvh;
     overflow:hidden;
-    padding-top:var(--nav-h);
   }
-  .sidebar{display:none !important;}
-  .rside{display:none !important;}
+  .sidebar{display:none;}
+  .rside{display:none;}
   .feed{
-    flex:1;
-    height:auto;
-    min-height:0;
+    height:calc(100dvh - var(--nav-h) - var(--safe-bottom));
     border:none !important;
     overflow-y:auto;
     overflow-x:hidden;
@@ -83,13 +79,12 @@ body{
     overscroll-behavior-y:contain;
     position:relative;
   }
-  .feed-top{display:none !important;}
   body{padding-bottom:0;}
   .mobile-logo{display:flex !important;}
 }
 @media(orientation:landscape) and (max-height:500px){
   .mobile-nav{display:none !important;}
-  .app{padding-top:0;}
+  body{padding-bottom:0;}
 }
 
 /* ── SIDEBAR ── */
@@ -194,7 +189,6 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 }
 .hamburger:hover{background:var(--bg3);}
 @media(max-width:640px){.hamburger{display:flex;}}
-@media(max-width:768px){.hamburger{display:none !important;}}
 .back-btn{
   background:none;border:none;cursor:pointer;color:var(--txt);
   padding:0.35rem;border-radius:50%;display:flex;
@@ -204,7 +198,7 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 .back-btn:hover{background:var(--bg3);}
 
 /* ── MOBILE FEED TOP ── */
-@media(max-width:768px){
+@media(max-width:640px){
   .feed-top{
     padding:0.65rem 0.75rem;
     min-height:52px;
@@ -428,24 +422,26 @@ html.dark .toast{background:#e7e9ea;color:#000;}
 .toast.out{animation:toastOut 0.3s ease forwards;}
 @keyframes toastOut{to{opacity:0;transform:translateY(8px);}}
 
-/* ── MOBILE NAV BAR - FIXED TOP ── */
+/* ── MOBILE NAV BAR (FIXED) ── */
 .mobile-nav{
   display:none;
-  position:fixed;top:0;left:0;right:0;
-  background:rgba(255,255,255,0.97);
+  position:fixed;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,0.96);
   backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
-  z-index:200;
-  height:var(--nav-h);
+  border-top:1px solid var(--border);
+  z-index:150;
+  padding-bottom:var(--safe-bottom);
+  height:calc(var(--nav-h) + var(--safe-bottom));
 }
-html.dark .mobile-nav{background:rgba(0,0,0,0.97);}
+html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
 .mobile-nav-inner{
   display:flex;justify-content:space-around;align-items:center;
-  height:100%;
-  padding:0 0.25rem;
+  height:var(--nav-h);
+  padding:0;
   width:100%;
 }
-@media(max-width:768px){.mobile-nav{display:block;}}
+@media(max-width:640px){.mobile-nav{display:block;}}
+.mobile-nav.hidden{display:none !important;}
 .mnav-btn{
   background:none;border:none;cursor:pointer;color:var(--txt2);
   padding:0.5rem 0.75rem;border-radius:14px;
@@ -455,33 +451,20 @@ html.dark .mobile-nav{background:rgba(0,0,0,0.97);}
   flex:1;min-height:var(--nav-h);
   -webkit-tap-highlight-color:transparent;
 }
-.mnav-btn svg{width:26px;height:26px;flex-shrink:0;}
+.mnav-btn svg{width:15px;height:15px;flex-shrink:0;}
 .mnav-btn.active{color:var(--accent);}
 .mnav-btn.active svg{stroke-width:3;}
 .mnav-fab{
   background:var(--accent);color:#fff !important;
-  border-radius:50%;width:52px;height:52px;min-width:52px;min-height:52px;
+  border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 16px rgba(29,155,240,0.5);
   transition:transform 0.15s,background 0.15s;
   padding:0;flex:unset;
-  margin-top:-10px;
+  margin-top:-8px;
 }
 .mnav-fab:hover{background:var(--accent2) !important;}
 .mnav-fab:active{transform:scale(0.93);}
-.mnav-notif-wrap{position:relative;}
-.mobile-compose-fab{
-  position:fixed;bottom:1.5rem;right:1.25rem;
-  width:52px;height:52px;border-radius:50%;
-  background:var(--accent);color:#fff;border:none;
-  cursor:pointer;font-family:inherit;
-  box-shadow:0 4px 20px rgba(29,155,240,0.45);
-  display:none;align-items:center;justify-content:center;
-  transition:transform 0.15s,background 0.15s;
-  z-index:130;
-}
-.mobile-compose-fab:active{transform:scale(0.93);}
-@media(max-width:768px){.mobile-compose-fab{display:flex;}}
 
 /* ── DROPDOWN MENU ── */
 .ddmenu{position:relative;display:inline-block;}
@@ -774,30 +757,25 @@ input[type=file]{display:none;}
 </div>
 
 <!-- MOBILE NAV BAR -->
-<nav class="mobile-nav" id="mobileNav">
+<nav class="mobile-nav hidden" id="mobileNav">
   <div class="mobile-nav-inner">
-    <button class="mnav-btn active" id="mnav-home" onclick="nav('home')" title="الرئيسية">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    <button class="mnav-btn active" id="mnav-home" onclick="nav('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M3 9L12 2l9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
     </button>
-    <button class="mnav-btn" id="mnav-explore" onclick="nav('explore')" title="استكشاف">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <button class="mnav-btn" id="mnav-explore" onclick="nav('explore')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     </button>
-    <button class="mnav-btn mnav-fab" onclick="openCompose()" title="منشور جديد">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <button class="mnav-btn mnav-fab" onclick="openCompose()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" width="22" height="22"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
-    <button class="mnav-btn mnav-notif-wrap" id="mnav-notifications" onclick="nav('notifications')" title="الإشعارات">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      <span id="mnav-notif-badge" style="display:none;position:absolute;top:8px;right:calc(50% - 18px);background:var(--accent);color:#fff;border-radius:10px;min-width:16px;height:16px;font-size:0.58rem;font-weight:700;padding:0 3px;align-items:center;justify-content:center;"></span>
+    <button class="mnav-btn" id="mnav-notifications" onclick="nav('notifications')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
     </button>
-    <button class="mnav-btn" id="mnav-profile" onclick="nav('profile')" title="الملف الشخصي">
-      <div id="mnavAvaWrap" style="width:26px;height:26px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg3);"></div>
+    <button class="mnav-btn" id="mnav-profile" onclick="nav('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </button>
   </div>
 </nav>
-<!-- Mobile FAB compose (floating bottom right) -->
-<button class="mobile-compose-fab" onclick="openCompose()" id="mobileComposeFab" style="display:none">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-</button>
 
 <!-- COMPOSE MODAL -->
 <div class="overlay" id="composeModal">
@@ -1076,6 +1054,7 @@ function showApp(){
   document.getElementById('loadingPage').style.display='none';
   document.getElementById('authPage').style.display='none';
   document.getElementById('appPage').style.display='block';
+  document.getElementById('mobileNav').classList.remove('hidden');
   updateSidebar();
   nav('home');
   renderTrends();
@@ -1089,9 +1068,6 @@ function updateSidebar(){
   document.getElementById('sidebarHandle').textContent='@'+me.handle;
   document.getElementById('composerAva').innerHTML=avaHtml(me,44);
   document.getElementById('modalAva').innerHTML=avaHtml(me,44);
-  // mobile nav avatar
-  const mnavAva=document.getElementById('mnavAvaWrap');
-  if(mnavAva) mnavAva.innerHTML=avaHtml(me,26);
   updateNotifBadge();
 }
 
@@ -1251,6 +1227,7 @@ function renderTweetDetail(id){
 async function postTweet(){
   const text = v('composerTxt').trim();
   if(!text && !pendingImg.composer) return;
+  if(text.length > MAX_CHARS){toast(`التغريدة طويلة جداً (الحد الأقصى ${MAX_CHARS} حرف)`);return;}
   const btn = document.getElementById('postBtn');
   btn.disabled = true;
   const tw = await createTweet(text, null, pendingImg.composer);
@@ -1475,6 +1452,8 @@ function insertHashtag(){
 function handleImgUpload(input, target){
   const file=input.files[0];
   if(!file) return;
+  if(!file.type.startsWith('image/')){toast('الرجاء اختيار صورة فقط');input.value='';return;}
+  if(file.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');input.value='';return;}
   const reader=new FileReader();
   reader.onload=e=>{
     pendingImg[target]=e.target.result;
@@ -1658,12 +1637,8 @@ function addNotif(toUserId, type, tweetId, fromUserId){
 function updateNotifBadge(){
   if(!db.notifications) return;
   const unread=db.notifications.filter(n=>n.to===me.id&&!n.read).length;
-  // desktop sidebar badge
   const badge=document.getElementById('notif-badge');
   if(badge){badge.style.display=unread?'inline-flex':'none';badge.textContent=unread>9?'9+':unread;}
-  // mobile top nav badge
-  const mbadge=document.getElementById('mnav-notif-badge');
-  if(mbadge){mbadge.style.display=unread?'inline-flex':'none';mbadge.textContent=unread>9?'9+':unread;}
 }
 
 function renderNotifications(){
@@ -1849,9 +1824,9 @@ function getUserById(id){return Object.values(db.users).find(u=>u.id===id);}
 function relTime(ts){
   const diff=(Date.now()-ts)/1000;
   if(diff<60) return 'الآن';
-  if(diff<3600) return `${Math.floor(diff/60)}د`;
-  if(diff<86400) return `${Math.floor(diff/3600)}س`;
-  if(diff<604800) return `${Math.floor(diff/86400)}ي`;
+  if(diff<3600) return `${Math.floor(diff/60).toLocaleString('ar-EG')}د`;
+  if(diff<86400) return `${Math.floor(diff/3600).toLocaleString('ar-EG')}س`;
+  if(diff<604800) return `${Math.floor(diff/86400).toLocaleString('ar-EG')}ي`;
   return new Date(ts).toLocaleDateString('ar-EG',{month:'short',day:'numeric'});
 }
 
@@ -1868,7 +1843,7 @@ function formatText(text){
     return u?`<a href="#" onclick="event.preventDefault();nav('profile','${u.id}')">@${h}</a>`:m;
   });
   // links
-  t=t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+  t=t.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer nofollow">$1</a>');
   return t;
 }
 
@@ -2183,7 +2158,7 @@ function closeDrawer(){
   feedEl.addEventListener('touchend',()=>{
     if(pulling){
       pulling=false; startY=0;
-      if(currentPage==='home'){renderFeed();loadTweetsFromFirestore().then(()=>renderFeed());}
+      if(currentPage==='home'){loadTweetsFromFirestore().then(()=>renderFeed());}
     }
     if(indicator) indicator.classList.remove('visible');
   });
