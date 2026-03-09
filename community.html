@@ -62,16 +62,17 @@ body{
   .logo span{display:none;}
   .logo{justify-content:center;padding:0.75rem 0;}
 }
-@media(max-width:640px){
+@media(max-width:768px){
   .app{
     display:block;
     height:100dvh;
     overflow:hidden;
   }
-  .sidebar{display:none;}
-  .rside{display:none;}
+  .sidebar{display:none !important;}
+  .rside{display:none !important;}
   .feed{
-    height:calc(100dvh - var(--nav-h) - var(--safe-bottom));
+    height:100dvh;
+    padding-bottom:calc(var(--nav-h) + var(--safe-bottom));
     border:none !important;
     overflow-y:auto;
     overflow-x:hidden;
@@ -79,6 +80,8 @@ body{
     overscroll-behavior-y:contain;
     position:relative;
   }
+  .feed-top{display:none !important;}
+  .mobile-back-btn{display:flex !important;}
   body{padding-bottom:0;}
   .mobile-logo{display:flex !important;}
 }
@@ -86,6 +89,20 @@ body{
   .mobile-nav{display:none !important;}
   body{padding-bottom:0;}
 }
+
+/* ── MOBILE BACK BUTTON (shows on detail pages) ── */
+.mobile-back-btn{
+  display:none;
+  position:fixed;top:calc(0.6rem + env(safe-area-inset-top,0px));right:0.75rem;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:50%;width:40px;height:40px;
+  align-items:center;justify-content:center;
+  cursor:pointer;z-index:90;
+  box-shadow:0 2px 12px var(--shadow);
+  color:var(--txt);
+}
+@media(max-width:768px){.mobile-back-btn{display:none;}}
+@media(max-width:768px){.mobile-back-btn.visible{display:flex !important;}}
 
 /* ── SIDEBAR ── */
 .sidebar{
@@ -138,6 +155,7 @@ body{
 }
 .drawer-overlay.open{display:block;}
 .sidebar.drawer-open{
+  display:flex !important;
   position:fixed;top:0;right:0;
   height:100vh;height:100dvh;
   width:min(280px,85vw);
@@ -364,6 +382,37 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 }
 .logout-btn:hover{background:var(--like);color:#fff;}
 
+/* ── ISLAMIC THEMES ── */
+:root[data-theme="green"]{--accent:#047857;--accent2:#065f46;}
+:root[data-theme="gold"]{--accent:#b45309;--accent2:#92400e;}
+:root[data-theme="purple"]{--accent:#7e22ce;--accent2:#6b21a8;}
+:root[data-theme="indigo"]{--accent:#3730a3;--accent2:#312e81;}
+:root[data-theme="blue"]{--accent:#1d9bf0;--accent2:#1a8cd8;}
+.theme-dots{display:flex;gap:0.45rem;align-items:center;padding:0.5rem 0.25rem;}
+.theme-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2.5px solid transparent;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
+.theme-dot:hover{transform:scale(1.2);}
+.theme-dot.active{border-color:var(--txt);transform:scale(1.15);}
+
+/* ── ADVANCED SEARCH FILTERS ── */
+.search-filters{display:flex;gap:0.4rem;padding:0.6rem 1rem;border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.search-filter{padding:0.35rem 0.9rem;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--txt2);font-family:inherit;font-size:0.82rem;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.search-filter.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.search-from-input{display:none;padding:0.5rem 1rem;border-bottom:1px solid var(--border);}
+.search-from-input input{width:100%;padding:0.4rem 0.75rem;border:1.5px solid var(--border);border-radius:10px;background:var(--bg2);color:var(--txt);font-family:inherit;font-size:0.85rem;outline:none;}
+.search-from-input input:focus{border-color:var(--accent);}
+
+/* ── PINNED TWEET ── */
+.pinned-label{display:flex;align-items:center;gap:0.35rem;font-size:0.8rem;color:var(--txt2);padding:0.5rem 1rem 0;font-weight:600;}
+
+/* ── TWEET ANALYTICS MODAL ── */
+.analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;padding:0.5rem 0;}
+.analytics-stat{background:var(--bg2);border-radius:12px;padding:0.85rem 1rem;text-align:center;}
+.analytics-stat .val{font-size:1.5rem;font-weight:700;color:var(--accent);}
+.analytics-stat .lbl{font-size:0.78rem;color:var(--txt2);margin-top:0.2rem;}
+.analytics-rate{text-align:center;padding:0.75rem;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;color:#fff;margin-top:0.25rem;}
+.analytics-rate .val{font-size:1.8rem;font-weight:700;}
+.analytics-rate .lbl{font-size:0.82rem;opacity:0.88;}
+
 /* ── PROFILE ── */
 .cover{height:160px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);position:relative;overflow:hidden;}
 .cover-btn{position:absolute;bottom:0.6rem;left:0.6rem;padding:0.35rem 0.8rem;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:15px;cursor:pointer;font-family:inherit;font-size:0.8rem;}
@@ -440,7 +489,7 @@ html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
   padding:0;
   width:100%;
 }
-@media(max-width:640px){.mobile-nav{display:block;}}
+@media(max-width:768px){.mobile-nav{display:block;}}
 .mobile-nav.hidden{display:none !important;}
 .mnav-btn{
   background:none;border:none;cursor:pointer;color:var(--txt2);
@@ -613,6 +662,14 @@ input[type=file]{display:none;}
         </button>
         <button class="logout-btn nav-label" onclick="doLogout()">خروج</button>
       </div>
+      <div class="theme-dots nav-label" id="themeDots">
+        <span style="font-size:0.75rem;color:var(--txt2);margin-left:0.3rem">ثيم:</span>
+        <div class="theme-dot active" data-theme="blue" style="background:#1d9bf0" onclick="applyAccentTheme('blue')" title="أزرق"></div>
+        <div class="theme-dot" data-theme="green" style="background:#047857" onclick="applyAccentTheme('green')" title="المسجد النبوي"></div>
+        <div class="theme-dot" data-theme="gold" style="background:#b45309" onclick="applyAccentTheme('gold')" title="القبة الذهبية"></div>
+        <div class="theme-dot" data-theme="purple" style="background:#7e22ce" onclick="applyAccentTheme('purple')" title="رمضان"></div>
+        <div class="theme-dot" data-theme="indigo" style="background:#3730a3" onclick="applyAccentTheme('indigo')" title="الكعبة"></div>
+      </div>
       <button class="user-card" id="sidebarCard" onclick="nav('profile');closeDrawer()">
         <div class="ava ava-sm" id="sidebarAva"></div>
         <div class="user-info" style="flex:1;min-width:0;text-align:right">
@@ -685,6 +742,15 @@ input[type=file]{display:none;}
             <input id="exploreSearch" type="text" placeholder="ابحث عن تغريدات أو مستخدمين..." oninput="doSearch(this.value)">
           </div>
         </div>
+        <div class="search-filters" id="searchFilters">
+          <button class="search-filter active" data-f="all" onclick="setSearchFilter('all')">الكل</button>
+          <button class="search-filter" data-f="images" onclick="setSearchFilter('images')">📷 صور فقط</button>
+          <button class="search-filter" data-f="from" onclick="setSearchFilter('from')">👤 من مستخدم</button>
+          <button class="search-filter" data-f="week" onclick="setSearchFilter('week')">📅 هذا الأسبوع</button>
+        </div>
+        <div class="search-from-input" id="searchFromWrap">
+          <input id="searchFromInput" type="text" placeholder="اسم المستخدم (بدون @)" oninput="doSearch(document.getElementById('exploreSearch').value)">
+        </div>
         <div id="searchResults"></div>
         <div id="exploreTrends"></div>
       </div>
@@ -755,6 +821,11 @@ input[type=file]{display:none;}
     </aside>
   </div>
 </div>
+
+<!-- MOBILE FLOATING BACK BUTTON -->
+<button class="mobile-back-btn" id="mobileBackBtn" onclick="goBack()">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+</button>
 
 <!-- MOBILE NAV BAR -->
 <nav class="mobile-nav hidden" id="mobileNav">
@@ -874,6 +945,17 @@ input[type=file]{display:none;}
     <div id="reportOptions"></div>
     <input type="hidden" id="reportTargetId">
     <input type="hidden" id="reportTargetType">
+  </div>
+</div>
+
+<!-- ANALYTICS MODAL -->
+<div class="overlay" id="analyticsModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-head">
+      <h3>📊 إحصائيات التغريدة</h3>
+      <button class="close-btn" onclick="closeModal('analyticsModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="analyticsContent"></div>
   </div>
 </div>
 
@@ -1060,6 +1142,7 @@ function showApp(){
   renderTrends();
   renderSuggestions();
   loadTheme();
+  loadAccentTheme();
 }
 
 function updateSidebar(){
@@ -1112,6 +1195,13 @@ function nav(page, userId=null){
     renderProfile(userId);
     document.getElementById('profileBackBtn').style.display = userId ? 'flex':'none';
   }
+  // mobile back button: show for non-main pages or when viewing others' profile
+  const mbb = document.getElementById('mobileBackBtn');
+  if(mbb){
+    const mainPages = ['home','explore','notifications','bookmarks'];
+    const needsBack = !mainPages.includes(page) || (page==='profile' && userId);
+    mbb.classList.toggle('visible', !!needsBack);
+  }
 }
 
 function goBack(){
@@ -1127,6 +1217,8 @@ function openTweet(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-tweet').classList.add('active');
   renderTweetDetail(id);
+  const mbb=document.getElementById('mobileBackBtn');
+  if(mbb) mbb.classList.add('visible');
 }
 
 // ============================================================
@@ -1527,6 +1619,11 @@ function renderProfile(userId=null){
     </div>
   </div>
   <div id="profileTweets">
+    ${me.pinnedTweet && userTweets.find(t=>t.id===me.pinnedTweet) && isMine ? `
+      <div class="pinned-label"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg> تغريدة مثبتة</div>
+      ${tweetCard(userTweets.find(t=>t.id===me.pinnedTweet),false,false)}
+      <div style="border-top:3px solid var(--border);margin:0.25rem 0"></div>
+    ` : ''}
     ${userTweets.length?userTweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا توجد تغريدات بعد</p></div>`}
   </div>`;
   document.getElementById('profileContent').innerHTML=html;
@@ -1733,10 +1830,22 @@ function doSearch(q){
   const trendsEl=document.getElementById('exploreTrends');
   trendsEl.style.display=q?'none':'block';
   if(!q){document.getElementById('searchResults').innerHTML='';return;}
+  const filter = currentSearchFilter || 'all';
+  const weekAgo = Date.now() - 7*24*60*60*1000;
+  const fromHandle = (document.getElementById('searchFromInput')||{}).value?.trim().toLowerCase();
   // tweets
-  const tweetMatches=db.tweets.filter(t=>t.text.toLowerCase().includes(q)).sort((a,b)=>b.ts-a.ts);
-  // users
-  const userMatches=Object.values(db.users).filter(u=>u.name.toLowerCase().includes(q)||u.handle.toLowerCase().includes(q)||('@'+u.handle).includes(q));
+  let tweetMatches=db.tweets.filter(t=>{
+    if(!t.text.toLowerCase().includes(q) && q!=='*') return false;
+    if(filter==='images' && !t.img) return false;
+    if(filter==='week' && t.ts < weekAgo) return false;
+    if(filter==='from' && fromHandle){
+      const author = getUserById(t.uid);
+      if(!author || author.handle.toLowerCase()!==fromHandle) return false;
+    }
+    return true;
+  }).sort((a,b)=>b.ts-a.ts);
+  // users (only on 'all' filter)
+  let userMatches = filter==='all' ? Object.values(db.users).filter(u=>u.name.toLowerCase().includes(q)||u.handle.toLowerCase().includes(q)||('@'+u.handle).includes(q)) : [];
   let html='';
   if(userMatches.length){
     html+=`<div style="padding:0.75rem 1rem;font-weight:700;border-bottom:1px solid var(--border)">مستخدمون</div>`;
@@ -1754,7 +1863,7 @@ function doSearch(q){
     }).join('');
   }
   if(tweetMatches.length){
-    html+=`<div style="padding:0.75rem 1rem;font-weight:700;border-bottom:1px solid var(--border);border-top:1px solid var(--border)">تغريدات</div>`;
+    if(userMatches.length) html+=`<div style="padding:0.75rem 1rem;font-weight:700;border-bottom:1px solid var(--border);border-top:1px solid var(--border)">تغريدات</div>`;
     html+=tweetMatches.map(t=>tweetCard(t,false,false)).join('');
   }
   if(!html) html=`<div class="empty-state"><p>لا توجد نتائج لـ "${esc(q)}"</p></div>`;
@@ -1789,6 +1898,93 @@ function loadTheme(){
     document.documentElement.classList.add('dark');
     if(btn) btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> الوضع الفاتح`;
   }
+}
+
+// ============================================================
+// 📌 PIN TWEET
+// ============================================================
+async function pinTweet(id){
+  if(me.pinnedTweet===id){
+    me.pinnedTweet=null;
+    toast('تم إلغاء التثبيت');
+  } else {
+    me.pinnedTweet=id;
+    toast('📌 تم تثبيت التغريدة');
+  }
+  db.users[me.email]=me;
+  try{ await dbFirestore.collection('users').doc(me.id).update({pinnedTweet: me.pinnedTweet||null}); }catch(e){}
+  saveDB();
+  if(currentPage==='profile') renderProfile(viewingUserId);
+}
+
+// ============================================================
+// 🎨 ISLAMIC THEMES
+// ============================================================
+function applyAccentTheme(name){
+  document.documentElement.setAttribute('data-theme', name);
+  try{ localStorage.setItem('accent-theme', name); }catch(e){}
+  document.querySelectorAll('.theme-dot').forEach(d=>{
+    d.classList.toggle('active', d.dataset.theme===name);
+  });
+}
+function loadAccentTheme(){
+  let t='blue'; try{ t=localStorage.getItem('accent-theme')||'blue'; }catch(e){}
+  applyAccentTheme(t);
+}
+
+// ============================================================
+// 🔍 ADVANCED SEARCH FILTER
+// ============================================================
+let currentSearchFilter = 'all';
+function setSearchFilter(f){
+  currentSearchFilter = f;
+  document.querySelectorAll('.search-filter').forEach(b=>b.classList.toggle('active', b.dataset.f===f));
+  const fromWrap = document.getElementById('searchFromWrap');
+  if(fromWrap) fromWrap.style.display = f==='from' ? 'block' : 'none';
+  doSearch(document.getElementById('exploreSearch').value);
+}
+
+// ============================================================
+// 📊 TWEET ANALYTICS
+// ============================================================
+function openAnalytics(id){
+  const tw = getTweetById(id);
+  if(!tw) return;
+  const views = tw.views || Math.floor((tw.likes.length + tw.retweets.length + (tw.replies||[]).length) * 8 + 12);
+  const engagements = tw.likes.length + tw.retweets.length + (tw.replies||[]).length;
+  const rate = views > 0 ? ((engagements/views)*100).toFixed(1) : '0.0';
+  document.getElementById('analyticsContent').innerHTML=`
+    <div class="analytics-grid">
+      <div class="analytics-stat">
+        <div class="val">${fmtNum(views)}</div>
+        <div class="lbl">مشاهدات</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="val">${fmtNum(engagements)}</div>
+        <div class="lbl">تفاعلات</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="val" style="color:var(--like)">${fmtNum(tw.likes.length)}</div>
+        <div class="lbl">❤️ إعجابات</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="val" style="color:var(--rt)">${fmtNum(tw.retweets.length)}</div>
+        <div class="lbl">🔄 إعادة نشر</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="val">${fmtNum((tw.replies||[]).length)}</div>
+        <div class="lbl">💬 ردود</div>
+      </div>
+      <div class="analytics-stat">
+        <div class="val">${relTime(tw.ts)}</div>
+        <div class="lbl">🕐 منذ</div>
+      </div>
+    </div>
+    <div class="analytics-rate">
+      <div class="val">${rate}%</div>
+      <div class="lbl">معدل التفاعل</div>
+    </div>`;
+  openModal('analyticsModal');
 }
 
 // ============================================================
@@ -1866,6 +2062,14 @@ function tweetMenuHtml(tweet){
         <button class="dditem" onclick="openEditTweet('${tweet.id}');closeMenu('menu-${tweet.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           تعديل التغريدة
+        </button>
+        <button class="dditem" onclick="pinTweet('${tweet.id}');closeMenu('menu-${tweet.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="12" y1="17" x2="12" y2="22"/><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V17z"/></svg>
+          ${me.pinnedTweet===tweet.id?'إلغاء التثبيت':'📌 تثبيت التغريدة'}
+        </button>
+        <button class="dditem" onclick="openAnalytics('${tweet.id}');closeMenu('menu-${tweet.id}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          إحصائيات
         </button>
         <button class="dditem danger" onclick="deleteTweet('${tweet.id}');closeMenu('menu-${tweet.id}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
