@@ -90,20 +90,6 @@ body{
   body{padding-bottom:0;}
 }
 
-/* ── MOBILE BACK BUTTON (shows on detail pages) ── */
-.mobile-back-btn{
-  display:none;
-  position:fixed;top:calc(0.6rem + env(safe-area-inset-top,0px));right:0.75rem;
-  background:var(--bg);border:1.5px solid var(--border);
-  border-radius:50%;width:40px;height:40px;
-  align-items:center;justify-content:center;
-  cursor:pointer;z-index:90;
-  box-shadow:0 2px 12px var(--shadow);
-  color:var(--txt);
-}
-@media(max-width:768px){.mobile-back-btn{display:none;}}
-@media(max-width:768px){.mobile-back-btn.visible{display:flex !important;}}
-
 /* ── SIDEBAR ── */
 .sidebar{
   border-left:1px solid var(--border);
@@ -300,8 +286,17 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 .tweet-text a:hover{text-decoration:underline;}
 .tweet-img{
   width:100%;border-radius:14px;
-  max-height:300px;object-fit:cover;
+  max-height:min(520px, 70vw);
+  height:auto;object-fit:cover;
   margin-bottom:0.75rem;display:block;
+  aspect-ratio:16/9;
+}
+@media(max-width:768px){
+  .tweet-img{
+    max-height:min(300px, 56vw);
+    border-radius:10px;
+    aspect-ratio:4/3;
+  }
 }
 .tweet-stats{
   display:flex;gap:1.5rem;margin-bottom:0.75rem;
@@ -414,7 +409,21 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 .analytics-rate .lbl{font-size:0.82rem;opacity:0.88;}
 
 /* ── PROFILE ── */
-.cover{height:160px;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);position:relative;overflow:hidden;}
+.cover{
+  height:180px;
+  background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  position:relative;overflow:hidden;cursor:pointer;
+  background-size:cover;background-position:center;
+}
+.cover:hover .cover-overlay{opacity:1;}
+.cover-overlay{
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0.35);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity 0.2s;
+}
+.cover-overlay svg{color:#fff;width:32px;height:32px;}
+@media(max-width:768px){.cover{height:130px;}}
 .cover-btn{position:absolute;bottom:0.6rem;left:0.6rem;padding:0.35rem 0.8rem;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:15px;cursor:pointer;font-family:inherit;font-size:0.8rem;}
 .profile-meta{padding:0.75rem 1rem 0;}
 .ava-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.75rem;}
@@ -822,11 +831,6 @@ input[type=file]{display:none;}
   </div>
 </div>
 
-<!-- MOBILE FLOATING BACK BUTTON -->
-<button class="mobile-back-btn" id="mobileBackBtn" onclick="goBack()">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
-</button>
-
 <!-- MOBILE NAV BAR -->
 <nav class="mobile-nav hidden" id="mobileNav">
   <div class="mobile-nav-inner">
@@ -1195,13 +1199,6 @@ function nav(page, userId=null){
     renderProfile(userId);
     document.getElementById('profileBackBtn').style.display = userId ? 'flex':'none';
   }
-  // mobile back button: show for non-main pages or when viewing others' profile
-  const mbb = document.getElementById('mobileBackBtn');
-  if(mbb){
-    const mainPages = ['home','explore','notifications','bookmarks'];
-    const needsBack = !mainPages.includes(page) || (page==='profile' && userId);
-    mbb.classList.toggle('visible', !!needsBack);
-  }
 }
 
 function goBack(){
@@ -1217,8 +1214,6 @@ function openTweet(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-tweet').classList.add('active');
   renderTweetDetail(id);
-  const mbb=document.getElementById('mobileBackBtn');
-  if(mbb) mbb.classList.add('visible');
 }
 
 // ============================================================
@@ -1592,8 +1587,8 @@ function renderProfile(userId=null){
   const userReplies=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
   document.getElementById('profileFeedTitle').textContent=user.name;
 
-  let html=`<div class="cover">
-    ${isMine?`<button class="cover-btn" onclick="toast('قريباً: رفع صورة الغلاف')">تغيير الغلاف</button>`:''}
+  let html=`<div class="cover" id="profileCover" ${isMine&&me.cover?'style="background-image:url(''+me.cover+'')"':(!isMine&&user.cover?'style="background-image:url(''+user.cover+'')"':'')} ${isMine?'onclick="uploadCover()" title="انقر لتغيير صورة الغلاف"':''}>
+    ${isMine?`<div class="cover-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`:''}
   </div>
   <div class="profile-meta">
     <div class="ava-row">
@@ -1666,12 +1661,39 @@ function uploadAvatar(){
   input.type='file'; input.accept='image/*';
   input.onchange=e=>{
     const f=e.target.files[0];
+    if(!f) return;
+    if(!f.type.startsWith('image/')){toast('الرجاء اختيار صورة فقط');return;}
+    if(f.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');return;}
     const r=new FileReader();
     r.onload=async ev=>{
       me.avatar=ev.target.result;
       db.users[me.email]=me;
       try{ await dbFirestore.collection('users').doc(me.id).update({avatar: me.avatar}); }catch(e){}
-      saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة ✓');
+      saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة الشخصية ✓');
+    };
+    r.readAsDataURL(f);
+  };
+  input.click();
+}
+
+function uploadCover(){
+  const input=document.createElement('input');
+  input.type='file'; input.accept='image/*';
+  input.onchange=e=>{
+    const f=e.target.files[0];
+    if(!f) return;
+    if(!f.type.startsWith('image/')){toast('الرجاء اختيار صورة فقط');return;}
+    if(f.size>8*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 8MB)');return;}
+    const r=new FileReader();
+    r.onload=async ev=>{
+      me.cover=ev.target.result;
+      db.users[me.email]=me;
+      try{ await dbFirestore.collection('users').doc(me.id).update({cover: me.cover}); }catch(e){}
+      saveDB();
+      // update cover directly without full re-render
+      const coverEl=document.getElementById('profileCover');
+      if(coverEl) coverEl.style.backgroundImage=`url('${me.cover}')`;
+      toast('تم تحديث صورة الغلاف ✓');
     };
     r.readAsDataURL(f);
   };
