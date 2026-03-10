@@ -472,6 +472,33 @@ html.dark .feed-top{background:rgba(0,0,0,0.88);}
 .auth-tab{flex:1;padding:0.7rem;text-align:center;cursor:pointer;font-weight:600;font-size:0.9rem;color:var(--txt2);border-bottom:2.5px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
 .auth-tab.active{color:var(--accent);border-color:var(--accent);}
 
+/* ── NOTIFICATIONS ── */
+.notif-row{
+  display:flex;gap:0.85rem;align-items:flex-start;
+  padding:0.9rem 1rem;
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  transition:background 0.12s;
+}
+.notif-row:hover{background:var(--bg2);}
+.notif-row.like .notif-icon-wrap{background:rgba(249,24,128,0.12);color:var(--like);}
+.notif-row.reply .notif-icon-wrap{background:rgba(29,155,240,0.12);color:var(--accent);}
+.notif-row.retweet .notif-icon-wrap{background:rgba(0,186,124,0.12);color:var(--rt);}
+.notif-row.follow .notif-icon-wrap{background:rgba(29,155,240,0.12);color:var(--accent);}
+.notif-row.mention .notif-icon-wrap{background:rgba(245,158,11,0.12);color:#f59e0b;}
+.notif-row.quote .notif-icon-wrap{background:rgba(124,58,237,0.12);color:#7c3aed;}
+.notif-icon-wrap{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.notif-body{flex:1;min-width:0;}
+.notif-text{font-size:0.9rem;line-height:1.4;color:var(--txt);margin-bottom:0.2rem;}
+.notif-snippet{font-size:0.82rem;color:var(--txt2);border-right:3px solid var(--border);padding-right:0.5rem;margin:0.3rem 0;line-height:1.4;}
+.notif-time{font-size:0.78rem;color:var(--txt2);}
+.notif-tabs{display:flex;border-bottom:1px solid var(--border);}
+.notif-tab{flex:1;padding:0.75rem;text-align:center;font-weight:600;font-size:0.88rem;color:var(--txt2);cursor:pointer;border-bottom:3px solid transparent;transition:all 0.15s;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;}
+.notif-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
 /* ── TOAST ── */
 .toast-wrap{position:fixed;bottom:calc(var(--nav-h) + var(--safe-bottom) + 0.75rem);left:50%;transform:translateX(-50%);z-index:350;display:flex;flex-direction:column;gap:0.4rem;pointer-events:none;align-items:center;}
 .toast{background:#1c1c1e;color:#fff;padding:0.7rem 1.3rem;border-radius:20px;font-size:0.87rem;font-weight:500;animation:toastIn 0.25s ease;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,0.3);}
@@ -493,7 +520,9 @@ html.dark .toast{background:#e7e9ea;color:#000;}
 }
 html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
 .mobile-nav-inner{
-  display:flex;justify-content:space-around;align-items:center;
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  align-items:center;
   height:var(--nav-h);
   padding:0;
   width:100%;
@@ -502,24 +531,34 @@ html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
 .mobile-nav.hidden{display:none !important;}
 .mnav-btn{
   background:none;border:none;cursor:pointer;color:var(--txt2);
-  padding:0.5rem 0.75rem;border-radius:14px;
+  padding:0;border-radius:14px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   font-size:0;font-family:inherit;
   transition:color 0.15s,background 0.15s;
-  flex:1;min-height:var(--nav-h);
+  width:100%;height:var(--nav-h);
   -webkit-tap-highlight-color:transparent;
+  position:relative;
 }
-.mnav-btn svg{width:15px;height:15px;flex-shrink:0;}
+.mnav-btn svg{width:24px;height:24px;flex-shrink:0;}
 .mnav-btn.active{color:var(--accent);}
 .mnav-btn.active svg{stroke-width:3;}
+.mnav-notif-dot{
+  position:absolute;top:10px;right:calc(50% - 14px);
+  width:8px;height:8px;background:var(--like);border-radius:50%;
+  border:2px solid var(--bg);
+  display:none;
+}
+.mnav-notif-dot.visible{display:block;}
 .mnav-fab{
   background:var(--accent);color:#fff !important;
-  border-radius:50%;width:20px;height:20px;min-width:20px;min-height:20px;
+  border-radius:50%;width:46px;height:46px;min-width:46px;min-height:46px;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 4px 16px rgba(29,155,240,0.5);
   transition:transform 0.15s,background 0.15s;
-  padding:0;flex:unset;
-  margin-top:-8px;
+  padding:0;
+  margin:0 auto;
+  justify-self:center;
+  width:44px !important;height:44px !important;
 }
 .mnav-fab:hover{background:var(--accent2) !important;}
 .mnav-fab:active{transform:scale(0.93);}
@@ -769,6 +808,13 @@ input[type=file]{display:none;}
         <div class="feed-top">
           <button class="hamburger" onclick="openDrawer()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
           <h2>الإشعارات</h2>
+          <button onclick="markAllNotifsRead()" style="background:none;border:none;color:var(--accent);font-size:0.82rem;cursor:pointer;font-family:inherit;padding:0.3rem 0.5rem;border-radius:8px;" title="تحديد الكل كمقروء">تحديد الكل ✓</button>
+        </div>
+        <div class="notif-tabs">
+          <button class="notif-tab active" id="ntab-all" onclick="switchNotifTab('all')">الكل</button>
+          <button class="notif-tab" id="ntab-like" onclick="switchNotifTab('like')">❤️ الإعجابات</button>
+          <button class="notif-tab" id="ntab-reply" onclick="switchNotifTab('reply')">💬 الردود</button>
+          <button class="notif-tab" id="ntab-follow" onclick="switchNotifTab('follow')">👤 المتابعون</button>
         </div>
         <div id="notifContainer"></div>
       </div>
@@ -845,6 +891,7 @@ input[type=file]{display:none;}
     </button>
     <button class="mnav-btn" id="mnav-notifications" onclick="nav('notifications')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="mnav-notif-dot" id="mnav-notif-dot"></span>
     </button>
     <button class="mnav-btn" id="mnav-profile" onclick="nav('profile')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -1140,6 +1187,8 @@ function showApp(){
   document.getElementById('loadingPage').style.display='none';
   document.getElementById('authPage').style.display='none';
   document.getElementById('appPage').style.display='block';
+  // Real-time listener for new notifications
+  startNotifListener();
   document.getElementById('mobileNav').classList.remove('hidden');
   updateSidebar();
   nav('home');
@@ -1324,6 +1373,15 @@ async function postTweet(){
   document.getElementById('composerImgPreview').innerHTML='';
   document.getElementById('charCount').textContent=MAX_CHARS;
   document.getElementById('charCount').className='char-count';
+  // Send mention notifications
+  const mentionHandles = [...new Set((tw.text||'').match(/@(\w+)/g)||[])];
+  for(const mh of mentionHandles){
+    const handle = mh.slice(1).toLowerCase();
+    const mentioned = Object.values(db.users).find(u=>u.handle&&u.handle.toLowerCase()===handle);
+    if(mentioned && mentioned.id !== me.id){
+      addNotif(mentioned.id,'mention',tw.id,me.id,tw.text.slice(0,80));
+    }
+  }
   renderFeed();
   toast('تم النشر بنجاح ✓');
 }
@@ -1346,6 +1404,15 @@ async function postFromModal(){
       if(parent.uid !== me.id){
         addNotif(parent.uid,'reply',tw.id,me.id);
       }
+    }
+  }
+  // Send mention notifications
+  const _mentionHandles = [...new Set((tw.text||'').match(/@(\w+)/g)||[])];
+  for(const mh of _mentionHandles){
+    const handle = mh.slice(1).toLowerCase();
+    const mentioned = Object.values(db.users).find(u=>u.handle&&u.handle.toLowerCase()===handle);
+    if(mentioned && mentioned.id !== me.id){
+      addNotif(mentioned.id,'mention',tw.id,me.id,tw.text.slice(0,80));
     }
   }
   sv('modalTxt',''); sv('replyToId','');
@@ -1406,7 +1473,22 @@ async function postReply(parentId){
     if(!parent.replies) parent.replies=[];
     parent.replies.push(tw.id);
     try{ await dbFirestore.collection('tweets').doc(parentId).update({replies: parent.replies}); }catch(e){}
-    if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id);
+    // Notify original tweet author of reply
+    if(parent.uid!==me.id) addNotif(parent.uid,'reply',tw.id,me.id,(tw.text||'').slice(0,80));
+    // If this is a reply-to-reply, also notify the tweet's root author
+    if(parent.replyTo){
+      const root=getTweetById(parent.replyTo);
+      if(root && root.uid!==me.id && root.uid!==parent.uid){
+        addNotif(root.uid,'reply',tw.id,me.id,(tw.text||'').slice(0,80));
+      }
+    }
+    // Mention notifications
+    const _mh=[...new Set((tw.text||'').match(/@(\w+)/g)||[])];
+    for(const mh of _mh){
+      const handle=mh.slice(1).toLowerCase();
+      const mentioned=Object.values(db.users).find(u=>u.handle&&u.handle.toLowerCase()===handle);
+      if(mentioned && mentioned.id!==me.id) addNotif(mentioned.id,'mention',tw.id,me.id,(tw.text||'').slice(0,80));
+    }
     saveDB();
   }
   renderTweetDetail(parentId);
@@ -1749,50 +1831,195 @@ function renderBookmarks(){
 // ============================================================
 // NOTIFICATIONS
 // ============================================================
-function addNotif(toUserId, type, tweetId, fromUserId){
+
+// Real-time listener for incoming notifications
+let _notifUnsub = null;
+function startNotifListener(){
+  if(!me || _notifUnsub) return;
+  _notifUnsub = dbFirestore.collection('users').doc(me.id)
+    .collection('notifications')
+    .orderBy('ts','desc').limit(50)
+    .onSnapshot(snap=>{
+      if(!db.notifications) db.notifications=[];
+      snap.docChanges().forEach(change=>{
+        const n = change.doc.data();
+        if(change.type==='added'){
+          if(!db.notifications.find(x=>x.id===n.id)){
+            db.notifications.push(n);
+          }
+        } else if(change.type==='modified'){
+          const idx = db.notifications.findIndex(x=>x.id===n.id);
+          if(idx>=0) db.notifications[idx]=n;
+        } else if(change.type==='removed'){
+          db.notifications = db.notifications.filter(x=>x.id!==n.id);
+        }
+      });
+      saveDB();
+      updateNotifBadge();
+      // If user is on notifications page, refresh it live
+      if(currentPage==='notifications'){
+        renderNotifications();
+      }
+    }, e=>console.warn('notif listener err',e));
+}
+
+// Save notification to Firestore under the recipient's user doc sub-collection
+async function addNotif(toUserId, type, tweetId, fromUserId, extra){
+  if(!toUserId || toUserId === fromUserId) return; // no self-notifications
+  const notif = {
+    id: 'n'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    to: toUserId,
+    type,              // like | reply | retweet | follow | mention | quote
+    tweetId: tweetId||null,
+    from: fromUserId,
+    extra: extra||null, // e.g. snippet of tweet text
+    ts: Date.now(),
+    read: false
+  };
+  // Store locally
   if(!db.notifications) db.notifications=[];
-  db.notifications.push({id:'n'+Date.now(),to:toUserId,type,tweetId,from:fromUserId,ts:Date.now(),read:false});
+  db.notifications.push(notif);
   saveDB();
+  updateNotifBadge();
+  // Persist to Firestore so other devices see it
+  try{
+    await dbFirestore.collection('users').doc(toUserId)
+      .collection('notifications').doc(notif.id).set(notif);
+  }catch(e){}
+}
+
+// Load notifications from Firestore for current user
+async function loadNotificationsFromFirestore(){
+  if(!me) return;
+  try{
+    const snap = await dbFirestore.collection('users').doc(me.id)
+      .collection('notifications').orderBy('ts','desc').limit(50).get();
+    if(!db.notifications) db.notifications=[];
+    snap.forEach(doc=>{
+      const n = doc.data();
+      // merge: don't duplicate
+      if(!db.notifications.find(x=>x.id===n.id)){
+        db.notifications.push(n);
+      }
+    });
+    saveDB();
+    updateNotifBadge();
+  }catch(e){}
+}
+
+// Mark single notification as read in Firestore
+async function markNotifRead(notifId){
+  try{
+    await dbFirestore.collection('users').doc(me.id)
+      .collection('notifications').doc(notifId).update({read:true});
+  }catch(e){}
 }
 
 function updateNotifBadge(){
-  if(!db.notifications) return;
-  const unread=db.notifications.filter(n=>n.to===me.id&&!n.read).length;
-  const badge=document.getElementById('notif-badge');
-  if(badge){badge.style.display=unread?'inline-flex':'none';badge.textContent=unread>9?'9+':unread;}
+  if(!db.notifications || !me) return;
+  const unread = db.notifications.filter(n=>n.to===me.id && !n.read).length;
+  // Desktop sidebar badge
+  const badge = document.getElementById('notif-badge');
+  if(badge){ badge.style.display=unread?'inline-flex':'none'; badge.textContent=unread>9?'9+':unread; }
+  // Mobile nav dot
+  const dot = document.getElementById('mnav-notif-dot');
+  if(dot){ dot.classList.toggle('visible', unread>0); }
+}
+
+function notifBgColor(type){
+  const map={like:'rgba(249,24,128,0.08)',reply:'rgba(29,155,240,0.08)',retweet:'rgba(0,186,124,0.08)',follow:'rgba(29,155,240,0.08)',mention:'rgba(255,165,0,0.08)',quote:'rgba(120,86,255,0.08)'};
+  return map[type]||'transparent';
 }
 
 function renderNotifications(){
   if(!db.notifications) db.notifications=[];
-  const mine=db.notifications.filter(n=>n.to===me.id).sort((a,b)=>b.ts-a.ts);
-  // mark read
-  mine.forEach(n=>n.read=true);
+  const mine = db.notifications.filter(n=>n.to===me.id).sort((a,b)=>b.ts-a.ts);
+
+  // Mark all as read locally & in Firestore
+  mine.forEach(n=>{ if(!n.read){ n.read=true; markNotifRead(n.id); } });
   saveDB(); updateNotifBadge();
+
+  const el = document.getElementById('notifContainer');
+
   if(!mine.length){
-    document.getElementById('notifContainer').innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><p>لا توجد إشعارات</p></div>`;
+    el.innerHTML=`<div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <p>لا توجد إشعارات بعد</p>
+    </div>`;
     return;
   }
-  document.getElementById('notifContainer').innerHTML=mine.map(n=>{
-    const from=getUserById(n.from);
-    if(!from) return '';
-    const labels={like:'أعجب بتغريدتك',reply:'رد على تغريدتك',retweet:'أعاد نشر تغريدتك',follow:'بدأ بمتابعتك'};
-    const icons={
-      like:`<svg width="18" height="18" viewBox="0 0 24 24" fill="var(--like)" stroke="var(--like)" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
-      reply:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
-      retweet:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--rt)" stroke-width="2.5"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
-      follow:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-    };
-    return `<div class="tweet" onclick="${n.tweetId?`openTweet('${n.tweetId}')`:`nav('profile','${from.id}')`}">
-      <div class="tweet-inner" style="align-items:center">
-        <div style="width:44px;display:flex;justify-content:center">${icons[n.type]||''}</div>
-        <div>
-          <div style="cursor:pointer;font-weight:600" onclick="event.stopPropagation();nav('profile','${from.id}')">${avaHtml(from,32)}</div>
-          <div style="margin-top:0.35rem"><strong>${esc(from.name)}</strong> ${labels[n.type]||''}</div>
-          <div style="color:var(--txt2);font-size:0.8rem">${relTime(n.ts)}</div>
-        </div>
+
+  const labels={
+    like:    'أعجب بتغريدتك',
+    reply:   'رد على تغريدتك',
+    retweet: 'أعاد نشر تغريدتك',
+    follow:  'بدأ بمتابعتك',
+    mention: 'ذكرك في تغريدة',
+    quote:   'اقتبس تغريدتك'
+  };
+
+  const iconBg={
+    like:'var(--like)', reply:'var(--accent)', retweet:'var(--rt)',
+    follow:'var(--accent)', mention:'#f59e0b', quote:'#7c3aed'
+  };
+
+  const icons={
+    like:`<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`,
+    reply:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+    retweet:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><polyline points="17,1 21,5 17,9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7,23 3,19 7,15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+    follow:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>`,
+    mention:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>`,
+    quote:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>`
+  };
+
+  // Group notifications: if same type+tweet has multiple actors in < 1hr, merge
+  const groups = [];
+  mine.forEach(n=>{
+    const key = `${n.type}_${n.tweetId||''}`;
+    const existing = groups.find(g=>g.key===key && (n.ts - g.latest < 3600000));
+    if(existing){
+      if(!existing.actors.find(a=>a===n.from)) existing.actors.push(n.from);
+      existing.ids.push(n.id);
+      if(n.ts > existing.latest) existing.latest = n.ts;
+    } else {
+      groups.push({key, type:n.type, tweetId:n.tweetId, actors:[n.from], ids:[n.id], latest:n.ts, extra:n.extra});
+    }
+  });
+
+  el.innerHTML = groups.map(g=>{
+    const actors = g.actors.map(id=>getUserById(id)).filter(Boolean);
+    if(!actors.length) return '';
+    const tweet = g.tweetId ? getTweetById(g.tweetId) : null;
+    const snippet = tweet ? (tweet.text||'').slice(0,60)+(tweet.text&&tweet.text.length>60?'…':'') : (g.extra||'');
+    const actionText = labels[g.type]||g.type;
+    const actorNames = actors.length===1
+      ? `<strong>${esc(actors[0].name)}</strong>`
+      : actors.length===2
+        ? `<strong>${esc(actors[0].name)}</strong> و<strong>${esc(actors[1].name)}</strong>`
+        : `<strong>${esc(actors[0].name)}</strong> و${actors.length-1} آخرون`;
+
+    const avatarsHtml = actors.slice(0,3).map(a=>
+      `<div style="width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid var(--bg);margin-left:-8px;flex-shrink:0">
+        ${a.avatar
+          ? `<img src="${a.avatar}" style="width:100%;height:100%;object-fit:cover">`
+          : `<div style="width:100%;height:100%;background:${a.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">${esc(a.name.charAt(0))}</div>`
+        }
+       </div>`
+    ).join('');
+
+    const iconColor = iconBg[g.type]||'var(--accent)';
+    const clickTarget = g.tweetId ? `openTweet('${g.tweetId}')` : `nav('profile','${actors[0].id}')`;
+
+    return `<div class="notif-row ${g.type}" onclick="${clickTarget}">
+      <div class="notif-icon-wrap" style="color:${iconColor}">${icons[g.type]||''}</div>
+      <div class="notif-body">
+        <div class="notif-avatars" style="display:flex;margin-bottom:0.4rem">${avatarsHtml}</div>
+        <div class="notif-text">${actorNames} ${actionText}</div>
+        ${snippet?`<div class="notif-snippet">${esc(snippet)}</div>`:''}
+        <div class="notif-time">${relTime(g.latest)}</div>
       </div>
     </div>`;
-  }).join('');
+  }).filter(Boolean).join('');
 }
 
 // ============================================================
