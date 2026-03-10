@@ -1587,7 +1587,9 @@ function renderProfile(userId=null){
   const userReplies=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
   document.getElementById('profileFeedTitle').textContent=user.name;
 
-  let html=`<div class="cover" id="profileCover" ${isMine&&me.cover?'style="background-image:url(''+me.cover+'')"':(!isMine&&user.cover?'style="background-image:url(''+user.cover+'')"':'')} ${isMine?'onclick="uploadCover()" title="انقر لتغيير صورة الغلاف"':''}>
+  const coverStyle = (()=>{ const c=isMine?me.cover:user.cover; return c?'style="background-image:url("'+encodeURI(c)+'")':""; })();
+  const coverClick = isMine ? 'onclick="uploadCover()" title="انقر لتغيير صورة الغلاف"' : '';
+  let html=`<div class="cover" id="profileCover" ${coverStyle} ${coverClick}>
     ${isMine?`<div class="cover-overlay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`:''}
   </div>
   <div class="profile-meta">
