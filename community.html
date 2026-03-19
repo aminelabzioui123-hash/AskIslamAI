@@ -11,6 +11,7 @@
 <title>اسأل الإسلام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-8IHFiMkA8F9oLGX3nS+IM3uyB7RoMwm2D0R8EnyUoJhb+ZeaKFXueCRAOL0IxT42mgGgZhHSXTNFbLo3USMIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
@@ -922,7 +923,7 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  <div style="display:flex;gap:0.75rem">
  <div class="ava ava-md" id="modalAva"></div>
  <div style="flex:1">
- <textarea id="modalTxt" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1.05rem;text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-family:inherit;resize:none;outline:none;min-height:80px;padding-top:0.35rem" placeholder="ما رأيك؟" oninput="updateModalComposer(this)" rows="4"></textarea>
+ <textarea id="modalTxt" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1.05rem;text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-family:inherit;resize:none;outline:none;min-height:80px;padding-top:0.35rem" placeholder="ما رأيك؟" oninput="updateModalComposer(this)" rows="4" maxlength="280"></textarea>
  <div id="modalImgPreview" style="margin-bottom:0.5rem"></div>
  <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:0.75rem">
  <div style="display:flex;gap:0.25rem;position:relative">
@@ -1222,9 +1223,15 @@ function updateSidebar(){
 
 function avaHtml(u,size){
  if(!u) return '';
- if(u.avatar) return `<img loading="lazy" decoding="async" src="${u.avatar}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
- const letter = u.name.charAt(0);
- return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${u.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
+ // 🔐 التحقق من مصدر الصورة — نقبل فقط base64 data URI
+ const safeAvatar = u.avatar && /^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u.avatar)
+   ? u.avatar : null;
+ if(safeAvatar) return `<img loading="lazy" decoding="async" src="${safeAvatar}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
+ // 🔐 تشفير الحرف الأول — يمنع XSS من أسماء المستخدمين
+ const d=document.createElement('div');
+ d.appendChild(document.createTextNode((u.name||'?').charAt(0)));
+ const letter=d.innerHTML;
+ return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${/^#[0-9a-fA-F]{3,6}$/.test(u.color)?u.color:'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
 }
 
 // ============================================================
@@ -1290,7 +1297,8 @@ function renderFeed(){
  return;
  }
  requestAnimationFrame(()=>{
- container.innerHTML=top.map(t=>tweetCard(t,false,false)).join('');
+ // 🔐 تطهير HTML التغريدات
+ container.innerHTML=DOMPurify.sanitize(top.map(t=>tweetCard(t,false,false)).join(''), PURIFY_CONFIG);
  });
 }
 
@@ -1361,16 +1369,17 @@ function renderTweetDetail(id){
  html += `<div class="composer" style="border-top:1px solid var(--border)">
  <div class="ava ava-md">${avaHtml(me,44)}</div>
  <div class="composer-right">
- <textarea id="replyTxt" placeholder="أضف ردك..." oninput="updateReplyComposer(this)" rows="2" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1rem;text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-family:inherit;resize:none;outline:none;min-height:50px;padding-top:0.35rem"></textarea>
+ <textarea id="replyTxt" placeholder="أضف ردك..." oninput="updateReplyComposer(this)" rows="2" maxlength="280" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1rem;text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-family:inherit;resize:none;outline:none;min-height:50px;padding-top:0.35rem"></textarea>
  <div style="display:flex;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--border);margin-top:0.5rem">
- <button class="post-btn" id="replyPostBtn" disabled onpointerdown="postReply('${id}')">رد</button>
+ <button class="post-btn" id="replyPostBtn" disabled onpointerdown="postReply('${esc(id)}')">رد</button>
  </div>
  </div>
  </div>`;
  // replies
  const replies = (tweet.replies||[]).map(rid=>getTweetById(rid)).filter(Boolean).sort((a,b)=>a.ts-b.ts);
  if(replies.length) html += `<div style="padding-top:0.5rem">`+replies.map(r=>tweetCard(r,false,true)).join('')+`</div>`;
- document.getElementById('tweetDetailContent').innerHTML=html;
+ // 🔐 تطهير شامل قبل إدراج HTML المُولَّد
+ document.getElementById('tweetDetailContent').innerHTML = DOMPurify.sanitize(html, PURIFY_CONFIG);
 }
 
 // ============================================================
@@ -1637,7 +1646,7 @@ function insertHashtag(){
 function handleImgUpload(input, target){
  const file=input.files[0];
  if(!file) return;
- if(!file.type.startsWith('image/')){toast('الرجاء اختيار صورة فقط');input.value='';return;}
+ const _ALLOWED_IMG=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_ALLOWED_IMG.includes(file.type)){toast('نوع الملف غير مدعوم. يُقبل: JPG, PNG, GIF, WEBP');input.value='';return;}
  if(file.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');input.value='';return;}
  const reader=new FileReader();
  reader.onload=e=>{
@@ -1689,7 +1698,8 @@ function renderProfile(userId=null){
  <div class="profile-meta">
  <div class="ava-row">
  <div class="ava ava-xl" style="position:relative">
- ${user.avatar?`<img loading="lazy" decoding="async" src="${user.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--bg)">`:`<div style="width:80px;height:80px;border-radius:50%;background:${user.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;border:3px solid var(--bg)">${user.name.charAt(0)}</div>`}
+ // 🔐 avatar: base64 فقط — نرفض أي URL خارجي
+ ${(()=>{const sa=user.avatar&&/^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(user.avatar)?user.avatar:null;const sc=/^#[0-9a-fA-F]{3,6}$/.test(user.color)?user.color:'#667eea';return sa?`<img loading="lazy" decoding="async" src="${sa}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--bg)">`:`<div style="width:80px;height:80px;border-radius:50%;background:${sc};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;border:3px solid var(--bg)">${esc((user.name||'?').charAt(0))}</div>`;})()}
  ${isMine?`<div class="ava-cam" onpointerdown="uploadAvatar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`:''}
  </div>
  ${isMine?`<button class="edit-btn" onpointerdown="openEditProfile()">تعديل الملف</button>`:
@@ -1718,7 +1728,8 @@ function renderProfile(userId=null){
  ${userTweets.length?userTweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا توجد تغريدات بعد</p></div>`}
  </div>`;
  requestAnimationFrame(()=>{
- document.getElementById('profileContent').innerHTML=html;
+ // 🔐 تطهير HTML الكامل للملف الشخصي
+ document.getElementById('profileContent').innerHTML=DOMPurify.sanitize(html, PURIFY_CONFIG);
  });
 }
 
@@ -1731,8 +1742,10 @@ function switchProfileTab(tab, userId){
  if(tab==='tweets') tweets=db.tweets.filter(t=>t.uid===user.id&&!t.replyTo).sort((a,b)=>b.ts-a.ts);
  else if(tab==='replies') tweets=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
  else if(tab==='likes') tweets=db.tweets.filter(t=>t.likes.includes(me.id)).sort((a,b)=>b.ts-a.ts);
- document.getElementById('profileTweets').innerHTML=
- tweets.length?tweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا يوجد محتوى</p></div>`;
+ // 🔐 تطهير تغريدات الملف الشخصي
+ document.getElementById('profileTweets').innerHTML=DOMPurify.sanitize(
+ tweets.length?tweets.map(t=>tweetCard(t,false,false)).join(''):'<div class="empty-state"><p>لا يوجد محتوى</p></div>',
+ PURIFY_CONFIG);
 }
 
 function openEditProfile(){
@@ -1745,7 +1758,12 @@ async function saveProfile(){
  const name=v('ed-name').trim();
  const handle=v('ed-handle').trim().replace(/\s+/g,'_').toLowerCase();
  const bio=v('ed-bio').trim();
+ // 🔐 تحقق من حدود الطول ومنع الحقول الفارغة
  if(!name||!handle){document.getElementById('ed-err').textContent='الاسم واسم المستخدم مطلوبان';return;}
+ if(name.length>50){document.getElementById('ed-err').textContent='الاسم طويل جداً (50 حرف كحد أقصى)';return;}
+ if(handle.length>30){document.getElementById('ed-err').textContent='اسم المستخدم طويل جداً (30 حرف كحد أقصى)';return;}
+ if(bio.length>200){document.getElementById('ed-err').textContent='النبذة طويلة جداً (200 حرف كحد أقصى)';return;}
+ if(!/^[a-zA-Z0-9_\u0600-\u06FF]{1,30}$/.test(handle)){document.getElementById('ed-err').textContent='اسم المستخدم يحتوي على أحرف غير مسموحة';return;}
  const taken=Object.values(db.users).filter(u=>u.id!==me.id).map(u=>u.handle);
  if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
  me.name=name; me.handle=handle; me.bio=bio;
@@ -1761,7 +1779,7 @@ function uploadAvatar(){
  input.onchange=e=>{
  const f=e.target.files[0];
  if(!f) return;
- if(!f.type.startsWith('image/')){toast('الرجاء اختيار صورة فقط');return;}
+ const _ALLOWED_AV=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_ALLOWED_AV.includes(f.type)){toast('نوع الملف غير مدعوم');return;}
  if(f.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');return;}
  const r=new FileReader();
  r.onload=async ev=>{
@@ -1818,7 +1836,8 @@ function renderBookmarks(){
  return;
  }
  const bms=me.bookmarks.map(id=>getTweetById(id)).filter(Boolean).reverse();
- document.getElementById('bookmarksContainer').innerHTML=bms.map(t=>tweetCard(t,false,false)).join('');
+ // 🔐 تطهير تغريدات المحفوظات
+ document.getElementById('bookmarksContainer').innerHTML=DOMPurify.sanitize(bms.map(t=>tweetCard(t,false,false)).join(''), PURIFY_CONFIG);
 }
 
 // ============================================================
@@ -2018,7 +2037,8 @@ function renderNotifications(){
  </div>`;
  }).filter(Boolean);
 
- el.innerHTML = `<div class="notif-grid">${rows.join('')}</div>`;
+ // 🔐 تطهير الإشعارات
+ el.innerHTML = DOMPurify.sanitize(`<div class="notif-grid">${rows.join('')}</div>`, PURIFY_CONFIG);
 
  // Attach fast click+touch listeners
  el.querySelectorAll('.notif-row[data-nkey]').forEach(row=>{
@@ -2049,20 +2069,23 @@ function renderExploreTrends(){
  const el=document.getElementById('exploreTrends');
  if(!trends.length){el.style.display='none';return;}
  el.style.display='block';
- el.innerHTML=`<div class="card" style="margin:0.75rem 1rem">
+ // 🔐 الترندات مشتقة من تغريدات المستخدمين — تحتاج تطهير
+ const rawTrends=`<div class="card" style="margin:0.75rem 1rem">
  <div class="card-title">مواضيع رائجة</div>`
- +trends.slice(0,8).map(([tag,num])=>`<div class="trend" onpointerup="searchByTag('${tag}')">
+ +trends.slice(0,8).map(([tag,num])=>`<div class="trend" onpointerup="searchByTag('${esc(tag)}')" data-tag="${esc(tag)}">
  <div class="trend-cat">ترند</div>
  <div class="trend-tag">${esc(tag)}</div>
  <div class="trend-num">${fmtNum(num)} تغريدة</div>
  </div>`).join('')
  +`</div>`;
+ el.innerHTML=DOMPurify.sanitize(rawTrends, PURIFY_CONFIG);
 }
 
 function renderSuggestions(){
  const others=Object.values(db.users).filter(u=>u.id!==me.id).slice(0,4);
  if(!others.length){document.getElementById('suggestContent').innerHTML='<div style="padding:1rem;color:var(--txt2);font-size:0.85rem;text-align:center">لا توجد اقتراحات</div>';return;}
- document.getElementById('suggestContent').innerHTML=others.map(u=>{
+ // 🔐 تطهير قسم الاقتراحات
+ const rawSuggest=others.map(u=>{
  const isFollowing=me.following&&me.following.includes(u.id);
  return `<div class="suggest">
  <div onpointerdown="nav('profile','${u.id}')" style="cursor:pointer">${avaHtml(u,36)}</div>
@@ -2073,6 +2096,7 @@ function renderSuggestions(){
  <button class="follow-btn ${isFollowing?'following':''}" onpointerup="toggleFollow('${u.id}')">${isFollowing?'متابَع':'متابعة'}</button>
  </div>`;
  }).join('');
+ document.getElementById('suggestContent').innerHTML=DOMPurify.sanitize(rawSuggest, PURIFY_CONFIG);
 }
 
 function searchByTag(tag){
@@ -2122,7 +2146,8 @@ function doSearch(q){
  html+=tweetMatches.map(t=>tweetCard(t,false,false)).join('');
  }
  if(!html) html=`<div class="empty-state"><p>لا توجد نتائج لـ "${esc(q)}"</p></div>`;
- document.getElementById('searchResults').innerHTML=html;
+ // 🔐 تطهير نتائج البحث
+ document.getElementById('searchResults').innerHTML=DOMPurify.sanitize(html, PURIFY_CONFIG);
 }
 
 function sideSearch(q){
@@ -2147,7 +2172,7 @@ function toggleTheme(){
 }
 
 function loadTheme(){
- let t='light'; try{t=localStorage.getItem('theme')||'light';}catch(e){}
+ let t='light'; try{const raw=localStorage.getItem('theme');t=(['light','dark'].includes(raw)?raw:'light');}catch(e){}
  const btn=document.getElementById('themeBtn');
  if(t==='dark'){
  document.documentElement.classList.add('dark');
@@ -2191,7 +2216,7 @@ function applyAccentTheme(name){
  if(typeof updateSidebar==='function') updateSidebar();
 }
 function loadAccentTheme(){
- let t='blue'; try{ t=localStorage.getItem('accent-theme')||'blue'; }catch(e){}
+ let t='blue'; try{ const rawAccent=localStorage.getItem('accent-theme');t=(['blue','green','rose','amber'].includes(rawAccent)?rawAccent:'blue'); }catch(e){}
  applyAccentTheme(t);
 }
 
@@ -2277,6 +2302,28 @@ document.addEventListener('click',e=>{
 function v(id){return document.getElementById(id).value;}
 function sv(id,val){document.getElementById(id).value=val;}
 function esc(s){if(!s) return '';const d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
+
+// 🔐 إعداد DOMPurify المشترك — يُستخدم في كل عمليات التطهير
+const PURIFY_CONFIG = {
+  ALLOWED_TAGS: [
+    'div','span','p','br','strong','em','b','i','u','s','small',
+    'h1','h2','h3','h4','h5','h6','blockquote','pre','code',
+    'ul','ol','li','a','button',
+    'img','svg','path','rect','polyline','circle','line','ellipse',
+    'defs','clipPath','use','g','text'
+  ],
+  ALLOWED_ATTR: [
+    'class','style','dir','id','data-nkey','data-id','title',
+    'src','alt','loading','decoding','width','height',
+    'viewBox','fill','stroke','stroke-width','stroke-linecap','stroke-linejoin',
+    'd','x','y','x1','y1','x2','y2','rx','ry','points','cx','cy','r',
+    'href','target','rel',
+    'onpointerup','onpointerdown','oninput','onclick','onchange','disabled',
+    'type','rows','maxlength','placeholder','value'
+  ],
+  FORCE_BODY: false,
+  RETURN_DOM_FRAGMENT: false,
+};
 function getTweetById(id){return db.tweets.find(t=>t.id===id);}
 function getUserById(id){return Object.values(db.users).find(u=>u.id===id);}
 
