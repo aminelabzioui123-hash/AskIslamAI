@@ -11,7 +11,6 @@
 <title>اسأل الإسلام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-8IHFiMkA8F9oLGX3nS+IM3uyB7RoMwm2D0R8EnyUoJhb+ZeaKFXueCRAOL0IxT42mgGgZhHSXTNFbLo3USMIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
@@ -762,7 +761,7 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  <div class="composer">
  <div class="ava ava-md" id="composerAva"></div>
  <div class="composer-right">
- <textarea id="composerTxt" placeholder="ما رأيك؟" oninput="updateComposer(this)" rows="3"></textarea>
+ <textarea id="composerTxt" placeholder="ما رأيك؟" oninput="updateComposer(this)" rows="3" maxlength="280"></textarea>
  <div class="composer-footer">
  <div class="composer-tools" style="position:relative">
  <label class="icon-btn" title="إضافة صورة" for="imgUpload">
@@ -881,10 +880,6 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  <div id="suggestContent"></div>
  </div>
  <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
- <button class="theme-btn" id="themeBtn2" onpointerup="toggleTheme()">
- <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
- الوضع الليلي
- </button>
  <button class="logout-btn" onpointerdown="doLogout()">خروج</button>
  </div>
  </aside>
@@ -1223,15 +1218,12 @@ function updateSidebar(){
 
 function avaHtml(u,size){
  if(!u) return '';
- // 🔐 التحقق من مصدر الصورة — نقبل فقط base64 data URI
- const safeAvatar = u.avatar && /^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+/=]+$/.test(u.avatar)
-   ? u.avatar : null;
- if(safeAvatar) return `<img loading="lazy" decoding="async" src="${safeAvatar}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
- // 🔐 تشفير الحرف الأول — يمنع XSS من أسماء المستخدمين
- const d=document.createElement('div');
- d.appendChild(document.createTextNode((u.name||'?').charAt(0)));
- const letter=d.innerHTML;
- return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${/^#[0-9a-fA-F]{3,6}$/.test(u.color)?u.color:'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
+ // 🔐 نقبل base64 data URI فقط — نمنع XSS من URLs خارجية
+ const safeAv = u.avatar && /^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(u.avatar) ? u.avatar : null;
+ const safeColor = /^#[0-9a-fA-F]{3,6}$/.test(u.color) ? u.color : '#667eea';
+ if(safeAv) return `<img loading="lazy" decoding="async" src="${safeAv}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
+ const letter = esc((u.name||'?').charAt(0));
+ return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${safeColor};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
 }
 
 // ============================================================
@@ -1297,8 +1289,7 @@ function renderFeed(){
  return;
  }
  requestAnimationFrame(()=>{
- // 🔐 تطهير HTML التغريدات
- container.innerHTML=DOMPurify.sanitize(top.map(t=>tweetCard(t,false,false)).join(''), PURIFY_CONFIG);
+ container.innerHTML=top.map(t=>tweetCard(t,false,false)).join('');
  });
 }
 
@@ -1371,15 +1362,14 @@ function renderTweetDetail(id){
  <div class="composer-right">
  <textarea id="replyTxt" placeholder="أضف ردك..." oninput="updateReplyComposer(this)" rows="2" maxlength="280" style="width:100%;background:transparent;border:none;color:var(--txt);font-size:1rem;text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-family:inherit;resize:none;outline:none;min-height:50px;padding-top:0.35rem"></textarea>
  <div style="display:flex;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--border);margin-top:0.5rem">
- <button class="post-btn" id="replyPostBtn" disabled onpointerdown="postReply('${esc(id)}')">رد</button>
+ <button class="post-btn" id="replyPostBtn" disabled onpointerdown="postReply('${id}')">رد</button>
  </div>
  </div>
  </div>`;
  // replies
  const replies = (tweet.replies||[]).map(rid=>getTweetById(rid)).filter(Boolean).sort((a,b)=>a.ts-b.ts);
  if(replies.length) html += `<div style="padding-top:0.5rem">`+replies.map(r=>tweetCard(r,false,true)).join('')+`</div>`;
- // 🔐 تطهير شامل قبل إدراج HTML المُولَّد
- document.getElementById('tweetDetailContent').innerHTML = DOMPurify.sanitize(html, PURIFY_CONFIG);
+ document.getElementById('tweetDetailContent').innerHTML=html;
 }
 
 // ============================================================
@@ -1646,7 +1636,7 @@ function insertHashtag(){
 function handleImgUpload(input, target){
  const file=input.files[0];
  if(!file) return;
- const _ALLOWED_IMG=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_ALLOWED_IMG.includes(file.type)){toast('نوع الملف غير مدعوم. يُقبل: JPG, PNG, GIF, WEBP');input.value='';return;}
+ const _AIMG=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_AIMG.includes(file.type)){toast('الرجاء اختيار: JPG, PNG, GIF, WEBP');input.value='';return;}
  if(file.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');input.value='';return;}
  const reader=new FileReader();
  reader.onload=e=>{
@@ -1698,8 +1688,7 @@ function renderProfile(userId=null){
  <div class="profile-meta">
  <div class="ava-row">
  <div class="ava ava-xl" style="position:relative">
- // 🔐 avatar: base64 فقط — نرفض أي URL خارجي
- ${(()=>{const sa=user.avatar&&/^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(user.avatar)?user.avatar:null;const sc=/^#[0-9a-fA-F]{3,6}$/.test(user.color)?user.color:'#667eea';return sa?`<img loading="lazy" decoding="async" src="${sa}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--bg)">`:`<div style="width:80px;height:80px;border-radius:50%;background:${sc};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;border:3px solid var(--bg)">${esc((user.name||'?').charAt(0))}</div>`;})()}
+ ${user.avatar?`<img loading="lazy" decoding="async" src="${user.avatar}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid var(--bg)">`:`<div style="width:80px;height:80px;border-radius:50%;background:${user.color||'#667eea'};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:28px;border:3px solid var(--bg)">${user.name.charAt(0)}</div>`}
  ${isMine?`<div class="ava-cam" onpointerdown="uploadAvatar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`:''}
  </div>
  ${isMine?`<button class="edit-btn" onpointerdown="openEditProfile()">تعديل الملف</button>`:
@@ -1728,8 +1717,7 @@ function renderProfile(userId=null){
  ${userTweets.length?userTweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا توجد تغريدات بعد</p></div>`}
  </div>`;
  requestAnimationFrame(()=>{
- // 🔐 تطهير HTML الكامل للملف الشخصي
- document.getElementById('profileContent').innerHTML=DOMPurify.sanitize(html, PURIFY_CONFIG);
+ document.getElementById('profileContent').innerHTML=html;
  });
 }
 
@@ -1742,10 +1730,8 @@ function switchProfileTab(tab, userId){
  if(tab==='tweets') tweets=db.tweets.filter(t=>t.uid===user.id&&!t.replyTo).sort((a,b)=>b.ts-a.ts);
  else if(tab==='replies') tweets=db.tweets.filter(t=>t.uid===user.id&&t.replyTo).sort((a,b)=>b.ts-a.ts);
  else if(tab==='likes') tweets=db.tweets.filter(t=>t.likes.includes(me.id)).sort((a,b)=>b.ts-a.ts);
- // 🔐 تطهير تغريدات الملف الشخصي
- document.getElementById('profileTweets').innerHTML=DOMPurify.sanitize(
- tweets.length?tweets.map(t=>tweetCard(t,false,false)).join(''):'<div class="empty-state"><p>لا يوجد محتوى</p></div>',
- PURIFY_CONFIG);
+ document.getElementById('profileTweets').innerHTML=
+ tweets.length?tweets.map(t=>tweetCard(t,false,false)).join(''):`<div class="empty-state"><p>لا يوجد محتوى</p></div>`;
 }
 
 function openEditProfile(){
@@ -1758,12 +1744,10 @@ async function saveProfile(){
  const name=v('ed-name').trim();
  const handle=v('ed-handle').trim().replace(/\s+/g,'_').toLowerCase();
  const bio=v('ed-bio').trim();
- // 🔐 تحقق من حدود الطول ومنع الحقول الفارغة
  if(!name||!handle){document.getElementById('ed-err').textContent='الاسم واسم المستخدم مطلوبان';return;}
  if(name.length>50){document.getElementById('ed-err').textContent='الاسم طويل جداً (50 حرف كحد أقصى)';return;}
- if(handle.length>30){document.getElementById('ed-err').textContent='اسم المستخدم طويل جداً (30 حرف كحد أقصى)';return;}
- if(bio.length>200){document.getElementById('ed-err').textContent='النبذة طويلة جداً (200 حرف كحد أقصى)';return;}
- if(!/^[a-zA-Z0-9_\u0600-\u06FF]{1,30}$/.test(handle)){document.getElementById('ed-err').textContent='اسم المستخدم يحتوي على أحرف غير مسموحة';return;}
+ if(handle.length>30){document.getElementById('ed-err').textContent='اسم المستخدم طويل جداً (30 حرف)';return;}
+ if(bio.length>200){document.getElementById('ed-err').textContent='النبذة طويلة جداً (200 حرف)';return;}
  const taken=Object.values(db.users).filter(u=>u.id!==me.id).map(u=>u.handle);
  if(taken.includes(handle)){document.getElementById('ed-err').textContent='اسم المستخدم محجوز';return;}
  me.name=name; me.handle=handle; me.bio=bio;
@@ -1779,7 +1763,7 @@ function uploadAvatar(){
  input.onchange=e=>{
  const f=e.target.files[0];
  if(!f) return;
- const _ALLOWED_AV=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_ALLOWED_AV.includes(f.type)){toast('نوع الملف غير مدعوم');return;}
+ const _AAV=['image/jpeg','image/jpg','image/png','image/gif','image/webp'];if(!_AAV.includes(f.type)){toast('الرجاء اختيار: JPG, PNG, GIF, WEBP');return;}
  if(f.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');return;}
  const r=new FileReader();
  r.onload=async ev=>{
@@ -1836,8 +1820,7 @@ function renderBookmarks(){
  return;
  }
  const bms=me.bookmarks.map(id=>getTweetById(id)).filter(Boolean).reverse();
- // 🔐 تطهير تغريدات المحفوظات
- document.getElementById('bookmarksContainer').innerHTML=DOMPurify.sanitize(bms.map(t=>tweetCard(t,false,false)).join(''), PURIFY_CONFIG);
+ document.getElementById('bookmarksContainer').innerHTML=bms.map(t=>tweetCard(t,false,false)).join('');
 }
 
 // ============================================================
@@ -2037,8 +2020,7 @@ function renderNotifications(){
  </div>`;
  }).filter(Boolean);
 
- // 🔐 تطهير الإشعارات
- el.innerHTML = DOMPurify.sanitize(`<div class="notif-grid">${rows.join('')}</div>`, PURIFY_CONFIG);
+ el.innerHTML = `<div class="notif-grid">${rows.join('')}</div>`;
 
  // Attach fast click+touch listeners
  el.querySelectorAll('.notif-row[data-nkey]').forEach(row=>{
@@ -2069,23 +2051,20 @@ function renderExploreTrends(){
  const el=document.getElementById('exploreTrends');
  if(!trends.length){el.style.display='none';return;}
  el.style.display='block';
- // 🔐 الترندات مشتقة من تغريدات المستخدمين — تحتاج تطهير
- const rawTrends=`<div class="card" style="margin:0.75rem 1rem">
+ el.innerHTML=`<div class="card" style="margin:0.75rem 1rem">
  <div class="card-title">مواضيع رائجة</div>`
- +trends.slice(0,8).map(([tag,num])=>`<div class="trend" onpointerup="searchByTag('${esc(tag)}')" data-tag="${esc(tag)}">
+ +trends.slice(0,8).map(([tag,num])=>`<div class="trend" onpointerup="searchByTag('${tag}')">
  <div class="trend-cat">ترند</div>
  <div class="trend-tag">${esc(tag)}</div>
  <div class="trend-num">${fmtNum(num)} تغريدة</div>
  </div>`).join('')
  +`</div>`;
- el.innerHTML=DOMPurify.sanitize(rawTrends, PURIFY_CONFIG);
 }
 
 function renderSuggestions(){
  const others=Object.values(db.users).filter(u=>u.id!==me.id).slice(0,4);
  if(!others.length){document.getElementById('suggestContent').innerHTML='<div style="padding:1rem;color:var(--txt2);font-size:0.85rem;text-align:center">لا توجد اقتراحات</div>';return;}
- // 🔐 تطهير قسم الاقتراحات
- const rawSuggest=others.map(u=>{
+ document.getElementById('suggestContent').innerHTML=others.map(u=>{
  const isFollowing=me.following&&me.following.includes(u.id);
  return `<div class="suggest">
  <div onpointerdown="nav('profile','${u.id}')" style="cursor:pointer">${avaHtml(u,36)}</div>
@@ -2096,7 +2075,6 @@ function renderSuggestions(){
  <button class="follow-btn ${isFollowing?'following':''}" onpointerup="toggleFollow('${u.id}')">${isFollowing?'متابَع':'متابعة'}</button>
  </div>`;
  }).join('');
- document.getElementById('suggestContent').innerHTML=DOMPurify.sanitize(rawSuggest, PURIFY_CONFIG);
 }
 
 function searchByTag(tag){
@@ -2146,8 +2124,7 @@ function doSearch(q){
  html+=tweetMatches.map(t=>tweetCard(t,false,false)).join('');
  }
  if(!html) html=`<div class="empty-state"><p>لا توجد نتائج لـ "${esc(q)}"</p></div>`;
- // 🔐 تطهير نتائج البحث
- document.getElementById('searchResults').innerHTML=DOMPurify.sanitize(html, PURIFY_CONFIG);
+ document.getElementById('searchResults').innerHTML=html;
 }
 
 function sideSearch(q){
@@ -2163,21 +2140,27 @@ function sideSearch(q){
 function toggleTheme(){
  const isDark=document.documentElement.classList.toggle('dark');
  try{localStorage.setItem('theme',isDark?'dark':'light');}catch(e){}
- const btn=document.getElementById('themeBtn');
+ _applyThemeBtn(isDark);
+}
+
+function _applyThemeBtn(isDark){
+ const sunSvg  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`;
+ const moonSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+ const btn  = document.getElementById('themeBtn');
+ const btn2 = document.getElementById('themeBtn2');
  if(isDark){
- btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> الوضع الفاتح`;
+  if(btn)  btn.innerHTML  = sunSvg  + ' <span class="nav-label">الوضع الفاتح</span>';
+  if(btn2) btn2.innerHTML = sunSvg  + ' الوضع الفاتح';
  } else {
- btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> الوضع الليلي`;
+  if(btn)  btn.innerHTML  = moonSvg + ' <span class="nav-label">الوضع الليلي</span>';
+  if(btn2) btn2.innerHTML = moonSvg + ' الوضع الليلي';
  }
 }
 
 function loadTheme(){
- let t='light'; try{const raw=localStorage.getItem('theme');t=(['light','dark'].includes(raw)?raw:'light');}catch(e){}
- const btn=document.getElementById('themeBtn');
- if(t==='dark'){
- document.documentElement.classList.add('dark');
- if(btn) btn.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg> الوضع الفاتح`;
- }
+ let t='light'; try{const _rt=localStorage.getItem('theme');t=(['light','dark'].includes(_rt)?_rt:'light');}catch(e){}
+ if(t==='dark') document.documentElement.classList.add('dark');
+ _applyThemeBtn(t==='dark');
 }
 
 // ============================================================
@@ -2216,7 +2199,7 @@ function applyAccentTheme(name){
  if(typeof updateSidebar==='function') updateSidebar();
 }
 function loadAccentTheme(){
- let t='blue'; try{ const rawAccent=localStorage.getItem('accent-theme');t=(['blue','green','rose','amber'].includes(rawAccent)?rawAccent:'blue'); }catch(e){}
+ let t='blue'; try{ t=localStorage.getItem('accent-theme')||'blue'; }catch(e){}
  applyAccentTheme(t);
 }
 
@@ -2302,28 +2285,6 @@ document.addEventListener('click',e=>{
 function v(id){return document.getElementById(id).value;}
 function sv(id,val){document.getElementById(id).value=val;}
 function esc(s){if(!s) return '';const d=document.createElement('div');d.appendChild(document.createTextNode(s));return d.innerHTML;}
-
-// 🔐 إعداد DOMPurify المشترك — يُستخدم في كل عمليات التطهير
-const PURIFY_CONFIG = {
-  ALLOWED_TAGS: [
-    'div','span','p','br','strong','em','b','i','u','s','small',
-    'h1','h2','h3','h4','h5','h6','blockquote','pre','code',
-    'ul','ol','li','a','button',
-    'img','svg','path','rect','polyline','circle','line','ellipse',
-    'defs','clipPath','use','g','text'
-  ],
-  ALLOWED_ATTR: [
-    'class','style','dir','id','data-nkey','data-id','title',
-    'src','alt','loading','decoding','width','height',
-    'viewBox','fill','stroke','stroke-width','stroke-linecap','stroke-linejoin',
-    'd','x','y','x1','y1','x2','y2','rx','ry','points','cx','cy','r',
-    'href','target','rel',
-    'onpointerup','onpointerdown','oninput','onclick','onchange','disabled',
-    'type','rows','maxlength','placeholder','value'
-  ],
-  FORCE_BODY: false,
-  RETURN_DOM_FRAGMENT: false,
-};
 function getTweetById(id){return db.tweets.find(t=>t.id===id);}
 function getUserById(id){return Object.values(db.users).find(u=>u.id===id);}
 
