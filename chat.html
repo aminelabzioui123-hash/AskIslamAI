@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri+Quran&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js" integrity="sha512-8IHFiMkA8F9oLGX3nS+IM3uyB7RoMwm2D0R8EnyUoJhb+ZeaKFXueCRAOL0IxT42mgGgZhHSXTNFbLo3USMIQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         /* ========== Reset ========== */
         * {
@@ -1153,6 +1154,7 @@
                         class="message-input"
                         placeholder="اسأل سؤالك الإسلامي..."
                         rows="1"
+                        maxlength="2000"
                     ></textarea>
                     <button class="send-btn" id="sendBtn" title="إرسال">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.478 2.405a.75.75 0 0 0-.926.94l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.405Z"/></svg>
@@ -1283,6 +1285,11 @@
         async function sendMessage() {
             const text = messageInput.value.trim();
             if (!text || isProcessing) return;
+            // 🔐 تحقق من الطول قبل الإرسال
+            if (text.length > 2000) {
+                addMessage('الرسالة طويلة جداً. يرجى اختصارها في أقل من 2000 حرف.', 'assistant');
+                return;
+            }
 
             if (!currentChatId) {
                 startNewChat();
@@ -1371,7 +1378,27 @@
                     ${actionsHTML}
                 </div>
             `;
-            messageDiv.innerHTML = messageHTML;
+            // 🔐 تطهير HTML قبل الإدراج — يمنع XSS من ردود AI أو أي مصدر خارجي
+            messageDiv.innerHTML = DOMPurify.sanitize(messageHTML, {
+                ALLOWED_TAGS: [
+                    'div','span','p','br','strong','em','b','i','u','s',
+                    'h1','h2','h3','h4','h5','h6',
+                    'ul','ol','li','blockquote','pre','code',
+                    'img','svg','path','rect','polyline','circle','line',
+                    'button','a'
+                ],
+                ALLOWED_ATTR: [
+                    'class','style','dir','id','title',
+                    'src','alt','loading','decoding','width','height',
+                    'viewBox','fill','stroke','stroke-width','stroke-linecap','stroke-linejoin',
+                    'd','x','y','x1','y1','x2','y2','rx','ry','points','cx','cy','r',
+                    'href','target','rel',
+                    'onclick','data-id',
+                    'disabled','type'
+                ],
+                FORCE_BODY: false,
+                RETURN_DOM_FRAGMENT: false,
+            });
             if (userQuestion) messageDiv.dataset.uq = userQuestion;
             messagesArea.appendChild(messageDiv);
             messagesArea.scrollTop = messagesArea.scrollHeight;
@@ -1473,29 +1500,58 @@
         function saveChat() {
             const chatKey = `chat_${window.currentUser?.uid || 'guest'}_${currentChatId}`;
             const firstMessage = chatHistory.find(m => m.role === 'user')?.content || 'محادثة جديدة';
+            // 🔐 تحديد حجم السجل المخزَّن — يمنع ملء localStorage بالكامل
+            const MAX_STORED_MSGS = 40;
+            const trimmedHistory = chatHistory.slice(-MAX_STORED_MSGS).map(m => ({
+                role:    ['user','assistant'].includes(m.role) ? m.role : 'user',
+                content: String(m.content || '').slice(0, 4000)
+            }));
             const chatData = {
-                id: currentChatId,
-                title: firstMessage.substring(0, 50),
-                history: chatHistory,
+                id:        currentChatId,
+                title:     String(firstMessage).replace(/[<>"'&]/g, '').substring(0, 60),
+                history:   trimmedHistory,
                 timestamp: new Date().toISOString()
             };
-            localStorage.setItem(chatKey, JSON.stringify(chatData));
+            try { localStorage.setItem(chatKey, JSON.stringify(chatData)); } catch(e) {}
             loadChats();
         }
 
         function loadChats() {
             const userId = window.currentUser?.uid || 'guest';
+            // 🔐 التحقق من userId — يمنع path traversal في مفاتيح localStorage
+            if (!/^[a-zA-Z0-9_-]{1,128}$/.test(userId) && userId !== 'guest') return;
             const prefix = `chat_${userId}_`;
             allChats = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key.startsWith(prefix)) {
-                    const data = JSON.parse(localStorage.getItem(key));
-                    allChats.push(data);
+                if (key && key.startsWith(prefix)) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        // 🔐 التحقق من بنية البيانات قبل استخدامها
+                        if (data && typeof data === 'object' && data.id && data.title && Array.isArray(data.history)) {
+                            allChats.push({
+                                id:        data.id,
+                                title:     String(data.title || '').slice(0, 80),
+                                history:   data.history,
+                                timestamp: data.timestamp || new Date().toISOString()
+                            });
+                        }
+                    } catch (e) {
+                        // بيانات تالفة — احذفها
+                        try { localStorage.removeItem(key); } catch {}
+                    }
                 }
             }
             allChats.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             renderConversations();
+        }
+
+        // 🔐 دالة مساعدة: تشفير النص قبل إدراجه في HTML
+        function escHtml(str) {
+            if (!str) return '';
+            const d = document.createElement('div');
+            d.appendChild(document.createTextNode(String(str)));
+            return d.innerHTML;
         }
 
         function renderConversations() {
@@ -1503,28 +1559,34 @@
                 conversationList.innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-tertiary); font-size: 0.85rem;">لا توجد محادثات</div>';
                 return;
             }
-            conversationList.innerHTML = allChats.map((chat, idx) => `
-                <div class="conversation-item ${chat.id === currentChatId ? 'active' : ''}" onclick="loadChat(${chat.id})">
-                    ${chat.title}
+            // 🔐 عناوين المحادثات من localStorage — يجب تطهيرها قبل إدراجها
+            conversationList.innerHTML = allChats.map((chat) => `
+                <div class="conversation-item ${chat.id === currentChatId ? 'active' : ''}" onclick="loadChat(${Number(chat.id) || 0})">
+                    ${escHtml(chat.title)}
                 </div>
             `).join('');
         }
 
         function loadChat(chatId) {
             const userId = window.currentUser?.uid || 'guest';
-            const chatKey = `chat_${userId}_${chatId}`;
-            const data = JSON.parse(localStorage.getItem(chatKey));
-            if (data) {
-                currentChatId = chatId;
-                chatHistory = data.history;
-                selectedOptions.clear();
-                updateToolsDisplay();
-                    messagesArea.innerHTML = '';
-                chatHistory.forEach(msg => {
-                    addMessage(msg.content, msg.role);
-                });
-                renderConversations();
-            }
+            if (!/^[a-zA-Z0-9_-]{1,128}$/.test(userId) && userId !== 'guest') return;
+            const safeId = Number(chatId);
+            if (!safeId) return;
+            const chatKey = `chat_${userId}_${safeId}`;
+            let data;
+            try { data = JSON.parse(localStorage.getItem(chatKey)); } catch { return; }
+            if (!data || !Array.isArray(data.history)) return;
+            currentChatId = safeId;
+            // 🔐 فلترة التاريخ المحمَّل
+            chatHistory = data.history.map(m => ({
+                role:    ['user','assistant'].includes(m.role) ? m.role : 'user',
+                content: String(m.content || '').slice(0, 4000)
+            }));
+            selectedOptions.clear();
+            updateToolsDisplay();
+            messagesArea.innerHTML = '';
+            chatHistory.forEach(msg => { addMessage(msg.content, msg.role); });
+            renderConversations();
         }
 
         window.askQuestion = function(question) {
@@ -1641,10 +1703,28 @@
                 document.getElementById('userEmail').textContent = user.email || user.uid;
                 
                 const avatar = document.getElementById('userAvatar');
+                // 🔐 التحقق من أن الصورة من Google فقط — يمنع حقن URLs ضارة
+                const safePhotoURL = (url) => {
+                    try {
+                        const u = new URL(url);
+                        const allowed = ['lh3.googleusercontent.com','lh4.googleusercontent.com','lh5.googleusercontent.com','lh6.googleusercontent.com','googleusercontent.com'];
+                        return allowed.some(h => u.hostname === h || u.hostname.endsWith('.' + h)) ? url : null;
+                    } catch { return null; }
+                };
                 if (user.photoURL) {
-                    avatar.innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}">`;
+                    const validUrl = safePhotoURL(user.photoURL);
+                    if (validUrl) {
+                        const img = document.createElement('img');
+                        img.src = validUrl;
+                        img.alt = user.displayName || 'مستخدم';
+                        img.onerror = () => { avatar.textContent = user.displayName?.charAt(0)?.toUpperCase() || '👤'; };
+                        avatar.innerHTML = '';
+                        avatar.appendChild(img);
+                    } else {
+                        avatar.textContent = user.displayName?.charAt(0)?.toUpperCase() || '👤';
+                    }
                 } else {
-                    avatar.textContent = user.displayName?.charAt(0) || '👤';
+                    avatar.textContent = user.displayName?.charAt(0)?.toUpperCase() || '👤';
                 }
             } else {
                 userSection.style.display = 'none';
