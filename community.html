@@ -545,6 +545,7 @@ html.dark .mobile-nav{background:rgba(0,0,0,0.96);}
 .mnav-btn svg{width:24px;height:24px;flex-shrink:0;}
 .mnav-btn.active{color:var(--accent);}
 .mnav-btn.active svg{stroke-width:3;}
+#mnav-profile.active #mnavAva{border-color:var(--accent) !important;}
 .mnav-notif-dot{
  position:absolute;top:10px;right:calc(50% - 14px);
  width:8px;height:8px;background:var(--like);border-radius:50%;
@@ -718,9 +719,9 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  </button>
  <!-- sidebar bottom: theme + logout -->
  <div style="margin-top:0.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;padding:0 0.1rem">
- <button class="theme-btn" id="themeBtn" onpointerup="toggleTheme()" style="flex:1;min-width:0">
+ <button class="theme-btn" id="themeBtn" onpointerup="toggleTheme()" style="flex:1;min-width:0" title="تبديل الوضع">
  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
- <span class="nav-label">الوضع الليلي</span>
+ <span class="nav-label" id="themeBtnLabel">الوضع الليلي</span>
  </button>
  <button class="logout-btn nav-label" onpointerdown="doLogout()">خروج</button>
  </div>
@@ -879,9 +880,7 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  <div class="card-title">حسابات مقترحة</div>
  <div id="suggestContent"></div>
  </div>
- <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
- <button class="logout-btn" onpointerdown="doLogout()">خروج</button>
- </div>
+
  </aside>
  </div>
 </div>
@@ -902,8 +901,10 @@ button:active,.nav-item:active,.trend:active,.suggest:active{opacity:0.75;}
  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
  <span class="mnav-notif-dot" id="mnav-notif-dot"></span>
  </button>
- <button class="mnav-btn" id="mnav-profile" onpointerup="nav('profile')">
- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+ <button class="mnav-btn" id="mnav-profile" onpointerup="nav('profile')" style="padding:4px">
+ <div id="mnavAva" style="width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid transparent;transition:border-color 0.2s;display:flex;align-items:center;justify-content:center">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+ </div>
  </button>
  </div>
 </nav>
@@ -1084,6 +1085,12 @@ async function handleFirebaseUser(user) {
  } else {
  me = doc.data();
  }
+  // 🔄 sync صورة Google تلقائياً إذا كانت فارغة في Firestore
+  if (user.photoURL && !me.avatar) {
+   me.avatar = user.photoURL;
+   try { await userRef.update({ avatar: user.photoURL }); } catch(e) {}
+  }
+
  db.users[me.email] = me;
  await loadTweetsFromFirestore();
  showApp();
@@ -1208,22 +1215,59 @@ function showApp(){
 }
 
 function updateSidebar(){
- document.getElementById('sidebarAva').innerHTML=avaHtml(me,36);
- document.getElementById('sidebarName').textContent=me.name;
- document.getElementById('sidebarHandle').textContent='@'+me.handle;
- document.getElementById('composerAva').innerHTML=avaHtml(me,44);
- document.getElementById('modalAva').innerHTML=avaHtml(me,44);
+ document.getElementById('sidebarAva').innerHTML  = avaHtml(me,36);
+ document.getElementById('sidebarName').textContent = me.name;
+ document.getElementById('sidebarHandle').textContent = '@'+me.handle;
+ document.getElementById('composerAva').innerHTML = avaHtml(me,44);
+ document.getElementById('modalAva').innerHTML    = avaHtml(me,44);
+ // ─── تحديث صورة mobile nav ────────────────────────────────
+ const mnavAva = document.getElementById('mnavAva');
+ if (mnavAva) {
+  if (_isSafeAvatarUrl(me.avatar)) {
+   mnavAva.innerHTML = `<img src="${me.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.innerHTML='<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><path d=\"M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/></svg>'">`;
+  } else {
+   const color = /^#[0-9a-fA-F]{3,6}$/.test(me.color) ? me.color : '#667eea';
+   const letter = (me.name||'?').charAt(0).toUpperCase();
+   mnavAva.innerHTML = `<div style="width:100%;height:100%;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">${letter}</div>`;
+  }
+ }
+ // ─── sidebarCard avatar ────────────────────────────────────
+ const sCard = document.getElementById('sidebarCard');
+ if (sCard) {
+  const sAva = sCard.querySelector('.ava-sm');
+  if (sAva) sAva.innerHTML = avaHtml(me,36);
+ }
  updateNotifBadge();
 }
 
-function avaHtml(u,size){
- if(!u) return '';
- // 🔐 نقبل base64 data URI فقط — نمنع XSS من URLs خارجية
- const safeAv = u.avatar && /^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(u.avatar) ? u.avatar : null;
+// ─── دالة موحّدة لعرض صورة الملف الشخصي ───────────────────────────
+// تقبل: base64 data URI، أو Google photo URL، أو تعرض الحرف الأول
+function _isSafeAvatarUrl(url) {
+ if (!url) return false;
+ // base64
+ if (/^data:image\/(jpeg|jpg|png|gif|webp);base64,[A-Za-z0-9+\/=]+$/.test(url)) return true;
+ // Google photo domains
+ try {
+  const u = new URL(url);
+  return ['lh3.googleusercontent.com','lh4.googleusercontent.com',
+          'lh5.googleusercontent.com','lh6.googleusercontent.com',
+          'googleusercontent.com','graph.facebook.com',
+          'platform-lookaside.fbsbx.com'].some(h => u.hostname === h || u.hostname.endsWith('.' + h));
+ } catch { return false; }
+}
+
+function avaHtml(u, size) {
+ if (!u) return '';
  const safeColor = /^#[0-9a-fA-F]{3,6}$/.test(u.color) ? u.color : '#667eea';
- if(safeAv) return `<img loading="lazy" decoding="async" src="${safeAv}" style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%">`;
- const letter = esc((u.name||'?').charAt(0));
- return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${safeColor};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0">${letter}</div>`;
+ const safeAv    = _isSafeAvatarUrl(u.avatar) ? u.avatar : null;
+ if (safeAv) {
+  return `<img loading="lazy" decoding="async" src="${safeAv}"
+   style="width:${size}px;height:${size}px;object-fit:cover;border-radius:50%;display:block"
+   onerror="this.replaceWith(Object.assign(document.createElement('div'),{innerHTML:esc((u&&u.name||'?').charAt(0)),style:'width:${size}px;height:${size}px;border-radius:50%;background:${safeColor};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0'}))"
+  >`;
+ }
+ const letter = esc((u.name || '?').charAt(0));
+ return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${safeColor};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${Math.round(size*0.38)}px;flex-shrink:0;text-transform:uppercase">${letter}</div>`;
 }
 
 // ============================================================
@@ -1767,10 +1811,14 @@ function uploadAvatar(){
  if(f.size>5*1024*1024){toast('حجم الصورة كبير جداً (الحد الأقصى 5MB)');return;}
  const r=new FileReader();
  r.onload=async ev=>{
- me.avatar=ev.target.result;
- db.users[me.email]=me;
- try{ await dbFirestore.collection('users').doc(me.id).update({avatar: me.avatar}); }catch(e){}
- saveDB();updateSidebar();renderProfile();toast('تم تحديث الصورة الشخصية ✓');
+ me.avatar = ev.target.result;
+   db.users[me.email] = me;
+   try { await dbFirestore.collection('users').doc(me.id).update({ avatar: me.avatar }); } catch(e) {}
+   saveDB();
+   updateSidebar();
+   renderProfile();
+   renderFeed();
+   toast('تم تحديث الصورة الشخصية ✓');
  };
  r.readAsDataURL(f);
  };
