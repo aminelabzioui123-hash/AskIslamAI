@@ -747,7 +747,279 @@
             .navbar { height: 70px; }
             .page { padding-top: 70px; }
         }
-</style>
+
+        /* ══════════════════════════════════
+           STATS SECTION
+        ══════════════════════════════════ */
+        .stats-section {
+            background: #000;
+            padding: 3.5rem 0;
+            border-bottom: 4px solid #FFE500;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 2px 1fr 2px 1fr;
+            align-items: center;
+            gap: 0;
+        }
+        .stat-item { text-align: center; padding: 2rem; }
+        .stat-number-wrap {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 0.1rem;
+            line-height: 1;
+        }
+        .stat-number {
+            font-size: clamp(3rem, 6vw, 5.5rem);
+            font-weight: 900;
+            color: #FFE500;
+            font-family: 'IBM Plex Sans Arabic', monospace;
+        }
+        .stat-plus { font-size: 2.5rem; font-weight: 900; color: #FFE500; }
+        .stat-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-top: 0.6rem;
+        }
+        .stat-divider-v { width: 2px; height: 90px; background: #333; }
+
+        /* ══════════════════════════════════
+           HOW IT WORKS
+        ══════════════════════════════════ */
+        .how-it-works-section {
+            padding: 5rem 0;
+            background: #fff;
+            border-bottom: 4px solid #000;
+        }
+        .section-label-new {
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #fff;
+            background: #000;
+            display: inline-block;
+            padding: 0.25rem 0.7rem;
+            margin-bottom: 1rem;
+        }
+        .section-heading-new {
+            font-size: clamp(1.6rem, 3vw, 2.4rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 3rem;
+            border-bottom: 4px solid #000;
+            padding-bottom: 1rem;
+        }
+        .steps-pathway {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+            gap: 0;
+            align-items: start;
+        }
+        .step-item {
+            border: 3px solid #000;
+            padding: 1.6rem 1.3rem;
+            background: #fff;
+            cursor: default;
+        }
+        .step-item:hover {
+            background: #FFE500;
+            box-shadow: 6px 6px 0 #000;
+            transform: translate(-4px, -4px);
+            position: relative;
+            z-index: 2;
+        }
+        .step-num {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #bbb;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.9rem;
+            font-family: monospace;
+        }
+        .step-item:hover .step-num { color: #555; }
+        .step-icon-wrap { font-size: 2rem; margin-bottom: 0.8rem; display: block; }
+        .step-title {
+            font-size: 0.88rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .step-desc { font-size: 0.78rem; color: #555; line-height: 1.6; }
+        .step-item:hover .step-desc { color: #222; }
+        .step-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: #000;
+            padding: 0 0.4rem;
+            margin-top: 2.5rem;
+            user-select: none;
+        }
+
+        /* ══════════════════════════════════
+           TRUSTED SOURCES CARDS
+        ══════════════════════════════════ */
+        .trusted-sources-section {
+            padding: 5rem 0;
+            background: #f5f5f5;
+            border-bottom: 4px solid #000;
+        }
+        .sources-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 4px solid #000;
+        }
+        .source-card {
+            position: relative;
+            min-height: 270px;
+            border-right: 3px solid #000;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        .source-card:last-child { border-right: none; }
+        .source-card-front {
+            padding: 2rem 1.5rem;
+            height: 100%;
+            background: #fff;
+        }
+        .source-card:hover .source-card-front { background: #111; color: #fff; }
+        .source-num {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #bbb;
+            letter-spacing: 0.12em;
+            margin-bottom: 1rem;
+            font-family: monospace;
+        }
+        .source-card:hover .source-num { color: #FFE500; }
+        .source-title {
+            font-size: 1.05rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .source-sub { font-size: 0.78rem; color: #777; line-height: 1.5; }
+        .source-card:hover .source-sub { color: #aaa; }
+        .source-card-hover {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: #FFE500;
+            border-top: 3px solid #000;
+            padding: 1.2rem 1.5rem;
+            transform: translateY(100%);
+        }
+        .source-card:hover .source-card-hover { transform: translateY(0); }
+        .source-card-hover p { font-size: 0.82rem; font-weight: 700; color: #000; line-height: 1.6; }
+
+        /* ══════════════════════════════════
+           CORE VALUES
+        ══════════════════════════════════ */
+        .core-values-section {
+            padding: 5rem 0;
+            background: #000;
+            border-bottom: 4px solid #FFE500;
+        }
+        .core-values-section .section-label-new { background: #FFE500; color: #000; }
+        .core-values-section .section-heading-new { color: #fff; border-bottom-color: #333; }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 3px solid #FFE500;
+        }
+        .value-card {
+            padding: 2.5rem 2rem;
+            border-right: 3px solid #FFE500;
+            background: #000;
+        }
+        .value-card:last-child { border-right: none; }
+        .value-card:hover { background: #FFE500; }
+        .value-card:hover .value-title,
+        .value-card:hover .value-desc { color: #000; }
+        .value-card:hover .value-badge { background: #000; color: #FFE500; border-color: #000; }
+        .value-icon { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+        .value-title {
+            font-size: 1.1rem; font-weight: 900; text-transform: uppercase;
+            color: #fff; margin-bottom: 0.8rem;
+        }
+        .value-desc { font-size: 0.85rem; color: #888; line-height: 1.7; margin-bottom: 1.2rem; }
+        .value-badge {
+            font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em;
+            color: #000; background: #FFE500;
+            display: inline-block; padding: 0.2rem 0.6rem;
+            border: 2px solid #FFE500;
+        }
+
+        /* ══════════════════════════════════
+           LIVE EXAMPLES
+        ══════════════════════════════════ */
+        .live-examples-section {
+            padding: 5rem 0;
+            background: #fff;
+            border-bottom: 4px solid #000;
+        }
+        .examples-buttons {
+            display: inline-flex;
+            flex-wrap: wrap;
+            border: 3px solid #000;
+            margin-bottom: 2.5rem;
+        }
+        .example-btn {
+            background: #fff; border: none; border-right: 3px solid #000;
+            font-family: inherit; font-size: 0.9rem; font-weight: 700;
+            padding: 0.9rem 1.5rem; cursor: pointer; color: #000;
+        }
+        .example-btn:last-child { border-right: none; }
+        .example-btn:hover, .example-btn.active { background: #FFE500; }
+        .example-result {
+            border: 4px solid #000;
+            box-shadow: 7px 7px 0 #000;
+            background: #fff;
+            padding: 2rem 2.5rem;
+        }
+        .example-result-label {
+            font-size: 0.68rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 0.15em; color: #aaa; margin-bottom: 0.4rem;
+        }
+        .example-result-q {
+            font-size: 1.1rem; font-weight: 900; margin-bottom: 1.5rem;
+            padding-bottom: 1rem; border-bottom: 3px solid #000;
+        }
+        .example-result-answer {
+            font-size: 1rem; line-height: 2; color: #000; margin-bottom: 1.5rem;
+        }
+        .example-result-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .meta-tag {
+            font-size: 0.75rem; font-weight: 900; padding: 0.3rem 0.8rem;
+            border: 2px solid #000; background: #FFE500; color: #000;
+        }
+        .meta-tag.grade { background: #000; color: #FFE500; }
+
+        /* ══ RESPONSIVE NEW SECTIONS ══ */
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .stat-divider-v { display: none; }
+            .steps-pathway { grid-template-columns: 1fr; }
+            .step-connector { transform: rotate(90deg); margin: 0.3rem auto; }
+            .sources-grid { grid-template-columns: 1fr 1fr; }
+            .source-card:nth-child(2) { border-right: none; }
+            .source-card:nth-child(3) { border-top: 3px solid #000; }
+            .source-card:nth-child(4) { border-top: 3px solid #000; border-right: none; }
+            .values-grid { grid-template-columns: 1fr; }
+            .value-card { border-right: none; border-bottom: 3px solid #FFE500; }
+            .value-card:last-child { border-bottom: none; }
+            .examples-buttons { flex-direction: column; display: flex; }
+            .example-btn { border-right: none; border-bottom: 3px solid #000; }
+            .example-btn:last-child { border-bottom: none; }
+        }
+
+    </style>
 </head>
 <body>
     <!-- ══ NAVBAR ══ -->
@@ -793,6 +1065,38 @@
 
         <hr class="section-divider">
 
+
+        <!-- ══ STATS COUNTER ══ -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number-wrap">
+                            <span class="stat-number" data-target="30000">0</span>
+                            <span class="stat-plus">+</span>
+                        </div>
+                        <div class="stat-label">حديث نصي معتمد</div>
+                    </div>
+                    <div class="stat-divider-v"></div>
+                    <div class="stat-item">
+                        <div class="stat-number-wrap">
+                            <span class="stat-number" data-target="4">0</span>
+                        </div>
+                        <div class="stat-label">أمهات الكتب الإسلامية</div>
+                    </div>
+                    <div class="stat-divider-v"></div>
+                    <div class="stat-item">
+                        <div class="stat-number-wrap">
+                            <span class="stat-number">&lt;1</span>
+                        </div>
+                        <div class="stat-label">ثانية سرعة الاستجابة</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
         <!-- ══ FEATURED BAND ══ -->
         <div class="featured-band">
             <div class="container">
@@ -834,6 +1138,46 @@
                     <p>
                         المشروع وقفي بالكامل، يُدار بنية خدمة الإسلام والمسلمين لوجه الله تعالى، ويُطور باستمرار لتقديم أفضل تجربة ممكنة.
                     </p>
+                </div>
+            </div>
+        </section>
+
+
+        <hr class="section-divider">
+
+        <!-- ══ HOW IT WORKS ══ -->
+        <section class="how-it-works-section">
+            <div class="container">
+                <p class="section-label-new">آلية العمل</p>
+                <h2 class="section-heading-new">كيف يعمل AskIslamAI؟</h2>
+                <div class="steps-pathway">
+                    <div class="step-item">
+                        <div class="step-num">— 01</div>
+                        <span class="step-icon-wrap">❓</span>
+                        <h3 class="step-title">تسأل سؤالك</h3>
+                        <p class="step-desc">اطرح سؤالك الفقهي أو الحديثي بلغة عربية طبيعية</p>
+                    </div>
+                    <div class="step-connector">←</div>
+                    <div class="step-item">
+                        <div class="step-num">— 02</div>
+                        <span class="step-icon-wrap">📚</span>
+                        <h3 class="step-title">البحث في الأصول</h3>
+                        <p class="step-desc">بحث حصري داخل قاعدة بيانات مغلقة: البخاري، مسلم، أبو داود، رياض الصالحين</p>
+                    </div>
+                    <div class="step-connector">←</div>
+                    <div class="step-item">
+                        <div class="step-num">— 03</div>
+                        <span class="step-icon-wrap">🔍</span>
+                        <h3 class="step-title">استخراج الدليل</h3>
+                        <p class="step-desc">فلترة دقيقة — النص الأصلي فقط دون زيادة أو نقصان</p>
+                    </div>
+                    <div class="step-connector">←</div>
+                    <div class="step-item">
+                        <div class="step-num">— 04</div>
+                        <span class="step-icon-wrap">✅</span>
+                        <h3 class="step-title">الإجابة مع المصدر</h3>
+                        <p class="step-desc">إجابة موثقة مع اسم الكتاب ورقم الحديث وحكمه</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -906,6 +1250,89 @@
 
         <hr class="section-divider">
 
+
+        <hr class="section-divider">
+
+        <!-- ══ TRUSTED SOURCES CARDS ══ -->
+        <section class="trusted-sources-section">
+            <div class="container">
+                <p class="section-label-new">مصادرنا</p>
+                <h2 class="section-heading-new">قواعد المعرفة الموثوقة</h2>
+                <div class="sources-grid">
+                    <div class="source-card">
+                        <div class="source-card-front">
+                            <div class="source-num">01 —</div>
+                            <h3 class="source-title">صحيح البخاري</h3>
+                            <p class="source-sub">أصح كتاب بعد القرآن الكريم</p>
+                        </div>
+                        <div class="source-card-hover">
+                            <p>يضم أكثر من 7,000 حديث مختارة بدقة فائقة — أصح الكتب الستة عند أهل الحديث.</p>
+                        </div>
+                    </div>
+                    <div class="source-card">
+                        <div class="source-card-front">
+                            <div class="source-num">02 —</div>
+                            <h3 class="source-title">صحيح مسلم</h3>
+                            <p class="source-sub">الصحيح الثاني في السنة النبوية</p>
+                        </div>
+                        <div class="source-card-hover">
+                            <p>يحتوي على أكثر من 12,000 رواية بترتيبه الفقهي المنهجي المتميز.</p>
+                        </div>
+                    </div>
+                    <div class="source-card">
+                        <div class="source-card-front">
+                            <div class="source-num">03 —</div>
+                            <h3 class="source-title">سنن أبي داود</h3>
+                            <p class="source-sub">مرجع الأحكام الفقهية العملية</p>
+                        </div>
+                        <div class="source-card-hover">
+                            <p>يُعرض حكم الحديث دائماً: صحيح، حسن، أو ضعيف — للحفاظ على الأمانة العلمية.</p>
+                        </div>
+                    </div>
+                    <div class="source-card">
+                        <div class="source-card-front">
+                            <div class="source-num">04 —</div>
+                            <h3 class="source-title">رياض الصالحين</h3>
+                            <p class="source-sub">جامع الأخلاق والتزكية النفسية</p>
+                        </div>
+                        <div class="source-card-hover">
+                            <p>للإمام النووي — أكثر من 1,900 حديث في التربية والأخلاق والعبادات.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ══ CORE VALUES ══ -->
+        <section class="core-values-section">
+            <div class="container">
+                <p class="section-label-new">مزايانا</p>
+                <h2 class="section-heading-new">لماذا نحن مختلفون؟</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <span class="value-icon">🚫</span>
+                        <h3 class="value-title">صفر هلوسة</h3>
+                        <p class="value-desc">الذكاء الاصطناعي مبرمج بصرامة للإجابة من النصوص المعتمدة فقط — لا يخترع إجابات من تلقاء نفسه.</p>
+                        <span class="value-badge">Zero Hallucination</span>
+                    </div>
+                    <div class="value-card">
+                        <span class="value-icon">📎</span>
+                        <h3 class="value-title">التوثيق الدقيق</h3>
+                        <p class="value-desc">كل إجابة تأتي مرفقة باسم الكتاب ورقم الحديث للرجوع إليها والتحقق منها مباشرة.</p>
+                        <span class="value-badge">Accurate Citation</span>
+                    </div>
+                    <div class="value-card">
+                        <span class="value-icon">⚡</span>
+                        <h3 class="value-title">سرعة فائقة</h3>
+                        <p class="value-desc">بحث في عشرات الآلاف من النصوص الشرعية في أجزاء من الثانية بفضل تقنية Cloudflare Vectorize.</p>
+                        <span class="value-badge">Lightning Fast</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- ══ NEWS / SOURCES TABLE ══ -->
         <section class="news-section" id="sources">
             <div class="container">
@@ -946,6 +1373,25 @@
         </section>
 
         <hr class="section-divider">
+
+
+        <hr class="section-divider">
+
+        <!-- ══ LIVE EXAMPLES ══ -->
+        <section class="live-examples-section">
+            <div class="container">
+                <p class="section-label-new">جرب الآن</p>
+                <h2 class="section-heading-new">جرب أن تسأل عن...</h2>
+                <div class="examples-buttons">
+                    <button class="example-btn" data-q="fasting">ما فضل صيام يوم عرفة؟</button>
+                    <button class="example-btn" data-q="parents">أحاديث عن بر الوالدين</button>
+                    <button class="example-btn" data-q="witr">ما حكم صلاة الوتر؟</button>
+                </div>
+                <div class="example-result" id="exampleResult" style="display:none;">
+                    <div id="exampleResultInner"></div>
+                </div>
+            </div>
+        </section>
 
         <!-- ══ CTA BAND ══ -->
         <section class="cta-band">
@@ -1458,6 +1904,80 @@
                     this.classList.remove('active');
                     document.body.style.overflow = '';
                 }
+            });
+        });
+    </script>
+    <script>
+        /* ══ STATS ANIMATED COUNTER ══ */
+        function animateCounter(el, target, duration) {
+            var start = 0;
+            var increment = target / (duration / 16);
+            var timer = setInterval(function() {
+                start += increment;
+                if (start >= target) {
+                    el.textContent = target.toLocaleString('en');
+                    clearInterval(timer);
+                } else {
+                    el.textContent = Math.floor(start).toLocaleString('en');
+                }
+            }, 16);
+        }
+        var statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    var el = entry.target;
+                    var target = parseInt(el.dataset.target);
+                    if (!isNaN(target)) animateCounter(el, target, 2000);
+                    statsObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.4 });
+        document.querySelectorAll('.stat-number[data-target]').forEach(function(el) {
+            statsObserver.observe(el);
+        });
+
+        /* ══ LIVE EXAMPLES ══ */
+        var exampleData = {
+            fasting: {
+                question: 'ما فضل صيام يوم عرفة؟',
+                answer: 'عن أبي قتادة رضي الله عنه، أن رسول الله صلى الله عليه وسلم سُئل عن صيام يوم عرفة فقال: «يُكَفِّرُ السَّنَةَ الْمَاضِيَةَ وَالسَّنَةَ الْقَابِلَة».',
+                source: 'صحيح مسلم',
+                num: '1162',
+                grade: 'صحيح'
+            },
+            parents: {
+                question: 'أحاديث عن بر الوالدين',
+                answer: 'عن عبد الله بن مسعود رضي الله عنه قال: سألتُ النبي صلى الله عليه وسلم: «أيُّ العمل أحبُّ إلى الله؟» قال: «الصَّلاةُ على وقتها». قلتُ: ثم أيّ؟ قال: «بِرُّ الوالدَيْن».',
+                source: 'صحيح البخاري',
+                num: '527',
+                grade: 'صحيح'
+            },
+            witr: {
+                question: 'ما حكم صلاة الوتر؟',
+                answer: 'عن علي رضي الله عنه قال: «الوِتْرُ ليس بحَتْمٍ كهيئةِ الفريضةِ، ولكنَّ رسولَ اللهِ صلى الله عليه وسلم أَوْتَرَ ثم قال: يا أهلَ القرآنِ أَوْتِروا، فإنَّ اللهَ وِتْرٌ يُحِبُّ الوِتْرَ».',
+                source: 'سنن أبي داود',
+                num: '1416',
+                grade: 'صحيح'
+            }
+        };
+        document.querySelectorAll('.example-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.example-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                var key = btn.dataset.q;
+                var d = exampleData[key];
+                var resultEl = document.getElementById('exampleResult');
+                var innerEl = document.getElementById('exampleResultInner');
+                innerEl.innerHTML =
+                    '<div class="example-result-label">السؤال</div>' +
+                    '<div class="example-result-q">' + d.question + '</div>' +
+                    '<div class="example-result-answer">' + d.answer + '</div>' +
+                    '<div class="example-result-meta">' +
+                    '<span class="meta-tag">📚 ' + d.source + '</span>' +
+                    '<span class="meta-tag">رقم الحديث: ' + d.num + '</span>' +
+                    '<span class="meta-tag grade">✅ ' + d.grade + '</span>' +
+                    '</div>';
+                resultEl.style.display = 'block';
             });
         });
     </script>
