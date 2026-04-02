@@ -23,24 +23,87 @@
         }
 
         :root {
-            --bg-primary: #F7F3E8;
-            --bg-secondary: #EDE8D8;
-            --bg-sidebar: #F9F5EA;
-            --bg-card: #F9F5EA;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            --text-tertiary: #999999;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f0f0f0;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #222222;
+            --text-tertiary: #666666;
             --accent: #000000;
-            --accent-hover: #333333;
-            --border: rgba(0, 0, 0, 0.18);
-            --border-strong: rgba(0, 0, 0, 0.30);
-            --shadow-sm: 0 1px 4px rgba(0,0,0,0.10);
-            --shadow-md: 0 4px 14px rgba(0,0,0,0.14);
-            --shadow-lg: 0 8px 28px rgba(0,0,0,0.18);
+            --accent-hover: #222222;
+            --accent-yellow: #FFE500;
+            --border: rgba(0,0,0,0.35);
+            --border-strong: rgba(0,0,0,0.7);
+            --shadow-sm: 3px 3px 0px #000;
+            --shadow-md: 5px 5px 0px #000;
+            --shadow-lg: 8px 8px 0px #000;
             --sidebar-width: 300px;
             --header-height: 0px;
-            --radius: 12px;
-            --radius-sm: 8px;
+            --radius: 0px;
+            --radius-sm: 0px;
+            --chat-font-size: 0.95rem;
+        }
+        /* ── DARK THEME ── */
+        [data-theme="dark"] {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-sidebar: #111111;
+            --bg-card: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-tertiary: #888888;
+            --accent: #FFE500;
+            --accent-hover: #e6cf00;
+            --border: rgba(255,255,255,0.25);
+            --border-strong: rgba(255,255,255,0.5);
+            --shadow-sm: 3px 3px 0px #FFE500;
+            --shadow-md: 5px 5px 0px #FFE500;
+            --shadow-lg: 8px 8px 0px #FFE500;
+        }
+        [data-theme="dark"] .message-content {
+            border-color: #FFE500 !important;
+            box-shadow: 3px 5px 0px #FFE500 !important;
+        }
+        [data-theme="dark"] .message.user .message-content {
+            background: #FFE500 !important;
+            color: #000 !important;
+            border-color: #FFE500 !important;
+        }
+        [data-theme="dark"] .action-btn {
+            border-color: #FFE500 !important;
+            color: #FFE500 !important;
+            box-shadow: 2px 2px 0px #FFE500 !important;
+        }
+        [data-theme="dark"] .action-btn:hover {
+            background: #FFE500 !important;
+            color: #000 !important;
+        }
+        [data-theme="dark"] .input-wrapper {
+            border-color: #FFE500 !important;
+            box-shadow: 2px 3px 0px #FFE500 !important;
+        }
+        [data-theme="dark"] .new-chat-btn {
+            background: #FFE500 !important;
+            color: #000 !important;
+        }
+        [data-theme="dark"] .sidebar-header {
+            border-bottom-color: #333 !important;
+        }
+        [data-theme="dark"] .sidebar-logo img {
+            mix-blend-mode: normal !important;
+            filter: invert(1) !important;
+        }
+        [data-theme="dark"] .header-logo-img {
+            mix-blend-mode: normal !important;
+            filter: invert(1) !important;
+        }
+        [data-theme="dark"] .message.assistant .message-avatar {
+            border-color: #FFE500 !important;
+        }
+        [data-theme="dark"] .message.assistant .message-avatar img {
+            mix-blend-mode: normal !important;
+            filter: invert(1) !important;
         }
 
         body {
@@ -59,8 +122,8 @@
             width: var(--sidebar-width);
             height: 100vh;
             background: var(--bg-sidebar);
-            border-left: 1px solid var(--border);
-            box-shadow: var(--shadow-md);
+            border-left: 4px solid #000;
+            box-shadow: none;
             display: flex;
             flex-direction: column;
             z-index: 10001;
@@ -69,7 +132,7 @@
 
         .sidebar-header {
             padding: 1.8rem 1rem 1.2rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 3px solid var(--border);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -83,7 +146,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
+            font-weight: 900;
             font-size: 1.2rem;
             color: var(--text-primary);
             flex-shrink: 0;
@@ -113,13 +176,12 @@
             gap: 0.8rem;
             padding: 0.8rem;
             background: var(--bg-secondary);
-            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
         }
 
         .user-avatar {
             width: 32px;
             height: 32px;
-            border-radius: 50%;
             background: var(--accent);
             color: white;
             display: flex;
@@ -164,24 +226,27 @@
             width: calc(100% - 2.4rem);
             padding: 0.8rem 1rem;
             background: var(--accent);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-size: 0.9rem;
+            color: var(--accent-yellow);
+            border: 3px solid var(--accent);
+            font-weight: 900;
+            font-size: 0.85rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: none;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
             font-family: inherit;
             flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .new-chat-btn:hover {
-            background: var(--accent-hover);
-            box-shadow: var(--shadow-sm);
+            background: var(--accent-yellow);
+            color: #000;
+            box-shadow: 4px 4px 0 #000;
+            transform: translate(-2px,-2px);
         }
 
         .new-chat-btn svg {
@@ -192,17 +257,20 @@
         /* Conversations Section */
         .conversations-section {
             padding: 0 1.2rem 1rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 3px solid var(--border);
             flex-shrink: 0;
         }
 
         .section-title {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-tertiary);
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #fff;
+            background: #000;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.1em;
             margin-bottom: 0.8rem;
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
         }
 
         .conversation-list {
@@ -214,13 +282,12 @@
         }
 
         .conversation-item {
-            padding: 0.8rem 0.8rem;
+            padding: 0.7rem 0.8rem;
             background: transparent;
-            border: 1px solid transparent;
-            border-radius: var(--radius-sm);
+            border: 2px solid transparent;
             cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.9rem;
+            transition: none;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             text-align: right;
             white-space: nowrap;
@@ -229,15 +296,17 @@
         }
 
         .conversation-item:hover {
-            background: var(--bg-secondary);
-            border-color: var(--border);
+            background: var(--accent-yellow);
+            border-color: #000;
+            color: #000;
+            font-weight: 700;
         }
 
         .conversation-item.active {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-weight: 500;
-            border-color: var(--accent);
+            background: #000;
+            color: var(--accent-yellow);
+            font-weight: 900;
+            border-color: #000;
         }
 
         /* Spaces Section */
@@ -292,7 +361,7 @@
         /* Sidebar Footer */
         .sidebar-footer {
             padding: 1rem 1.2rem;
-            border-top: 1px solid var(--border);
+            border-top: 3px solid var(--border);
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
@@ -302,21 +371,24 @@
         .footer-btn {
             padding: 0.7rem 0.8rem;
             background: transparent;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: none;
             display: flex;
             align-items: center;
             gap: 0.6rem;
-            font-size: 0.9rem;
+            font-size: 0.82rem;
+            font-weight: 700;
             color: var(--text-secondary);
             font-family: inherit;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
         }
 
         .footer-btn:hover {
             background: var(--bg-secondary);
             border-color: var(--border-strong);
+            box-shadow: 3px 3px 0 var(--border-strong);
         }
 
         .footer-btn svg {
@@ -358,11 +430,10 @@
 
         .confirm-box {
             background: var(--bg-card);
-            border: 1.5px solid #1a1a1a;
-            border-radius: var(--radius);
-            box-shadow: 5px 7px 0px rgba(0,0,0,0.18);
+            border: 4px solid #000;
+            box-shadow: 8px 8px 0 #000;
             padding: 1.8rem 1.6rem;
-            max-width: 320px;
+            max-width: 340px;
             width: 90%;
             text-align: center;
             display: flex;
@@ -372,8 +443,9 @@
 
         .confirm-title {
             font-size: 1.1rem;
-            font-weight: 700;
+            font-weight: 900;
             color: var(--text-primary);
+            text-transform: uppercase;
         }
 
         .confirm-sub {
@@ -392,30 +464,30 @@
             padding: 0.6rem 1.4rem;
             background: #ef4444;
             color: white;
-            border: 1.5px solid #dc2626;
-            border-radius: var(--radius-sm);
+            border: 3px solid #000;
             font-family: inherit;
-            font-weight: 600;
+            font-weight: 900;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: none;
+            text-transform: uppercase;
         }
-        .confirm-yes:hover { background: #dc2626; }
+        .confirm-yes:hover { background: #c00; box-shadow: 3px 3px 0 #000; transform: translate(-2px,-2px); }
 
         .confirm-no {
             padding: 0.6rem 1.4rem;
             background: transparent;
             color: var(--text-primary);
-            border: 1.5px solid #1a1a1a;
-            border-radius: var(--radius-sm);
+            border: 3px solid #000;
             font-family: inherit;
-            font-weight: 600;
+            font-weight: 900;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 2px 3px 0px rgba(0,0,0,0.15);
+            transition: none;
+            box-shadow: 3px 3px 0 #000;
+            text-transform: uppercase;
         }
-        .confirm-no:hover { background: var(--bg-secondary); }
+        .confirm-no:hover { background: var(--bg-secondary); box-shadow: none; transform: translate(2px,2px); }
 
         /* ========== Header with Hamburger Menu ========== */
         .header {
@@ -423,8 +495,8 @@
             align-items: center;
             justify-content: space-between;
             padding: 0.4rem 1rem;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border);
+            background: var(--accent-yellow, #FFE500);
+            border-bottom: 3px solid #000;
             flex-shrink: 0;
             min-height: 68px;
         }
@@ -558,9 +630,10 @@
 
         .welcome-title {
             font-size: 2rem;
-            font-weight: 700;
+            font-weight: 900;
             color: var(--text-primary);
             margin-bottom: 0.5rem;
+            text-transform: uppercase;
         }
 
         .welcome-subtitle {
@@ -607,10 +680,11 @@
 
         .message.assistant .message-avatar {
             background: var(--bg-card);
-            border: 1.5px solid #1a1a1a;
+            border: 2px solid #000;
             color: var(--text-primary);
             overflow: hidden;
             padding: 3px;
+            box-shadow: 2px 2px 0 #000;
         }
 
         .message.assistant .message-avatar img {
@@ -623,23 +697,22 @@
 
         .message-content {
             background: var(--bg-card);
-            border: 1.5px solid #1a1a1a;
-            border-radius: var(--radius);
+            border: 2px solid #000;
             padding: 1rem 1.2rem;
             max-width: 70%;
             line-height: 1.6;
-            font-size: 0.95rem;
-            box-shadow: 3px 5px 0px rgba(0,0,0,0.18);
+            font-size: var(--chat-font-size);
+            box-shadow: 4px 5px 0px #000;
             color: var(--text-primary);
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
 
         .message.user .message-content {
-            background: var(--accent);
-            color: white;
+            background: #000;
+            color: #FFE500;
             border-color: #000;
-            box-shadow: 3px 5px 0px rgba(0,0,0,0.18);
+            box-shadow: 4px 5px 0px rgba(0,0,0,0.5);
         }
 
         /* ========== Typing Indicator ========== */
@@ -665,8 +738,8 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: #1a1a1a;
-            border-radius: 50%;
+            background: #000;
+            border-radius: 0;
             animation: typingBounce 1.2s ease-in-out infinite;
         }
 
@@ -690,7 +763,7 @@
         .input-area {
             padding: 1rem 2rem;
             background: var(--bg-primary);
-            border-top: 1px solid var(--border);
+            border-top: 3px solid #000;
             flex-shrink: 0;
             position: sticky;
             bottom: 0;
@@ -710,16 +783,15 @@
             flex-direction: column;
             gap: 0.5rem;
             background: var(--bg-card);
-            border: 1.5px solid #1a1a1a;
-            border-radius: var(--radius);
+            border: 3px solid #000;
             padding: 0.6rem 0.8rem;
-            transition: all 0.2s;
-            box-shadow: 2px 3px 0px rgba(0,0,0,0.22);
+            transition: none;
+            box-shadow: 4px 4px 0px #000;
         }
 
         .input-wrapper:focus-within {
-            border-color: var(--accent);
-            box-shadow: var(--shadow-md);
+            border-color: #000;
+            box-shadow: 6px 6px 0 #000;
         }
 
         .input-row {
@@ -837,26 +909,27 @@
         }
 
         .send-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            background: #000;
+            color: #FFE500;
+            border: 3px solid #000;
+            width: 38px;
+            height: 38px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
+            transition: none;
             flex-shrink: 0;
         }
 
         .send-btn:hover:not(:disabled) {
-            background: var(--accent-hover);
-            box-shadow: var(--shadow-md);
+            background: #FFE500;
+            color: #000;
+            box-shadow: 3px 3px 0 #000;
+            transform: translate(-2px,-2px);
         }
 
-        .send-btn:active:not(:disabled) { transform: scale(0.95); }
+        .send-btn:active:not(:disabled) { transform: translate(1px,1px); }
         .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         .send-btn svg {
@@ -923,18 +996,17 @@
 
         .action-btn {
             background: transparent;
-            border: 1.5px solid #1a1a1a;
-            color: #1a1a1a;
+            border: 2px solid var(--text-primary);
+            color: var(--text-primary);
             width: 32px;
             height: 32px;
-            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.15s;
+            transition: none;
             flex-shrink: 0;
-            box-shadow: 2px 2px 0px #1a1a1a;
+            box-shadow: 2px 2px 0px var(--text-primary);
         }
 
         .action-btn:hover {
@@ -1050,6 +1122,166 @@
             .input-wrapper { padding: 0.3rem; gap: 0.3rem; }
             .message-input { max-height: 50px; min-height: 28px; font-size: 0.75rem; }
         }
+
+        /* ══════════════════════════════════
+           SETTINGS PANEL — BRUTALIST
+        ══════════════════════════════════ */
+        .settings-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 99998;
+            align-items: center;
+            justify-content: center;
+        }
+        .settings-overlay.active { display: flex; }
+
+        .settings-panel {
+            background: var(--bg-card);
+            border: 4px solid #000;
+            box-shadow: 10px 10px 0 #000;
+            padding: 0;
+            max-width: 460px;
+            width: 94%;
+            max-height: 88vh;
+            overflow-y: auto;
+            direction: rtl;
+        }
+        .settings-header {
+            background: #000;
+            color: #FFE500;
+            padding: 1rem 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 4px solid #000;
+        }
+        .settings-header h2 {
+            font-size: 1rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .settings-close {
+            background: #FFE500;
+            color: #000;
+            border: 2px solid #FFE500;
+            width: 30px; height: 30px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: none;
+        }
+        .settings-close:hover { background: #fff; border-color: #fff; }
+
+        .settings-body { padding: 1.4rem; display: flex; flex-direction: column; gap: 1.6rem; }
+
+        .settings-group {}
+        .settings-group-label {
+            font-size: 0.65rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #fff;
+            background: #000;
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            margin-bottom: 0.9rem;
+        }
+
+        /* Font size */
+        .font-size-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border: 3px solid #000;
+        }
+        .font-size-btn {
+            padding: 0.7rem 0.4rem;
+            background: var(--bg-card);
+            border: none;
+            border-left: 2px solid #000;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-primary);
+            text-align: center;
+            transition: none;
+        }
+        .font-size-btn:first-child { border-left: none; }
+        .font-size-btn:hover { background: #f0f0f0; }
+        .font-size-btn.active {
+            background: #000;
+            color: #FFE500;
+            font-weight: 900;
+        }
+        .font-size-btn .fsize-label { font-size: 0.65rem; display: block; margin-top: 0.2rem; color: inherit; opacity: 0.7; }
+
+        /* Theme */
+        .theme-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border: 3px solid #000;
+        }
+        .theme-btn {
+            padding: 0.8rem 0.5rem;
+            background: var(--bg-card);
+            border: none;
+            border-left: 2px solid #000;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            text-align: center;
+            transition: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        .theme-btn:first-child { border-left: none; }
+        .theme-btn:hover { background: #f0f0f0; }
+        .theme-btn.active { background: #000; color: #FFE500; font-weight: 900; }
+        .theme-btn .theme-icon { font-size: 1.3rem; }
+
+        /* Delete old chats */
+        .delete-period-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            border: 3px solid #000;
+        }
+        .delete-period-btn {
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border: none;
+            border-bottom: 2px solid #000;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            color: var(--text-primary);
+            text-align: right;
+            transition: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .delete-period-btn:last-child { border-bottom: none; }
+        .delete-period-btn:hover { background: #FFE500; font-weight: 900; }
+        .delete-period-btn .del-badge {
+            font-size: 0.65rem;
+            font-weight: 900;
+            background: #000;
+            color: #FFE500;
+            padding: 0.1rem 0.4rem;
+            text-transform: uppercase;
+        }
+        .delete-period-btn.danger { color: #c00; }
+        .delete-period-btn.danger:hover { background: #c00; color: #fff; }
+
     </style>
 </head>
 <body>
@@ -1565,6 +1797,110 @@
             confirmOverlay.classList.remove('active');
             startNewChat();
         });
+
+        // ── SETTINGS PANEL ────────────────────────────────────────────────
+        const settingsBtn       = document.getElementById('settingsBtn');
+        const settingsOverlay   = document.getElementById('settingsOverlay');
+        const settingsClose     = document.getElementById('settingsClose');
+
+        function openSettings() { settingsOverlay.classList.add('active'); }
+        function closeSettings() { settingsOverlay.classList.remove('active'); }
+
+        settingsBtn.addEventListener('click', openSettings);
+        settingsClose.addEventListener('click', closeSettings);
+        settingsOverlay.addEventListener('click', (e) => {
+            if (e.target === settingsOverlay) closeSettings();
+        });
+
+        // ── Font size ──────────────────────────────────────────────────────
+        const savedFontSize = localStorage.getItem('askislam_fontsize') || '0.95rem';
+        document.documentElement.style.setProperty('--chat-font-size', savedFontSize);
+
+        document.querySelectorAll('.font-size-btn').forEach(btn => {
+            if (btn.dataset.size === savedFontSize) btn.classList.add('active');
+            else btn.classList.remove('active');
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.font-size-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const size = btn.dataset.size;
+                document.documentElement.style.setProperty('--chat-font-size', size);
+                localStorage.setItem('askislam_fontsize', size);
+            });
+        });
+
+        // ── Theme ─────────────────────────────────────────────────────────
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                root.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            } else {
+                root.setAttribute('data-theme', theme);
+            }
+        }
+
+        const savedTheme = localStorage.getItem('askislam_theme') || 'light';
+        applyTheme(savedTheme);
+
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            if (btn.dataset.theme === savedTheme) btn.classList.add('active');
+            else btn.classList.remove('active');
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const theme = btn.dataset.theme;
+                localStorage.setItem('askislam_theme', theme);
+                applyTheme(theme);
+            });
+        });
+
+        // Auto theme: listen for system changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (localStorage.getItem('askislam_theme') === 'auto') applyTheme('auto');
+        });
+
+        // ── Delete old chats ───────────────────────────────────────────────
+        document.querySelectorAll('.delete-period-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const days = parseInt(btn.dataset.days);
+                const userId = window.currentUser?.uid || 'guest';
+                const prefix = `chat_${userId}_`;
+                const cutoff = days === 0 ? Infinity : Date.now() - days * 86400000;
+                const keysToDelete = [];
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (!key || !key.startsWith(prefix)) continue;
+                    if (days === 0) {
+                        keysToDelete.push(key);
+                    } else {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            const ts = data?.timestamp ? new Date(data.timestamp).getTime() : 0;
+                            if (ts < Date.now() - days * 86400000) keysToDelete.push(key);
+                        } catch {}
+                    }
+                }
+
+                if (keysToDelete.length === 0) {
+                    alert('لا توجد محادثات تستوفي هذا الشرط.');
+                    return;
+                }
+
+                const label = days === 0 ? 'جميع المحادثات' : 'المحادثات الأقدم من ' + days + ' يوم';
+                if (!confirm('سيتم حذف ' + label + ' (' + keysToDelete.length + ' محادثة). هل أنت متأكد؟')) return;
+
+                keysToDelete.forEach(k => localStorage.removeItem(k));
+                allChats = [];
+                renderConversations();
+                startNewChat();
+                closeSettings();
+            });
+        });
+        // ─────────────────────────────────────────────────────────────────
+
     </script>
 
     <!-- ========== Confirm Delete Dialog ========== -->
@@ -1655,13 +1991,88 @@
         });
 
         document.getElementById('logoutBtn').addEventListener('click', window.logout);
-        document.getElementById('settingsBtn').addEventListener('click', () => {
-            if (!window.currentUser) {
-                window.loginGoogle();
-            }
-        });
+        // settingsBtn is handled by the settings panel script above
 
         console.log('✅ Firebase جاهز');
     </script>
+
+    <!-- ========== Settings Panel ========== -->
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-header">
+                <h2>⚙ الإعدادات</h2>
+                <button class="settings-close" id="settingsClose">✕</button>
+            </div>
+            <div class="settings-body">
+
+                <!-- Font Size -->
+                <div class="settings-group">
+                    <div class="settings-group-label">حجم الخط</div>
+                    <div class="font-size-options">
+                        <button class="font-size-btn" data-size="0.82rem">
+                            <span style="font-size:0.82rem">أ</span>
+                            <span class="fsize-label">صغير</span>
+                        </button>
+                        <button class="font-size-btn active" data-size="0.95rem">
+                            <span style="font-size:0.95rem">أ</span>
+                            <span class="fsize-label">متوسط</span>
+                        </button>
+                        <button class="font-size-btn" data-size="1.08rem">
+                            <span style="font-size:1.08rem">أ</span>
+                            <span class="fsize-label">كبير</span>
+                        </button>
+                        <button class="font-size-btn" data-size="1.22rem">
+                            <span style="font-size:1.22rem">أ</span>
+                            <span class="fsize-label">كبير جداً</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme -->
+                <div class="settings-group">
+                    <div class="settings-group-label">السمة</div>
+                    <div class="theme-options">
+                        <button class="theme-btn active" data-theme="light">
+                            <span class="theme-icon">☀️</span>
+                            فاتح
+                        </button>
+                        <button class="theme-btn" data-theme="dark">
+                            <span class="theme-icon">🌙</span>
+                            داكن
+                        </button>
+                        <button class="theme-btn" data-theme="auto">
+                            <span class="theme-icon">🖥</span>
+                            تلقائي
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Delete old chats -->
+                <div class="settings-group">
+                    <div class="settings-group-label">حذف المحادثات القديمة</div>
+                    <div class="delete-period-options">
+                        <button class="delete-period-btn" data-days="7">
+                            حذف المحادثات الأقدم من أسبوع
+                            <span class="del-badge">7 أيام</span>
+                        </button>
+                        <button class="delete-period-btn" data-days="30">
+                            حذف المحادثات الأقدم من شهر
+                            <span class="del-badge">30 يوم</span>
+                        </button>
+                        <button class="delete-period-btn" data-days="90">
+                            حذف المحادثات الأقدم من 3 أشهر
+                            <span class="del-badge">90 يوم</span>
+                        </button>
+                        <button class="delete-period-btn danger" data-days="0">
+                            حذف جميع المحادثات
+                            <span class="del-badge" style="background:#c00;">الكل</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
