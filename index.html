@@ -537,6 +537,226 @@
                 padding-top: 72px;
             }
         }
+    /* ═══════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════ */
+    .how-section {
+        padding: 4.5rem 0;
+        background: #f0ece3;
+        text-align: center;
+    }
+    .how-section h2 { font-size: clamp(1.4rem,2.5vw,1.9rem); font-weight:700; letter-spacing:-.02em; margin-bottom:.5rem; }
+    .how-section > .container > .how-sub { font-size:.95rem; color:#4a4540; margin-bottom:3rem; }
+    .how-steps {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0;
+        flex-wrap: wrap;
+    }
+    .how-step {
+        flex: 1 1 180px;
+        max-width: 220px;
+        padding: 1.5rem 1rem;
+        border-radius: 12px;
+        transition: background .25s, transform .25s, box-shadow .25s;
+        cursor: default;
+    }
+    .how-step:hover {
+        background: #e8e3d8;
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(26,22,19,.1);
+    }
+    .how-step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px; height: 36px;
+        border-radius: 50%;
+        background: #1a1613;
+        color: #f0ece3;
+        font-size: .8rem;
+        font-weight: 700;
+        margin-bottom: .9rem;
+    }
+    .how-step-icon { font-size: 2.2rem; margin-bottom: .7rem; display:block; }
+    .how-step h3 { font-size: .95rem; font-weight: 700; margin-bottom: .4rem; }
+    .how-step p { font-size: .8rem; color: #4a4540; line-height: 1.55; }
+    .how-arrow {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 2.4rem;
+        color: rgba(26,22,19,.25);
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    @media(max-width:768px){ .how-arrow { display:none; } }
+
+    /* ═══════════════════════════════════
+       TRUSTED SOURCES GRID
+    ═══════════════════════════════════ */
+    .tsources-section {
+        padding: 4.5rem 0;
+        background: #e8e3d8;
+        text-align: center;
+    }
+    .tsources-section h2 { font-size: clamp(1.4rem,2.5vw,1.9rem); font-weight:700; letter-spacing:-.02em; margin-bottom:.5rem; }
+    .tsources-section > .container > .tsources-sub { font-size:.95rem; color:#4a4540; margin-bottom:2.5rem; }
+    .tsources-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 1.2rem;
+    }
+    @media(max-width:900px){ .tsources-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:500px){ .tsources-grid { grid-template-columns: 1fr; } }
+    .tsource-card {
+        background: #f0ece3;
+        border-radius: 12px;
+        padding: 1.8rem 1.2rem;
+        position: relative;
+        overflow: hidden;
+        transition: transform .25s, box-shadow .25s;
+        cursor: default;
+    }
+    .tsource-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(26,22,19,.12); }
+    .tsource-card-icon { font-size: 2.5rem; margin-bottom: .8rem; }
+    .tsource-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .3rem; }
+    .tsource-card .tsource-cat { font-size: .75rem; font-weight: 600; color: #6b6560; text-transform: uppercase; letter-spacing:.05em; }
+    .tsource-hover {
+        position: absolute;
+        inset: 0;
+        background: #1a1613;
+        color: #f0ece3;
+        border-radius: 12px;
+        padding: 1.4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity .25s;
+        font-size: .82rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+    .tsource-card:hover .tsource-hover { opacity: 1; }
+    .tsource-hover strong { display:block; font-size:.9rem; margin-bottom:.4rem; }
+
+    /* ═══════════════════════════════════
+       CORE VALUES
+    ═══════════════════════════════════ */
+    .values-section {
+        padding: 4.5rem 0;
+        background: #f0ece3;
+        text-align: center;
+    }
+    .values-section h2 { font-size: clamp(1.4rem,2.5vw,1.9rem); font-weight:700; letter-spacing:-.02em; margin-bottom:.5rem; }
+    .values-section > .container > .values-sub { font-size:.95rem; color:#4a4540; margin-bottom:2.5rem; }
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 1.5rem;
+    }
+    @media(max-width:700px){ .values-grid { grid-template-columns: 1fr; } }
+    .value-card {
+        background: #e8e3d8;
+        border-radius: 14px;
+        padding: 2.2rem 1.5rem;
+        transition: transform .25s, box-shadow .25s;
+    }
+    .value-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(26,22,19,.1); }
+    .value-icon { font-size: 2.8rem; margin-bottom: 1rem; display:block; }
+    .value-badge {
+        display: inline-block;
+        background: #1a1613;
+        color: #f0ece3;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        padding: .25rem .65rem;
+        border-radius: 20px;
+        margin-bottom: .9rem;
+        text-transform: uppercase;
+    }
+    .value-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .5rem; }
+    .value-card p { font-size: .85rem; color: #4a4540; line-height: 1.6; }
+
+    /* ═══════════════════════════════════
+       LIVE EXAMPLES
+    ═══════════════════════════════════ */
+    .examples-section {
+        padding: 4.5rem 0;
+        background: #e8e3d8;
+        text-align: center;
+    }
+    .examples-section h2 { font-size: clamp(1.4rem,2.5vw,1.9rem); font-weight:700; letter-spacing:-.02em; margin-bottom:.5rem; }
+    .examples-section > .container > .examples-sub { font-size:.95rem; color:#4a4540; margin-bottom:2rem; }
+    .example-btns {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: .75rem;
+        margin-bottom: 2rem;
+    }
+    .example-btn {
+        background: #f0ece3;
+        border: 1.5px solid rgba(26,22,19,.18);
+        border-radius: 24px;
+        padding: .55rem 1.2rem;
+        font-family: inherit;
+        font-size: .88rem;
+        font-weight: 500;
+        cursor: pointer;
+        color: #1a1613;
+        transition: background .18s, border-color .18s, transform .15s;
+    }
+    .example-btn:hover, .example-btn.active { background: #1a1613; color: #f0ece3; border-color: #1a1613; }
+    .example-result {
+        max-width: 640px;
+        margin: 0 auto;
+        background: #f0ece3;
+        border-radius: 14px;
+        padding: 1.8rem 2rem;
+        text-align: right;
+        box-shadow: 0 4px 18px rgba(26,22,19,.08);
+        display: none;
+    }
+    .example-result.show { display: block; animation: fadeInUp .3s ease; }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .example-result-q { font-size:.78rem; font-weight:700; color:#6b6560; letter-spacing:.05em; text-transform:uppercase; margin-bottom:.6rem; }
+    .example-result-text { font-size:.95rem; line-height:1.75; margin-bottom:1.1rem; }
+    .example-result-source { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+    .example-source-tag { background:#1a1613; color:#f0ece3; font-size:.75rem; font-weight:700; padding:.25rem .7rem; border-radius:6px; }
+    .example-hadith-num { font-size:.82rem; color:#4a4540; }
+    .example-verdict { font-size:.78rem; font-weight:600; color:#2a7a3b; background:rgba(42,122,59,.1); padding:.2rem .6rem; border-radius:4px; }
+
+    /* ═══════════════════════════════════
+       STATS COUNTER
+    ═══════════════════════════════════ */
+    .stats-section {
+        padding: 4rem 0;
+        background: #1a1613;
+        color: #f0ece3;
+        text-align: center;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3,1fr);
+        gap: 2rem;
+    }
+    @media(max-width:600px){ .stats-grid { grid-template-columns: 1fr; gap:1.5rem; } }
+    .stat-num {
+        font-size: clamp(2.2rem,4vw,3rem);
+        font-weight: 700;
+        letter-spacing: -.02em;
+        color: #f0ece3;
+        display: block;
+        line-height: 1;
+        margin-bottom: .4rem;
+    }
+    .stat-label { font-size: .9rem; color: rgba(240,236,227,.6); }
+
     .modal-overlay {
             display: none;
             position: fixed;
@@ -705,6 +925,46 @@
 
         <hr class="section-divider">
 
+        <!-- ══ HOW IT WORKS ══ -->
+        <section class="how-section">
+            <div class="container">
+                <p class="section-label">كيف يعمل؟</p>
+                <h2>رحلة سؤالك في 4 خطوات</h2>
+                <p class="how-sub">من لحظة كتابة سؤالك حتى الحصول على الدليل الموثق من المصدر الأصيل</p>
+                <div class="how-steps">
+                    <div class="how-step">
+                        <span class="how-step-num">١</span>
+                        <span class="how-step-icon">❓</span>
+                        <h3>تسأل سؤالك</h3>
+                        <p>اكتب سؤالك الفقهي أو البحثي بأي صياغة طبيعية بالعربية أو الإنجليزية</p>
+                    </div>
+                    <div class="how-arrow">←</div>
+                    <div class="how-step">
+                        <span class="how-step-num">٢</span>
+                        <span class="how-step-icon">📚</span>
+                        <h3>البحث في الأصول</h3>
+                        <p>الذكاء الاصطناعي يبحث حصراً في قاعدة بيانات مغلقة: صحيح البخاري، مسلم، أبو داود، رياض الصالحين</p>
+                    </div>
+                    <div class="how-arrow">←</div>
+                    <div class="how-step">
+                        <span class="how-step-num">٣</span>
+                        <span class="how-step-icon">🔍</span>
+                        <h3>استخراج الدليل</h3>
+                        <p>يُستخرج النص الأصلي دون زيادة أو نقصان، مع الحفاظ على ألفاظ الحديث كما وردت</p>
+                    </div>
+                    <div class="how-arrow">←</div>
+                    <div class="how-step">
+                        <span class="how-step-num">٤</span>
+                        <span class="how-step-icon">✅</span>
+                        <h3>الإجابة الموثقة</h3>
+                        <p>تصل إليك الإجابة مرفقةً باسم الكتاب، رقم الحديث، وحكمه العلمي</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
         <!-- ══ CARDS ══ -->
         <section class="cards-section" id="features">
             <div class="container">
@@ -729,6 +989,86 @@
                             <div class="card-icon">🤖</div>
                         </div>
                         <h3 class="card-title">ذكاء اصطناعي متطور للغة العربية</h3>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ══ TRUSTED SOURCES GRID ══ -->
+        <section class="tsources-section">
+            <div class="container">
+                <p class="section-label">مصادرنا الموثوقة</p>
+                <h2>أمهات الكتب الإسلامية</h2>
+                <p class="tsources-sub">مرّر على كل بطاقة لمعرفة المزيد</p>
+                <div class="tsources-grid">
+                    <div class="tsource-card">
+                        <div class="tsource-card-icon">📗</div>
+                        <h3>صحيح البخاري</h3>
+                        <p class="tsource-cat">حديث</p>
+                        <div class="tsource-hover">
+                            <strong>صحيح البخاري</strong>
+                            أصح كتاب بعد القرآن الكريم، جمعه الإمام البخاري من أكثر من 600,000 حديث. كل حديث فيه صحيح مقطوع بصحته.
+                        </div>
+                    </div>
+                    <div class="tsource-card">
+                        <div class="tsource-card-icon">📘</div>
+                        <h3>صحيح مسلم</h3>
+                        <p class="tsource-cat">حديث</p>
+                        <div class="tsource-hover">
+                            <strong>صحيح مسلم</strong>
+                            الصحيح الثاني في المرتبة، للإمام مسلم بن الحجاج. يُعدّ مرجعاً لا غنى عنه في علم الحديث النبوي.
+                        </div>
+                    </div>
+                    <div class="tsource-card">
+                        <div class="tsource-card-icon">📙</div>
+                        <h3>سنن أبي داود</h3>
+                        <p class="tsource-cat">حديث</p>
+                        <div class="tsource-hover">
+                            <strong>سنن أبي داود</strong>
+                            يتضمن أحاديث ذات حكم متنوع: صحيح، حسن، أو ضعيف. تُعرض درجة الحديث مع كل نتيجة للحفاظ على الأمانة العلمية.
+                        </div>
+                    </div>
+                    <div class="tsource-card">
+                        <div class="tsource-card-icon">📕</div>
+                        <h3>رياض الصالحين</h3>
+                        <p class="tsource-cat">فقه وأخلاق</p>
+                        <div class="tsource-hover">
+                            <strong>رياض الصالحين</strong>
+                            للإمام النووي. جامع شامل للأحاديث في الآداب والأخلاق والعبادات، مرتّب ترتيباً موضوعياً يسهّل الاستدلال.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ══ CORE VALUES ══ -->
+        <section class="values-section">
+            <div class="container">
+                <p class="section-label">لماذا نحن مختلفون؟</p>
+                <h2>قيمنا الجوهرية</h2>
+                <p class="values-sub">ثلاثة مبادئ تُميّز AskIslamAI عن كل أداة ذكاء اصطناعي أخرى</p>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <span class="value-icon">🛡️</span>
+                        <span class="value-badge">Zero Hallucination</span>
+                        <h3>صفر هلوسة</h3>
+                        <p>الذكاء الاصطناعي مبرمج بصرامة للإجابة من النصوص المعتمدة فقط. إذا لم يجد الدليل في قاعدة البيانات، يُفصح بذلك صراحةً ولا يخترع إجابة.</p>
+                    </div>
+                    <div class="value-card">
+                        <span class="value-icon">📌</span>
+                        <span class="value-badge">Accurate Citation</span>
+                        <h3>التوثيق الدقيق</h3>
+                        <p>كل إجابة تأتي مرفقة باسم الكتاب ورقم الحديث ودرجته. يمكنك التحقق منها مباشرةً في المصدر الأصيل في أي وقت.</p>
+                    </div>
+                    <div class="value-card">
+                        <span class="value-icon">⚡</span>
+                        <span class="value-badge">Lightning Fast</span>
+                        <h3>سرعة فائقة</h3>
+                        <p>بحث في عشرات الآلاف من النصوص الشرعية في أجزاء من الثانية، بفضل تقنية Cloudflare Vectorize للبحث الدلالي المتقدم.</p>
                     </div>
                 </div>
             </div>
@@ -772,6 +1112,71 @@
                         <td class="news-meta">أبو داود السجستاني</td>
                     </tr>
                 </table>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ══ LIVE EXAMPLES ══ -->
+        <section class="examples-section">
+            <div class="container">
+                <p class="section-label">جرّب بنفسك</p>
+                <h2>جرّب أن تسأل عن…</h2>
+                <p class="examples-sub">اضغط على أي سؤال لترى نموذجاً فعلياً لشكل الإجابة</p>
+                <div class="example-btns">
+                    <button class="example-btn" onclick="showExample(this,0)">ما فضل صيام يوم عرفة؟</button>
+                    <button class="example-btn" onclick="showExample(this,1)">أحاديث عن بر الوالدين</button>
+                    <button class="example-btn" onclick="showExample(this,2)">ما حكم صلاة الوتر؟</button>
+                </div>
+                <div class="example-result" id="ex-0">
+                    <p class="example-result-q">السؤال: ما فضل صيام يوم عرفة؟</p>
+                    <p class="example-result-text">صِيَامُ يَوْمِ عَرَفَةَ يُكَفِّرُ السَّنَةَ الْمَاضِيَةَ وَالسَّنَةَ الْقَابِلَةَ. وَصِيَامُ يَوْمِ عَاشُورَاءَ يُكَفِّرُ السَّنَةَ الْمَاضِيَةَ.</p>
+                    <div class="example-result-source">
+                        <span class="example-source-tag">صحيح مسلم</span>
+                        <span class="example-hadith-num">الحديث رقم: ١١٦٢</span>
+                        <span class="example-verdict">✓ صحيح</span>
+                    </div>
+                </div>
+                <div class="example-result" id="ex-1">
+                    <p class="example-result-q">السؤال: أحاديث عن بر الوالدين</p>
+                    <p class="example-result-text">رِضَا اللهِ فِي رِضَا الْوَالِدَيْنِ، وَسَخَطُ اللهِ فِي سَخَطِ الْوَالِدَيْنِ.</p>
+                    <div class="example-result-source">
+                        <span class="example-source-tag">رياض الصالحين</span>
+                        <span class="example-hadith-num">الحديث رقم: ٣١٦</span>
+                        <span class="example-verdict">✓ صحيح</span>
+                    </div>
+                </div>
+                <div class="example-result" id="ex-2">
+                    <p class="example-result-q">السؤال: ما حكم صلاة الوتر؟</p>
+                    <p class="example-result-text">الْوِتْرُ حَقٌّ، فَمَنْ شَاءَ فَلْيُوتِرْ بِخَمْسٍ، وَمَنْ شَاءَ فَلْيُوتِرْ بِثَلَاثٍ، وَمَنْ شَاءَ فَلْيُوتِرْ بِوَاحِدَةٍ.</p>
+                    <div class="example-result-source">
+                        <span class="example-source-tag">سنن أبي داود</span>
+                        <span class="example-hadith-num">الحديث رقم: ١٤٢٢</span>
+                        <span class="example-verdict">✓ صحيح</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <hr class="section-divider">
+
+        <!-- ══ STATS ══ -->
+        <section class="stats-section">
+            <div class="container">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-num" data-target="30000" data-suffix="+">0</span>
+                        <span class="stat-label">حديث نصي معتمد</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num" data-target="4" data-suffix="">0</span>
+                        <span class="stat-label">من أمهات الكتب الإسلامية</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-num" data-target="1" data-suffix="<">0</span>
+                        <span class="stat-label">ثانية — سرعة الاستجابة</span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1062,6 +1467,331 @@
             }
         }
 
+        /* ══════════════════════════════════
+           HOW IT WORKS
+        ══════════════════════════════════ */
+        .how-section {
+            padding: 4rem 0;
+            background: #f5f2ec;
+        }
+        .how-section .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6b6560;
+            margin-bottom: 0.75rem;
+        }
+        .how-section h2 {
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2.5rem;
+            color: #1a1613;
+        }
+        .how-steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            position: relative;
+        }
+        .how-steps::before {
+            content: '';
+            position: absolute;
+            top: 2.2rem;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: rgba(26,22,19,0.12);
+            z-index: 0;
+        }
+        .how-step {
+            text-align: center;
+            padding: 1.5rem 1rem;
+            position: relative;
+            z-index: 1;
+            cursor: default;
+            transition: transform 0.2s;
+        }
+        .how-step:hover { transform: translateY(-4px); }
+        .how-step:hover .how-icon { background: #1a1613; color: #f0ece3; }
+        .how-icon {
+            width: 4rem;
+            height: 4rem;
+            border-radius: 50%;
+            background: #e8e3d8;
+            border: 2px solid rgba(26,22,19,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+        .how-num {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #6b6560;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .how-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1613;
+            margin-bottom: 0.4rem;
+        }
+        .how-desc {
+            font-size: 0.8rem;
+            color: #6b6560;
+            line-height: 1.5;
+        }
+        @media (max-width: 768px) {
+            .how-steps { grid-template-columns: 1fr 1fr; }
+            .how-steps::before { display: none; }
+        }
+
+        /* ══════════════════════════════════
+           TRUSTED SOURCES GRID
+        ══════════════════════════════════ */
+        .sources-grid-section {
+            padding: 4rem 0;
+            background: #e8e3d8;
+        }
+        .sources-grid-section .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6b6560;
+            margin-bottom: 0.75rem;
+        }
+        .sources-grid-section h2 {
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            color: #1a1613;
+        }
+        .sources-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .source-card {
+            background: #faf8f4;
+            border: 1.5px solid rgba(26,22,19,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .source-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(26,22,19,0.1);
+        }
+        .source-card:hover .source-tooltip { opacity: 1; transform: translateY(0); }
+        .source-emoji { font-size: 2rem; margin-bottom: 0.75rem; }
+        .source-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1613;
+            margin-bottom: 0.3rem;
+        }
+        .source-author {
+            font-size: 0.78rem;
+            color: #6b6560;
+        }
+        .source-tooltip {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1613;
+            color: #f0ece3;
+            padding: 0.75rem 1rem;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 0.2s, transform 0.2s;
+        }
+        @media (max-width: 768px) {
+            .sources-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        /* ══════════════════════════════════
+           CORE VALUES
+        ══════════════════════════════════ */
+        .values-section {
+            padding: 4rem 0;
+            background: #1a1613;
+            color: #f0ece3;
+        }
+        .values-section .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: rgba(240,236,227,0.5);
+            margin-bottom: 0.75rem;
+        }
+        .values-section h2 {
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 2.5rem;
+        }
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .value-item {
+            text-align: center;
+            padding: 1.5rem;
+            border: 1px solid rgba(240,236,227,0.1);
+            border-radius: 10px;
+            transition: background 0.2s;
+        }
+        .value-item:hover { background: rgba(240,236,227,0.05); }
+        .value-icon-big {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .value-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+        .value-desc {
+            font-size: 0.85rem;
+            color: rgba(240,236,227,0.65);
+            line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            .values-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ══════════════════════════════════
+           LIVE EXAMPLES
+        ══════════════════════════════════ */
+        .examples-section {
+            padding: 4rem 0;
+            background: #f5f2ec;
+        }
+        .examples-section .section-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #6b6560;
+            margin-bottom: 0.75rem;
+        }
+        .examples-section h2 {
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            color: #1a1613;
+        }
+        .examples-section p {
+            font-size: 0.95rem;
+            color: #4a4540;
+            margin-bottom: 1.5rem;
+        }
+        .example-btns {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .example-btn {
+            background: #e8e3d8;
+            border: 1.5px solid rgba(26,22,19,0.15);
+            color: #1a1613;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.65rem 1.2rem;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .example-btn:hover, .example-btn.active {
+            background: #1a1613;
+            color: #f0ece3;
+            border-color: #1a1613;
+        }
+        .example-answer {
+            display: none;
+            background: #faf8f4;
+            border: 1.5px solid rgba(26,22,19,0.1);
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 640px;
+        }
+        .example-answer.visible { display: block; }
+        .example-answer-q {
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #6b6560;
+            margin-bottom: 0.5rem;
+        }
+        .example-answer-text {
+            font-size: 0.95rem;
+            color: #1a1613;
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        .example-answer-source {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #1a1613;
+            color: #f0ece3;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 0.4rem 0.9rem;
+            border-radius: 100px;
+        }
+
+        /* ══════════════════════════════════
+           STATS COUNTER
+        ══════════════════════════════════ */
+        .stats-section {
+            padding: 4rem 0;
+            background: #e8e3d8;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            text-align: center;
+        }
+        .stat-item { padding: 1rem; }
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #1a1613;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b6560;
+            font-weight: 500;
+        }
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -1297,6 +2027,47 @@
             document.getElementById('modal-' + id).classList.add('active');
             document.body.style.overflow = 'hidden';
         }
+
+        /* ── Live Examples ── */
+        function showExample(btn, idx) {
+            document.querySelectorAll('.example-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.example-result').forEach(r => r.classList.remove('show'));
+            btn.classList.add('active');
+            var el = document.getElementById('ex-' + idx);
+            if (el) { el.classList.add('show'); }
+        }
+
+        /* ── Stats Counter ── */
+        function animateCounters() {
+            document.querySelectorAll('.stat-num[data-target]').forEach(function(el) {
+                var target = parseInt(el.getAttribute('data-target'), 10);
+                var suffix = el.getAttribute('data-suffix') || '';
+                var duration = 1800;
+                var start = null;
+                function step(ts) {
+                    if (!start) start = ts;
+                    var progress = Math.min((ts - start) / duration, 1);
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    var current = Math.floor(eased * target);
+                    el.textContent = (target >= 1000)
+                        ? current.toLocaleString('ar-EG') + suffix
+                        : current + suffix;
+                    if (progress < 1) requestAnimationFrame(step);
+                    else el.textContent = (target >= 1000)
+                        ? target.toLocaleString('ar-EG') + suffix
+                        : target + suffix;
+                }
+                requestAnimationFrame(step);
+            });
+        }
+        var statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(e) {
+                if (e.isIntersecting) { animateCounters(); statsObserver.disconnect(); }
+            });
+        }, { threshold: 0.3 });
+        var statsSection = document.querySelector('.stats-section');
+        if (statsSection) statsObserver.observe(statsSection);
+
         function closeModal(id) {
             document.getElementById('modal-' + id).classList.remove('active');
             document.body.style.overflow = '';
