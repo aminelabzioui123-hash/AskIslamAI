@@ -2176,7 +2176,23 @@
         }
         .modal-close:hover { color: #c00; }
         .modal-box a { color: #c8a96e; }
-    </style>
+    
+    /* ══ Mobile consistency fixes (additive, phones only) ══ */
+    @media (max-width: 768px) {
+        html, body { overflow-x: hidden; max-width: 100%; }
+        .hero > *, .container > *, .footer-top > * { min-width: 0; }
+        .hero { padding-inline: 1rem; }
+        .hero-text, .hero-desc { max-width: 100%; }
+        .hero-title { overflow-wrap: anywhere; }
+        .hero-graphic, .chat-preview { width: 100%; max-width: 100%; }
+        .container { padding-inline: 1rem; }
+        img, video, iframe, svg { max-width: 100%; }
+        iframe, video { height: auto; aspect-ratio: 16 / 9; }
+        table { display: block; overflow-x: auto; max-width: 100%; }
+        pre, code { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .modal-box { max-width: 94vw; }
+    }
+</style>
 
     <!-- Modal: Help Center -->
     <div class="modal-overlay" id="modal-help">
